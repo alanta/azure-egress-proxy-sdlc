@@ -72,6 +72,8 @@ The subject input was a clean clone at `~/Projects/Alanta/azure-egress-proxy-age
 
 ## Handoff
 
+> **Superseded, 2026-10-06.** The OpenSpec change was reviewed with the maintainer and rewritten as `revision-dependency-scan` (slice 1). It keeps Renovate as the main engine, with custom managers for the gaps below and native queries as a cross-check. PydanticAI is not carried forward: slices 2 and 3 use a coding agent. The notes below are kept as the original handoff.
+
 - The OpenSpec change `report-only-dependency-assessment` is committed in the current Delta branch, but it is **not ready to apply as written**; no orchestration or implementation tasks have started (0/13 complete).
 - Before implementation, revise the spec/design/tasks to record the tool-spike findings and decide which candidate sources are in scope. In particular, do not rely on Renovate alone for AVM module tags, inline Python, or Packer/Azure Marketplace image inputs.
 - Continue the spike with a least-privilege read-only GitHub credential only if needed to test Renovate's authenticated action lookups and structured output. Never use or store a write-capable token for this pilot.

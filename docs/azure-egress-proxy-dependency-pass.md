@@ -5,6 +5,13 @@
 **Subject revision:** `main` at `064aa099ecf7ffea9664b89df29f7d89d6859358`  
 **Mode:** Read-only discovery. No files in the subject repository were changed.
 
+## Update, 2026-10-06
+
+This document is a snapshot and is not kept current. Since it was written:
+
+- #89 was closed by Dependabot and replaced by #98 (Azure.Core, coverlet.collector, Scalar.AspNetCore), whose .NET build was cancelled. #99 (azcore 1.23.1 → 1.23.2, azblob) is new, and no check ran on it: the `changes` job was cancelled.
+- The green govulncheck on #76 is not evidence for that PR. CI runs govulncheck with `setup-go '1.25'`, while #76 builds the proxy image with Go 1.27, so the standard library that ships was not scanned. The Go toolchain is declared in `go.mod`, `ci.yml`, `release.yml` and `proxy/Dockerfile`, and #76 changes only the last.
+
 ## Executive summary
 
 Dependabot already covers weekly grouped updates for NuGet, Go modules, Dockerfiles, and GitHub Actions. The repo also has scheduled `govulncheck` coverage. However, a green dependency PR is not always evidence that every changed dependency or affected output was exercised:
