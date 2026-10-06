@@ -81,7 +81,7 @@ Useful measures include:
 
 ## Initial scope and open questions
 
-The initial pilot is `azure-egress-proxy`. Dependabot may remain as a comparison or signal while the system's own discovery is evaluated; it should not define the system's eventual scope. The read-only repository discovery in [azure-egress-proxy-dependency-pass.md](docs/azure-egress-proxy-dependency-pass.md) is a snapshot of `main` before the Marketplace image work was added on the separate `research/marketplace` checkout.
+The initial pilot is `azure-egress-proxy`. Dependabot may remain as a comparison or signal while the system's own discovery is evaluated; it should not define the system's eventual scope. The read-only repository discovery in [azure-egress-proxy-dependency-pass.md](docs/azure-egress-proxy-dependency-pass.md) is a snapshot of `main` before the Marketplace image work was added on the separate `research/marketplace` checkout. A preliminary scanner/provider spike and its handoff notes are in [tooling-spike.md](docs/tooling-spike.md).
 
 Before implementation, refine this brief by inspecting the repository and answering:
 
