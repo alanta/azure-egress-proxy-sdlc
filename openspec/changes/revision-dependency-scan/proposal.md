@@ -10,6 +10,7 @@ The end goal is hands-off maintenance of `azure-egress-proxy`: updates applied, 
 - Find update candidates for each dependency (patch, minor and major), and report lookups that fail as `unknown`, never as up to date.
 - Apply the update policy kept in the subject repository, so that a candidate it rules out, such as a NuGet major tied to the next .NET runtime, is reported as held by policy rather than dropped.
 - Report known vulnerabilities in the inventoried versions, with reachability kept separate from a version match.
+- Report platforms, toolchains and base images whose version line is past end of life, such as a Go line that stopped getting security fixes when a newer line shipped, so that moving to a supported line becomes a recommendation, not something the maintainer has to notice.
 - Flag one logical dependency declared at different versions in different places, such as the Go toolchain in `go.mod`, the workflows and a Dockerfile.
 - Compare the result with the open Dependabot PRs at scan time. Every in-scope update Dependabot proposes is matched, or the miss is explained.
 - Write a machine-readable record and a Markdown report from the same result. Nothing is written to the subject repository and no LLM is involved.

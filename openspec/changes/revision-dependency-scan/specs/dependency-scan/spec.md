@@ -110,6 +110,25 @@ The scan SHALL report known vulnerabilities in the inventoried versions, with th
 - **WHEN** an advisory source can't be read, such as Dependabot alerts without permission
 - **THEN** the record lists the source as unavailable, and does not claim the dependency has no vulnerabilities
 
+### Requirement: Report end-of-life versions
+
+For platforms, language toolchains and base images with published lifecycle data, the scan SHALL report whether the version line in use is supported, its end-of-life date, and the oldest supported line. Missing lifecycle data SHALL be reported as `unknown`, not as supported.
+
+#### Scenario: A toolchain line is past end of life
+
+- **WHEN** the revision builds with Go `1.25` and lifecycle data shows that line ended when Go `1.27` was released
+- **THEN** the record marks the Go toolchain as end of life, with the date and the supported lines
+
+#### Scenario: A version line nears end of life
+
+- **WHEN** a line's end-of-life date falls within 90 days of the scan
+- **THEN** the record marks it as nearing end of life, with the date
+
+#### Scenario: No lifecycle data exists
+
+- **WHEN** no lifecycle data is available for a platform or image
+- **THEN** its lifecycle state is `unknown`
+
 ### Requirement: Flag inconsistent declarations
 
 The scan SHALL flag a logical dependency whose declarations in different files resolve to different versions at the precision each declares, and list every declaring location.

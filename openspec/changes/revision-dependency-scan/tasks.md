@@ -28,6 +28,8 @@
 - [ ] 4.3 Read Dependabot alerts when the credential allows it, otherwise record the source as unavailable; verify both paths, with and without the permission
 - [ ] 4.4 Implement the alias table and the consistency check (design decision 6); verify `064aa09` has no Go toolchain inconsistency, and the head of PR #76 (captured in 1.1) flags `golang:1.27-alpine` against `go 1.25.14` and `setup-go 1.25`
 
+- [ ] 4.5 Look up lifecycle data from endoflife.date for the Go toolchain, .NET images, Python, Alpine and distroless Debian, and report end-of-life and nearing-end-of-life lines; verify a scan of `064aa09` marks Go 1.25 as end of life, unmapped entries report `unknown`, and an unreachable API reports `unknown` for all
+
 ## 5. Dependabot parity
 
 - [ ] 5.1 Read open Dependabot PRs and parse their proposed updates from the commit metadata and the from-versions from title or body; verify against the fixtures from 1.1, including grouped PRs #75, #76, #98 and #99 and a deliberately corrupted message reported as `unparseable`

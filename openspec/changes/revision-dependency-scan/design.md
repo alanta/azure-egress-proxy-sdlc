@@ -86,6 +86,14 @@ The autonomy and merge policy of slice 3 is a separate concern, and gets its own
 
 Image OS packages are not scanned here. That arrives with the image build, which already plans Syft and Grype.
 
+### 6a. Lifecycle data comes from endoflife.date
+
+The public endoflife.date API publishes support and end-of-life dates for Go, .NET, Python, Alpine, Debian and many other products, with no account needed. A mapping table in this repository links inventory entries to its product names: the Go toolchain, .NET SDK and runtime images, `python` and `alpine` tags, and distroless `debian12`. Entries without a mapping report `unknown`.
+
+Renovate knows versions, not support windows. Without this, staying on a line that no longer gets security fixes looks the same as being up to date within that line, which is what happened with Go 1.25.
+
+**Alternative:** maintaining dates by hand goes stale without anyone noticing.
+
 ### 6. A small alias table drives the consistency check
 
 Logical dependencies declared through different ecosystems are listed in a table in this repository:
