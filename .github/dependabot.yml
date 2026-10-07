@@ -1,0 +1,17 @@
+version: 2
+
+# Until this project's own scan covers itself, Dependabot keeps its dependencies moving.
+# Python (uv) is added when the project gets its pyproject.toml.
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      actions-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
