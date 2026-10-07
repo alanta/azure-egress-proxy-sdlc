@@ -102,7 +102,7 @@ Versions are compared at the precision each declares: `1.25` agrees with `1.25.1
 
 Open PRs by `dependabot[bot]` are read with the read-only credential:
 
-- **Names, target versions and update types** come from the `updated-dependencies` YAML block Dependabot writes in its commit messages.
+- **Names, target versions and groups** come from the `updated-dependencies` YAML block Dependabot writes in its commit messages. The block doesn't always carry an update type (the grouped Docker PR #76 has none), so the update type is derived from the from- and to-versions.
 - **From-versions** come from the `Updates <name> from A to B` lines in the PR body, or the title for a single update, matched with fixed patterns only. PR text is never interpreted beyond that.
 - **Unparseable PRs** are reported as such.
 

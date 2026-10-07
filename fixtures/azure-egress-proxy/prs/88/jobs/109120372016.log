@@ -1,0 +1,276 @@
+﻿2026-09-28T20:26:28.3693825Z Current runner version: '2.337.0'
+2026-09-28T20:26:28.3712360Z ##[group]Runner Image Provisioner
+2026-09-28T20:26:28.3713033Z Hosted Compute Agent
+2026-09-28T20:26:28.3713395Z Version: 20260828.587
+2026-09-28T20:26:28.3713807Z Commit: abac92662cab4cc7352de4f9f9d2e2419aad9c29
+2026-09-28T20:26:28.3714293Z Build Date: 2026-08-28T16:44:25Z
+2026-09-28T20:26:28.3714697Z Worker ID: {bb5231c4-7f0a-4a41-b82e-1facaafe0f85}
+2026-09-28T20:26:28.3715201Z Azure Region: centralus
+2026-09-28T20:26:28.3715566Z ##[endgroup]
+2026-09-28T20:26:28.3716491Z ##[group]Operating System
+2026-09-28T20:26:28.3716869Z Ubuntu
+2026-09-28T20:26:28.3717196Z 24.04.5
+2026-09-28T20:26:28.3717589Z LTS
+2026-09-28T20:26:28.3717912Z ##[endgroup]
+2026-09-28T20:26:28.3718255Z ##[group]Runner Image
+2026-09-28T20:26:28.3718703Z Image: ubuntu-24.04
+2026-09-28T20:26:28.3719055Z Version: 20260920.314.1
+2026-09-28T20:26:28.3719883Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260920.314/images/ubuntu/Ubuntu2404-Readme.md
+2026-09-28T20:26:28.3720776Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260920.314
+2026-09-28T20:26:28.3721340Z ##[endgroup]
+2026-09-28T20:26:28.3722008Z ##[group]GITHUB_TOKEN Permissions
+2026-09-28T20:26:28.3723235Z Contents: read
+2026-09-28T20:26:28.3723591Z Metadata: read
+2026-09-28T20:26:28.3723986Z ##[endgroup]
+2026-09-28T20:26:28.3725304Z Secret source: Dependabot
+2026-09-28T20:26:28.3726085Z Cache mode: write
+2026-09-28T20:26:28.3726521Z Prepare workflow directory
+2026-09-28T20:26:28.4366641Z Prepare all required actions
+2026-09-28T20:26:28.4409515Z Getting action download info
+2026-09-28T20:26:28.6679981Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)
+2026-09-28T20:26:29.0043406Z Download action repository 'actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e' (SHA:b7ad1dad31e06c5925ef5d2fc7ad053ef454303e)
+2026-09-28T20:26:29.7774326Z Complete job name: Scan proxy module for reachable vulnerabilities
+2026-09-28T20:26:29.8351888Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+2026-09-28T20:26:29.8353235Z with:
+2026-09-28T20:26:29.8353755Z   persist-credentials: false
+2026-09-28T20:26:29.8354432Z   repository: alanta/azure-egress-proxy
+2026-09-28T20:26:29.8362105Z   token: ***
+2026-09-28T20:26:29.8362681Z   ssh-strict: true
+2026-09-28T20:26:29.8363096Z   ssh-user: git
+2026-09-28T20:26:29.8363492Z   clean: true
+2026-09-28T20:26:29.8363918Z   sparse-checkout-cone-mode: true
+2026-09-28T20:26:29.8364440Z   fetch-depth: 1
+2026-09-28T20:26:29.8364843Z   fetch-tags: false
+2026-09-28T20:26:29.8365263Z   show-progress: true
+2026-09-28T20:26:29.8365695Z   lfs: false
+2026-09-28T20:26:29.8366288Z   submodules: false
+2026-09-28T20:26:29.8366728Z   set-safe-directory: true
+2026-09-28T20:26:29.8367218Z   allow-unsafe-pr-checkout: false
+2026-09-28T20:26:29.8368117Z ##[endgroup]
+2026-09-28T20:26:29.9087827Z Syncing repository: alanta/azure-egress-proxy
+2026-09-28T20:26:29.9089644Z ##[group]Getting Git version info
+2026-09-28T20:26:29.9090475Z Working directory is '/home/runner/work/azure-egress-proxy/azure-egress-proxy'
+2026-09-28T20:26:29.9091804Z [command]/usr/bin/git version
+2026-09-28T20:26:29.9174896Z git version 2.55.0
+2026-09-28T20:26:29.9189881Z ##[endgroup]
+2026-09-28T20:26:29.9199673Z Temporarily overriding HOME='/home/runner/work/_temp/445b3938-9e18-4214-824f-9424716f697e' before making global git config changes
+2026-09-28T20:26:29.9201951Z Adding repository directory to the temporary git global config as a safe directory
+2026-09-28T20:26:29.9204189Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/azure-egress-proxy/azure-egress-proxy
+2026-09-28T20:26:29.9497636Z Deleting the contents of '/home/runner/work/azure-egress-proxy/azure-egress-proxy'
+2026-09-28T20:26:29.9500800Z ##[group]Determining repository object format
+2026-09-28T20:26:29.9502408Z ##[endgroup]
+2026-09-28T20:26:29.9503444Z ##[group]Initializing the repository
+2026-09-28T20:26:29.9507847Z [command]/usr/bin/git init /home/runner/work/azure-egress-proxy/azure-egress-proxy
+2026-09-28T20:26:30.0097214Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-09-28T20:26:30.0098607Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-09-28T20:26:30.0099998Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-09-28T20:26:30.0100908Z hint: call:
+2026-09-28T20:26:30.0101439Z hint:
+2026-09-28T20:26:30.0101962Z hint: 	git config --global init.defaultBranch <name>
+2026-09-28T20:26:30.0102564Z hint:
+2026-09-28T20:26:30.0103325Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-09-28T20:26:30.0104774Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-09-28T20:26:30.0106044Z hint:
+2026-09-28T20:26:30.0106595Z hint: 	git branch -m <name>
+2026-09-28T20:26:30.0107235Z hint:
+2026-09-28T20:26:30.0108175Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-09-28T20:26:30.0109988Z Initialized empty Git repository in /home/runner/work/azure-egress-proxy/azure-egress-proxy/.git/
+2026-09-28T20:26:30.0112867Z [command]/usr/bin/git remote add origin https://github.com/alanta/azure-egress-proxy
+2026-09-28T20:26:30.0329072Z ##[endgroup]
+2026-09-28T20:26:30.0330131Z ##[group]Disabling automatic garbage collection
+2026-09-28T20:26:30.0331624Z [command]/usr/bin/git config --local gc.auto 0
+2026-09-28T20:26:30.0802085Z ##[endgroup]
+2026-09-28T20:26:30.0803663Z ##[group]Setting up auth
+2026-09-28T20:26:30.0804523Z Removing SSH command configuration
+2026-09-28T20:26:30.0807827Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-09-28T20:26:30.0848166Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-09-28T20:26:30.1129639Z Removing HTTP extra header
+2026-09-28T20:26:30.1134116Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-09-28T20:26:30.1163632Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-09-28T20:26:30.1335554Z Removing includeIf entries pointing to credentials config files
+2026-09-28T20:26:30.1338472Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-09-28T20:26:30.1365635Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-09-28T20:26:30.1536829Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-a0a00d6d-50f4-44c4-8093-7f52fb13bdc6.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-09-28T20:26:30.1895668Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/azure-egress-proxy/azure-egress-proxy/.git.path /home/runner/work/_temp/git-credentials-a0a00d6d-50f4-44c4-8093-7f52fb13bdc6.config
+2026-09-28T20:26:30.2509133Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/azure-egress-proxy/azure-egress-proxy/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-a0a00d6d-50f4-44c4-8093-7f52fb13bdc6.config
+2026-09-28T20:26:30.3709307Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-a0a00d6d-50f4-44c4-8093-7f52fb13bdc6.config
+2026-09-28T20:26:30.4913677Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-a0a00d6d-50f4-44c4-8093-7f52fb13bdc6.config
+2026-09-28T20:26:30.6108341Z ##[endgroup]
+2026-09-28T20:26:30.6109704Z ##[group]Fetching the repository
+2026-09-28T20:26:30.6113098Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +24197a123336277ce8683f27c7f97c23dd628868:refs/remotes/pull/88/merge
+2026-09-28T20:26:31.7479396Z From https://github.com/alanta/azure-egress-proxy
+2026-09-28T20:26:31.7480769Z  * [new ref]         24197a123336277ce8683f27c7f97c23dd628868 -> pull/88/merge
+2026-09-28T20:26:31.7482478Z ##[endgroup]
+2026-09-28T20:26:31.7483008Z ##[group]Determining the checkout info
+2026-09-28T20:26:31.7483539Z ##[endgroup]
+2026-09-28T20:26:31.7487098Z [command]/usr/bin/git sparse-checkout disable
+2026-09-28T20:26:31.8183488Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-09-28T20:26:31.8324939Z ##[group]Checking out the ref
+2026-09-28T20:26:31.8333439Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/88/merge
+2026-09-28T20:26:31.8928825Z Note: switching to 'refs/remotes/pull/88/merge'.
+2026-09-28T20:26:31.8930506Z 
+2026-09-28T20:26:31.8930877Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-09-28T20:26:31.8931598Z changes and commit them, and you can discard any commits you make in this
+2026-09-28T20:26:31.8932478Z state without impacting any branches by switching back to a branch.
+2026-09-28T20:26:31.8932884Z 
+2026-09-28T20:26:31.8933204Z If you want to create a new branch to retain commits you create, you may
+2026-09-28T20:26:31.8933767Z do so (now or later) by using -c with the switch command. Example:
+2026-09-28T20:26:31.8934156Z 
+2026-09-28T20:26:31.8934335Z   git switch -c <new-branch-name>
+2026-09-28T20:26:31.8934620Z 
+2026-09-28T20:26:31.8934838Z Or undo this operation with:
+2026-09-28T20:26:31.8935176Z 
+2026-09-28T20:26:31.8935466Z   git switch -
+2026-09-28T20:26:31.8936032Z 
+2026-09-28T20:26:31.8936373Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-09-28T20:26:31.8936776Z 
+2026-09-28T20:26:31.8937223Z HEAD is now at 24197a1 Merge 8a489a6b4e11849377e9277945437e7c5017fc50 into 4e28d53e60767e5c33f9e1952c1fd3b879a8990b
+2026-09-28T20:26:31.8939211Z ##[endgroup]
+2026-09-28T20:26:31.8983017Z [command]/usr/bin/git log -1 --format=%H
+2026-09-28T20:26:31.9006981Z 24197a123336277ce8683f27c7f97c23dd628868
+2026-09-28T20:26:31.9014018Z ##[group]Removing auth
+2026-09-28T20:26:31.9014485Z Removing SSH command configuration
+2026-09-28T20:26:31.9016589Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-09-28T20:26:31.9044466Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-09-28T20:26:31.9211113Z Removing HTTP extra header
+2026-09-28T20:26:31.9212810Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-09-28T20:26:31.9240118Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-09-28T20:26:31.9407425Z Removing includeIf entries pointing to credentials config files
+2026-09-28T20:26:31.9409139Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-09-28T20:26:31.9434204Z includeif.gitdir:/home/runner/work/azure-egress-proxy/azure-egress-proxy/.git.path
+2026-09-28T20:26:31.9434912Z includeif.gitdir:/home/runner/work/azure-egress-proxy/azure-egress-proxy/.git/worktrees/*.path
+2026-09-28T20:26:31.9435473Z includeif.gitdir:/github/workspace/.git.path
+2026-09-28T20:26:31.9436414Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-09-28T20:26:31.9440289Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/azure-egress-proxy/azure-egress-proxy/.git.path
+2026-09-28T20:26:31.9460563Z /home/runner/work/_temp/git-credentials-a0a00d6d-50f4-44c4-8093-7f52fb13bdc6.config
+2026-09-28T20:26:31.9468078Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/azure-egress-proxy/azure-egress-proxy/.git.path \/home\/runner\/work\/_temp\/git\-credentials\-a0a00d6d\-50f4\-44c4\-8093\-7f52fb13bdc6\.config
+2026-09-28T20:26:31.9497199Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/azure-egress-proxy/azure-egress-proxy/.git/worktrees/*.path
+2026-09-28T20:26:31.9518518Z /home/runner/work/_temp/git-credentials-a0a00d6d-50f4-44c4-8093-7f52fb13bdc6.config
+2026-09-28T20:26:31.9523460Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/azure-egress-proxy/azure-egress-proxy/.git/worktrees/*.path \/home\/runner\/work\/_temp\/git\-credentials\-a0a00d6d\-50f4\-44c4\-8093\-7f52fb13bdc6\.config
+2026-09-28T20:26:31.9551297Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-09-28T20:26:31.9572162Z /github/runner_temp/git-credentials-a0a00d6d-50f4-44c4-8093-7f52fb13bdc6.config
+2026-09-28T20:26:31.9578198Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path \/github\/runner_temp\/git\-credentials\-a0a00d6d\-50f4\-44c4\-8093\-7f52fb13bdc6\.config
+2026-09-28T20:26:31.9610612Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-09-28T20:26:31.9632496Z /github/runner_temp/git-credentials-a0a00d6d-50f4-44c4-8093-7f52fb13bdc6.config
+2026-09-28T20:26:31.9668245Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path \/github\/runner_temp\/git\-credentials\-a0a00d6d\-50f4\-44c4\-8093\-7f52fb13bdc6\.config
+2026-09-28T20:26:31.9708235Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-09-28T20:26:31.9871002Z Removing credentials config '/home/runner/work/_temp/git-credentials-a0a00d6d-50f4-44c4-8093-7f52fb13bdc6.config'
+2026-09-28T20:26:31.9877541Z ##[endgroup]
+2026-09-28T20:26:32.0157939Z ##[group]Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+2026-09-28T20:26:32.0158260Z with:
+2026-09-28T20:26:32.0158464Z   go-version: 1.25
+2026-09-28T20:26:32.0158685Z   check-latest: true
+2026-09-28T20:26:32.0160075Z   token: ***
+2026-09-28T20:26:32.0160287Z   cache: true
+2026-09-28T20:26:32.0160492Z ##[endgroup]
+2026-09-28T20:26:32.0886565Z Setup go version spec 1.25
+2026-09-28T20:26:32.0887657Z Attempting to resolve the latest version from the manifest...
+2026-09-28T20:26:32.8057511Z matching 1.25...
+2026-09-28T20:26:32.8068407Z Resolved as '1.25.14'
+2026-09-28T20:26:32.8082619Z Found in cache @ /opt/hostedtoolcache/go/1.25.14/x64
+2026-09-28T20:26:32.8082903Z Added go to the path
+2026-09-28T20:26:32.8083107Z Successfully set up Go version 1.25
+2026-09-28T20:26:32.8572546Z [command]/opt/hostedtoolcache/go/1.25.14/x64/bin/go env GOMODCACHE
+2026-09-28T20:26:32.8601551Z [command]/opt/hostedtoolcache/go/1.25.14/x64/bin/go env GOCACHE
+2026-09-28T20:26:32.8628433Z /home/runner/go/pkg/mod
+2026-09-28T20:26:32.8640502Z /home/runner/.cache/go-build
+2026-09-28T20:26:32.8664444Z ##[warning]Restore cache failed: Dependencies file is not found in /home/runner/work/azure-egress-proxy/azure-egress-proxy. Supported file pattern: go.mod
+2026-09-28T20:26:32.8687014Z go version go1.25.14 linux/amd64
+2026-09-28T20:26:32.8687136Z 
+2026-09-28T20:26:32.8687369Z ##[group]go env
+2026-09-28T20:26:32.9732064Z AR='ar'
+2026-09-28T20:26:32.9732292Z CC='gcc'
+2026-09-28T20:26:32.9732468Z CGO_CFLAGS='-O2 -g'
+2026-09-28T20:26:32.9732669Z CGO_CPPFLAGS=''
+2026-09-28T20:26:32.9732846Z CGO_CXXFLAGS='-O2 -g'
+2026-09-28T20:26:32.9733036Z CGO_ENABLED='1'
+2026-09-28T20:26:32.9733205Z CGO_FFLAGS='-O2 -g'
+2026-09-28T20:26:32.9733381Z CGO_LDFLAGS='-O2 -g'
+2026-09-28T20:26:32.9733551Z CXX='g++'
+2026-09-28T20:26:32.9733711Z GCCGO='gccgo'
+2026-09-28T20:26:32.9733896Z GO111MODULE=''
+2026-09-28T20:26:32.9734057Z GOAMD64='v1'
+2026-09-28T20:26:32.9734218Z GOARCH='amd64'
+2026-09-28T20:26:32.9734378Z GOAUTH='netrc'
+2026-09-28T20:26:32.9734570Z GOBIN=''
+2026-09-28T20:26:32.9734780Z GOCACHE='/home/runner/.cache/go-build'
+2026-09-28T20:26:32.9735006Z GOCACHEPROG=''
+2026-09-28T20:26:32.9735207Z GODEBUG=''
+2026-09-28T20:26:32.9735611Z GOENV='/home/runner/.config/go/env'
+2026-09-28T20:26:32.9735953Z GOEXE=''
+2026-09-28T20:26:32.9736105Z GOEXPERIMENT=''
+2026-09-28T20:26:32.9736270Z GOFIPS140='off'
+2026-09-28T20:26:32.9736465Z GOFLAGS=''
+2026-09-28T20:26:32.9736899Z GOGCCFLAGS='-fPIC -m64 -pthread -Wl,--no-gc-sections -fmessage-length=0 -ffile-prefix-map=/tmp/go-build1961020151=/tmp/go-build -gno-record-gcc-switches'
+2026-09-28T20:26:32.9737241Z GOHOSTARCH='amd64'
+2026-09-28T20:26:32.9737354Z GOHOSTOS='linux'
+2026-09-28T20:26:32.9737470Z GOINSECURE=''
+2026-09-28T20:26:32.9737633Z GOMOD='/dev/null'
+2026-09-28T20:26:32.9737760Z GOMODCACHE='/home/runner/go/pkg/mod'
+2026-09-28T20:26:32.9737898Z GONOPROXY=''
+2026-09-28T20:26:32.9738000Z GONOSUMDB=''
+2026-09-28T20:26:32.9738119Z GOOS='linux'
+2026-09-28T20:26:32.9738236Z GOPATH='/home/runner/go'
+2026-09-28T20:26:32.9738356Z GOPRIVATE=''
+2026-09-28T20:26:32.9738515Z GOPROXY='https://proxy.golang.org,direct'
+2026-09-28T20:26:32.9738725Z GOROOT='/opt/hostedtoolcache/go/1.25.14/x64'
+2026-09-28T20:26:32.9738890Z GOSUMDB='sum.golang.org'
+2026-09-28T20:26:32.9739018Z GOTELEMETRY='local'
+2026-09-28T20:26:32.9739162Z GOTELEMETRYDIR='/home/runner/.config/go/telemetry'
+2026-09-28T20:26:32.9739319Z GOTMPDIR=''
+2026-09-28T20:26:32.9739421Z GOTOOLCHAIN='local'
+2026-09-28T20:26:32.9739592Z GOTOOLDIR='/opt/hostedtoolcache/go/1.25.14/x64/pkg/tool/linux_amd64'
+2026-09-28T20:26:32.9739773Z GOVCS=''
+2026-09-28T20:26:32.9739876Z GOVERSION='go1.25.14'
+2026-09-28T20:26:32.9739990Z GOWORK=''
+2026-09-28T20:26:32.9740098Z PKG_CONFIG='pkg-config'
+2026-09-28T20:26:32.9740177Z 
+2026-09-28T20:26:32.9740554Z ##[endgroup]
+2026-09-28T20:26:32.9859602Z ##[group]Run go install golang.org/x/vuln/cmd/govulncheck@v1.7.0
+2026-09-28T20:26:32.9859926Z [36;1mgo install golang.org/x/vuln/cmd/govulncheck@v1.7.0[0m
+2026-09-28T20:26:33.0094058Z shell: /usr/bin/bash -e {0}
+2026-09-28T20:26:33.0094274Z env:
+2026-09-28T20:26:33.0094397Z   GOTOOLCHAIN: local
+2026-09-28T20:26:33.0094522Z ##[endgroup]
+2026-09-28T20:26:33.1016057Z go: downloading golang.org/x/vuln v1.7.0
+2026-09-28T20:26:33.7045905Z go: downloading golang.org/x/telemetry v0.0.0-20260811182544-a038080d80e5
+2026-09-28T20:26:33.8969335Z go: downloading golang.org/x/mod v0.39.0
+2026-09-28T20:26:33.9054921Z go: downloading golang.org/x/tools v0.49.0
+2026-09-28T20:26:33.9585341Z go: downloading golang.org/x/sync v0.22.0
+2026-09-28T20:26:44.7112853Z ##[group]Run govulncheck ./...
+2026-09-28T20:26:44.7113052Z [36;1mgovulncheck ./...[0m
+2026-09-28T20:26:44.7165196Z shell: /usr/bin/bash -e {0}
+2026-09-28T20:26:44.7165337Z env:
+2026-09-28T20:26:44.7165463Z   GOTOOLCHAIN: local
+2026-09-28T20:26:44.7165586Z ##[endgroup]
+2026-09-28T20:26:50.2957180Z === Symbol Results ===
+2026-09-28T20:26:50.2957352Z 
+2026-09-28T20:26:50.2957420Z No vulnerabilities found.
+2026-09-28T20:26:50.2957513Z 
+2026-09-28T20:26:50.2957587Z Your code is affected by 0 vulnerabilities.
+2026-09-28T20:26:50.2957977Z This scan also found 0 vulnerabilities in packages you import and 3
+2026-09-28T20:26:50.2958282Z vulnerabilities in modules you require, but your code doesn't appear to call
+2026-09-28T20:26:50.2960582Z these vulnerabilities.
+2026-09-28T20:26:50.2960794Z Use '-show verbose' for more details.
+2026-09-28T20:26:50.3096771Z Post job cleanup.
+2026-09-28T20:26:50.3859676Z [command]/opt/hostedtoolcache/go/1.25.14/x64/bin/go env GOMODCACHE
+2026-09-28T20:26:50.3906094Z [command]/opt/hostedtoolcache/go/1.25.14/x64/bin/go env GOCACHE
+2026-09-28T20:26:50.3919929Z /home/runner/go/pkg/mod
+2026-09-28T20:26:50.3933526Z /home/runner/.cache/go-build
+2026-09-28T20:26:50.3939787Z Primary key was not generated. Please check the log messages above for more errors or information
+2026-09-28T20:26:50.4090258Z Post job cleanup.
+2026-09-28T20:26:50.4663185Z [command]/usr/bin/git version
+2026-09-28T20:26:50.4694029Z git version 2.55.0
+2026-09-28T20:26:50.4715069Z Temporarily overriding HOME='/home/runner/work/_temp/c5ed30b2-6041-45af-9c69-c13d11953f8d' before making global git config changes
+2026-09-28T20:26:50.4740540Z Adding repository directory to the temporary git global config as a safe directory
+2026-09-28T20:26:50.4741433Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/azure-egress-proxy/azure-egress-proxy
+2026-09-28T20:26:50.4745705Z Removing SSH command configuration
+2026-09-28T20:26:50.4750804Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-09-28T20:26:50.4778040Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-09-28T20:26:50.4966890Z Removing HTTP extra header
+2026-09-28T20:26:50.4971847Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-09-28T20:26:50.4999174Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-09-28T20:26:50.5252738Z Removing includeIf entries pointing to credentials config files
+2026-09-28T20:26:50.5253302Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-09-28T20:26:50.5278335Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-09-28T20:26:50.5609570Z Cleaning up orphan processes

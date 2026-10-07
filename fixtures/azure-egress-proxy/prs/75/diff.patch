@@ -1,0 +1,41 @@
+diff --git a/.github/workflows/allowlist.yml b/.github/workflows/allowlist.yml
+index c752780..ede7136 100644
+--- a/.github/workflows/allowlist.yml
++++ b/.github/workflows/allowlist.yml
+@@ -53,7 +53,7 @@ jobs:
+ 
+       - name: Azure login (OIDC)
+         if: steps.preflight.outputs.upload_enabled == 'true'
+-        uses: azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
++        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
+         with:
+           client-id: ${{ vars.AZURE_CLIENT_ID }}
+           tenant-id: ${{ vars.AZURE_TENANT_ID }}
+diff --git a/.github/workflows/deploy.yml b/.github/workflows/deploy.yml
+index 1b4197d..2eb9be7 100644
+--- a/.github/workflows/deploy.yml
++++ b/.github/workflows/deploy.yml
+@@ -64,7 +64,7 @@ jobs:
+ 
+       - name: Azure login (OIDC)
+         if: steps.preflight.outputs.run_deploy == 'true'
+-        uses: azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
++        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
+         with:
+           client-id: ${{ vars.AZURE_CLIENT_ID }}
+           tenant-id: ${{ vars.AZURE_TENANT_ID }}
+diff --git a/.github/workflows/release.yml b/.github/workflows/release.yml
+index c639a1d..ffdfc3e 100644
+--- a/.github/workflows/release.yml
++++ b/.github/workflows/release.yml
+@@ -129,8 +129,8 @@ jobs:
+         with:
+           persist-credentials: false
+ 
+-      - uses: docker/setup-qemu-action@1f40c72289eff860ee54a304f1438e3cff362e0a # v4.3.0
+-      - uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
++      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
++      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+ 
+       - name: Log in to GHCR
+         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4

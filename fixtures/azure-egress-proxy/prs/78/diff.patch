@@ -1,0 +1,30 @@
+diff --git a/Directory.Packages.props b/Directory.Packages.props
+index 34605b6..daadd23 100644
+--- a/Directory.Packages.props
++++ b/Directory.Packages.props
+@@ -27,7 +27,7 @@
+     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
+     <!-- Keep OpenAPI stack on 2.x for now; 3.x requires explicit migration work (see
+          .github/dependabot.yml, which holds this same package on 2.*). -->
+-    <PackageVersion Include="Microsoft.OpenApi" Version="2.12.2" />
++    <PackageVersion Include="Microsoft.OpenApi" Version="3.10.2" />
+     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.19.1" />
+     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.19.1" />
+     <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.19.0" />
+diff --git a/src/ControlPlane/packages.lock.json b/src/ControlPlane/packages.lock.json
+index df2cf1c..ff7eb51 100644
+--- a/src/ControlPlane/packages.lock.json
++++ b/src/ControlPlane/packages.lock.json
+@@ -32,9 +32,9 @@
+       },
+       "Microsoft.OpenApi": {
+         "type": "Direct",
+-        "requested": "[2.12.2, )",
+-        "resolved": "2.12.2",
+-        "contentHash": "ZkT7qiJe0Kj0+DTZOZo+xrDy1kNmdsWFQVPIQLNx9ZJ0T9cB2LG7r+Bi60so8/+yg1nkS7QCPadrzsTG4VPKrA=="
++        "requested": "[3.10.2, )",
++        "resolved": "3.10.2",
++        "contentHash": "qzg4a3WmgQm28Azaporbnsu+KHA+vq5sgpQQFLiJgB06Rra2S+kzGAU7pzUB8/UIwZJCSCY2JEE/M5e0hQ2K8w=="
+       },
+       "Scalar.AspNetCore": {
+         "type": "Direct",

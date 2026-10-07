@@ -1,0 +1,250 @@
+﻿2026-09-28T20:27:37.5408206Z Current runner version: '2.337.0'
+2026-09-28T20:27:37.5441615Z ##[group]Runner Image Provisioner
+2026-09-28T20:27:37.5442892Z Hosted Compute Agent
+2026-09-28T20:27:37.5443983Z Version: 20260828.587
+2026-09-28T20:27:37.5445071Z Commit: abac92662cab4cc7352de4f9f9d2e2419aad9c29
+2026-09-28T20:27:37.5446499Z Build Date: 2026-08-28T16:44:25Z
+2026-09-28T20:27:37.5447695Z Worker ID: {b299047d-30ac-41ed-9674-304f6575070a}
+2026-09-28T20:27:37.5448864Z Azure Region: eastus
+2026-09-28T20:27:37.5450256Z ##[endgroup]
+2026-09-28T20:27:37.5453024Z ##[group]Operating System
+2026-09-28T20:27:37.5454123Z Ubuntu
+2026-09-28T20:27:37.5455105Z 24.04.5
+2026-09-28T20:27:37.5456005Z LTS
+2026-09-28T20:27:37.5456834Z ##[endgroup]
+2026-09-28T20:27:37.5457745Z ##[group]Runner Image
+2026-09-28T20:27:37.5458893Z Image: ubuntu-24.04
+2026-09-28T20:27:37.5460103Z Version: 20260920.314.1
+2026-09-28T20:27:37.5462309Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260920.314/images/ubuntu/Ubuntu2404-Readme.md
+2026-09-28T20:27:37.5465015Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260920.314
+2026-09-28T20:27:37.5466924Z ##[endgroup]
+2026-09-28T20:27:37.5468787Z ##[group]GITHUB_TOKEN Permissions
+2026-09-28T20:27:37.5471939Z Contents: read
+2026-09-28T20:27:37.5472916Z Metadata: read
+2026-09-28T20:27:37.5473888Z ##[endgroup]
+2026-09-28T20:27:37.5476924Z Secret source: Dependabot
+2026-09-28T20:27:37.5478566Z Cache mode: write
+2026-09-28T20:27:37.5480253Z Prepare workflow directory
+2026-09-28T20:27:37.5957682Z Prepare all required actions
+2026-09-28T20:27:37.6027968Z Getting action download info
+2026-09-28T20:27:37.8407114Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)
+2026-09-28T20:27:37.9455594Z Download action repository 'actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68' (SHA:a98b56852c35b8e3190ac28c8c2271da59106c68)
+2026-09-28T20:27:38.2472070Z Complete job name: Build and test .NET solution
+2026-09-28T20:27:38.3248426Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+2026-09-28T20:27:38.3249752Z with:
+2026-09-28T20:27:38.3250234Z   persist-credentials: false
+2026-09-28T20:27:38.3250831Z   repository: alanta/azure-egress-proxy
+2026-09-28T20:27:38.3254628Z   token: ***
+2026-09-28T20:27:38.3255066Z   ssh-strict: true
+2026-09-28T20:27:38.3255512Z   ssh-user: git
+2026-09-28T20:27:38.3255945Z   clean: true
+2026-09-28T20:27:38.3256401Z   sparse-checkout-cone-mode: true
+2026-09-28T20:27:38.3256939Z   fetch-depth: 1
+2026-09-28T20:27:38.3257389Z   fetch-tags: false
+2026-09-28T20:27:38.3257845Z   show-progress: true
+2026-09-28T20:27:38.3258314Z   lfs: false
+2026-09-28T20:27:38.3258734Z   submodules: false
+2026-09-28T20:27:38.3259195Z   set-safe-directory: true
+2026-09-28T20:27:38.3259877Z   allow-unsafe-pr-checkout: false
+2026-09-28T20:27:38.3260725Z ##[endgroup]
+2026-09-28T20:27:38.4292929Z Syncing repository: alanta/azure-egress-proxy
+2026-09-28T20:27:38.4296138Z ##[group]Getting Git version info
+2026-09-28T20:27:38.4298104Z Working directory is '/home/runner/work/azure-egress-proxy/azure-egress-proxy'
+2026-09-28T20:27:38.4300784Z [command]/usr/bin/git version
+2026-09-28T20:27:38.4372822Z git version 2.55.0
+2026-09-28T20:27:38.4397549Z ##[endgroup]
+2026-09-28T20:27:38.4417973Z Temporarily overriding HOME='/home/runner/work/_temp/f2ade01b-f958-46a6-afb2-3fa47294b8e8' before making global git config changes
+2026-09-28T20:27:38.4427967Z Adding repository directory to the temporary git global config as a safe directory
+2026-09-28T20:27:38.4430446Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/azure-egress-proxy/azure-egress-proxy
+2026-09-28T20:27:38.4474409Z Deleting the contents of '/home/runner/work/azure-egress-proxy/azure-egress-proxy'
+2026-09-28T20:27:38.4477957Z ##[group]Determining repository object format
+2026-09-28T20:27:38.4479791Z ##[endgroup]
+2026-09-28T20:27:38.4481174Z ##[group]Initializing the repository
+2026-09-28T20:27:38.4484399Z [command]/usr/bin/git init /home/runner/work/azure-egress-proxy/azure-egress-proxy
+2026-09-28T20:27:38.4590590Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-09-28T20:27:38.4592271Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-09-28T20:27:38.4595650Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-09-28T20:27:38.4597100Z hint: call:
+2026-09-28T20:27:38.4597999Z hint:
+2026-09-28T20:27:38.4598997Z hint: 	git config --global init.defaultBranch <name>
+2026-09-28T20:27:38.4600499Z hint:
+2026-09-28T20:27:38.4601627Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-09-28T20:27:38.4603119Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-09-28T20:27:38.4604299Z hint:
+2026-09-28T20:27:38.4604984Z hint: 	git branch -m <name>
+2026-09-28T20:27:38.4605803Z hint:
+2026-09-28T20:27:38.4606905Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-09-28T20:27:38.4608772Z Initialized empty Git repository in /home/runner/work/azure-egress-proxy/azure-egress-proxy/.git/
+2026-09-28T20:27:38.4612200Z [command]/usr/bin/git remote add origin https://github.com/alanta/azure-egress-proxy
+2026-09-28T20:27:38.4655316Z ##[endgroup]
+2026-09-28T20:27:38.4656656Z ##[group]Disabling automatic garbage collection
+2026-09-28T20:27:38.4658608Z [command]/usr/bin/git config --local gc.auto 0
+2026-09-28T20:27:38.4691671Z ##[endgroup]
+2026-09-28T20:27:38.4692803Z ##[group]Setting up auth
+2026-09-28T20:27:38.4696290Z Removing SSH command configuration
+2026-09-28T20:27:38.4697873Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-09-28T20:27:38.4740057Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-09-28T20:27:38.5170576Z Removing HTTP extra header
+2026-09-28T20:27:38.5172842Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-09-28T20:27:38.5200622Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-09-28T20:27:38.5430321Z Removing includeIf entries pointing to credentials config files
+2026-09-28T20:27:38.5437175Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-09-28T20:27:38.5478213Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-09-28T20:27:38.5735637Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-20730573-28cf-4e46-beec-623ae15a0277.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-09-28T20:27:38.5784763Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/azure-egress-proxy/azure-egress-proxy/.git.path /home/runner/work/_temp/git-credentials-20730573-28cf-4e46-beec-623ae15a0277.config
+2026-09-28T20:27:38.5825612Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/azure-egress-proxy/azure-egress-proxy/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-20730573-28cf-4e46-beec-623ae15a0277.config
+2026-09-28T20:27:38.5882936Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-20730573-28cf-4e46-beec-623ae15a0277.config
+2026-09-28T20:27:38.5927265Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-20730573-28cf-4e46-beec-623ae15a0277.config
+2026-09-28T20:27:38.5978613Z ##[endgroup]
+2026-09-28T20:27:38.5979921Z ##[group]Fetching the repository
+2026-09-28T20:27:38.5981784Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +5898b148f73426162a82e3458a9fa180c1a81f3c:refs/remotes/pull/77/merge
+2026-09-28T20:27:38.9116058Z From https://github.com/alanta/azure-egress-proxy
+2026-09-28T20:27:38.9118342Z  * [new ref]         5898b148f73426162a82e3458a9fa180c1a81f3c -> pull/77/merge
+2026-09-28T20:27:38.9122951Z ##[endgroup]
+2026-09-28T20:27:38.9124461Z ##[group]Determining the checkout info
+2026-09-28T20:27:38.9126079Z ##[endgroup]
+2026-09-28T20:27:38.9128484Z [command]/usr/bin/git sparse-checkout disable
+2026-09-28T20:27:38.9204486Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-09-28T20:27:38.9239081Z ##[group]Checking out the ref
+2026-09-28T20:27:38.9243070Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/77/merge
+2026-09-28T20:27:38.9504028Z Note: switching to 'refs/remotes/pull/77/merge'.
+2026-09-28T20:27:38.9504926Z 
+2026-09-28T20:27:38.9505480Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-09-28T20:27:38.9506784Z changes and commit them, and you can discard any commits you make in this
+2026-09-28T20:27:38.9508041Z state without impacting any branches by switching back to a branch.
+2026-09-28T20:27:38.9508914Z 
+2026-09-28T20:27:38.9509826Z If you want to create a new branch to retain commits you create, you may
+2026-09-28T20:27:38.9511342Z do so (now or later) by using -c with the switch command. Example:
+2026-09-28T20:27:38.9512091Z 
+2026-09-28T20:27:38.9512347Z   git switch -c <new-branch-name>
+2026-09-28T20:27:38.9512819Z 
+2026-09-28T20:27:38.9513142Z Or undo this operation with:
+2026-09-28T20:27:38.9513938Z 
+2026-09-28T20:27:38.9514342Z   git switch -
+2026-09-28T20:27:38.9514767Z 
+2026-09-28T20:27:38.9515375Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-09-28T20:27:38.9516280Z 
+2026-09-28T20:27:38.9517347Z HEAD is now at 5898b14 Merge cc93b67fdf8dcb499b8250ae077e5aeeef8d2a93 into 4e28d53e60767e5c33f9e1952c1fd3b879a8990b
+2026-09-28T20:27:38.9521415Z ##[endgroup]
+2026-09-28T20:27:38.9566264Z [command]/usr/bin/git log -1 --format=%H
+2026-09-28T20:27:38.9596648Z 5898b148f73426162a82e3458a9fa180c1a81f3c
+2026-09-28T20:27:38.9607148Z ##[group]Removing auth
+2026-09-28T20:27:38.9607789Z Removing SSH command configuration
+2026-09-28T20:27:38.9611732Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-09-28T20:27:38.9649690Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-09-28T20:27:38.9876670Z Removing HTTP extra header
+2026-09-28T20:27:38.9880544Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-09-28T20:27:38.9920585Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-09-28T20:27:39.0161604Z Removing includeIf entries pointing to credentials config files
+2026-09-28T20:27:39.0164737Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-09-28T20:27:39.0199086Z includeif.gitdir:/home/runner/work/azure-egress-proxy/azure-egress-proxy/.git.path
+2026-09-28T20:27:39.0202054Z includeif.gitdir:/home/runner/work/azure-egress-proxy/azure-egress-proxy/.git/worktrees/*.path
+2026-09-28T20:27:39.0203986Z includeif.gitdir:/github/workspace/.git.path
+2026-09-28T20:27:39.0205458Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-09-28T20:27:39.0216545Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/azure-egress-proxy/azure-egress-proxy/.git.path
+2026-09-28T20:27:39.0242697Z /home/runner/work/_temp/git-credentials-20730573-28cf-4e46-beec-623ae15a0277.config
+2026-09-28T20:27:39.0264584Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/azure-egress-proxy/azure-egress-proxy/.git.path \/home\/runner\/work\/_temp\/git\-credentials\-20730573\-28cf\-4e46\-beec\-623ae15a0277\.config
+2026-09-28T20:27:39.0306375Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/azure-egress-proxy/azure-egress-proxy/.git/worktrees/*.path
+2026-09-28T20:27:39.0361333Z /home/runner/work/_temp/git-credentials-20730573-28cf-4e46-beec-623ae15a0277.config
+2026-09-28T20:27:39.0371183Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/azure-egress-proxy/azure-egress-proxy/.git/worktrees/*.path \/home\/runner\/work\/_temp\/git\-credentials\-20730573\-28cf\-4e46\-beec\-623ae15a0277\.config
+2026-09-28T20:27:39.0408687Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-09-28T20:27:39.0435891Z /github/runner_temp/git-credentials-20730573-28cf-4e46-beec-623ae15a0277.config
+2026-09-28T20:27:39.0447307Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path \/github\/runner_temp\/git\-credentials\-20730573\-28cf\-4e46\-beec\-623ae15a0277\.config
+2026-09-28T20:27:39.0487614Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-09-28T20:27:39.0516239Z /github/runner_temp/git-credentials-20730573-28cf-4e46-beec-623ae15a0277.config
+2026-09-28T20:27:39.0577330Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path \/github\/runner_temp\/git\-credentials\-20730573\-28cf\-4e46\-beec\-623ae15a0277\.config
+2026-09-28T20:27:39.0618061Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-09-28T20:27:39.0840619Z Removing credentials config '/home/runner/work/_temp/git-credentials-20730573-28cf-4e46-beec-623ae15a0277.config'
+2026-09-28T20:27:39.0849166Z ##[endgroup]
+2026-09-28T20:27:39.1193769Z ##[group]Run actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68
+2026-09-28T20:27:39.1194709Z with:
+2026-09-28T20:27:39.1195129Z   dotnet-version: 10.0.x
+2026-09-28T20:27:39.1195647Z   cache: false
+2026-09-28T20:27:39.1196085Z ##[endgroup]
+2026-09-28T20:27:39.2543765Z [command]/home/runner/work/_actions/actions/setup-dotnet/a98b56852c35b8e3190ac28c8c2271da59106c68/externals/install-dotnet.sh --skip-non-versioned-files --runtime dotnet --channel LTS
+2026-09-28T20:27:39.4715202Z dotnet-install: .NET Core Runtime with version '10.0.12' is already installed.
+2026-09-28T20:27:39.4742085Z [command]/home/runner/work/_actions/actions/setup-dotnet/a98b56852c35b8e3190ac28c8c2271da59106c68/externals/install-dotnet.sh --skip-non-versioned-files --channel 10.0
+2026-09-28T20:27:39.6476022Z dotnet-install: .NET Core SDK with version '10.0.401' is already installed.
+2026-09-28T20:27:39.6700816Z ##[group]Run if [ ! -f AzureEgressProxy.slnx ]; then
+2026-09-28T20:27:39.6702713Z [36;1mif [ ! -f AzureEgressProxy.slnx ]; then[0m
+2026-09-28T20:27:39.6705020Z [36;1m  echo "::notice::AzureEgressProxy.slnx not present yet; skipping .NET build/test."[0m
+2026-09-28T20:27:39.6707142Z [36;1m  exit 0[0m
+2026-09-28T20:27:39.6708201Z [36;1mfi[0m
+2026-09-28T20:27:39.6710060Z [36;1m# --locked-mode fails the build if resolved packages drift from the committed[0m
+2026-09-28T20:27:39.6712529Z [36;1m# packages.lock.json rather than silently restoring something else.[0m
+2026-09-28T20:27:39.6714644Z [36;1mdotnet restore AzureEgressProxy.slnx --locked-mode[0m
+2026-09-28T20:27:39.6717063Z [36;1mdotnet build AzureEgressProxy.slnx --configuration Release --no-restore[0m
+2026-09-28T20:27:39.6719807Z [36;1mdotnet test AzureEgressProxy.slnx --configuration Release --no-build[0m
+2026-09-28T20:27:39.7001272Z shell: /usr/bin/bash -e {0}
+2026-09-28T20:27:39.7002526Z env:
+2026-09-28T20:27:39.7003577Z   DOTNET_ROOT: /usr/share/dotnet
+2026-09-28T20:27:39.7004867Z ##[endgroup]
+2026-09-28T20:27:46.7555465Z   Determining projects to restore...
+2026-09-28T20:27:50.2021786Z   Restored /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/EgressProxy.Client/EgressProxy.Client.csproj (in 2.14 sec).
+2026-09-28T20:27:50.2081051Z   Restored /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/AppHost/AllowlistSeeder/AllowlistSeeder.csproj (in 2.14 sec).
+2026-09-28T20:27:50.2735138Z   Restored /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/EgressProxy.Client.Tests/EgressProxy.Client.Tests.csproj (in 2.36 sec).
+2026-09-28T20:27:50.9442898Z   Restored /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/ServiceDefaults/ServiceDefaults.csproj (in 646 ms).
+2026-09-28T20:27:50.9510888Z   Restored /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/ControlPlane/ControlPlane.csproj (in 728 ms).
+2026-09-28T20:27:50.9666835Z   Restored /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/ControlPlane.Tests/ControlPlane.Tests.csproj (in 3.1 sec).
+2026-09-28T20:27:50.9735434Z   Restored /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/SampleApp/SampleApp.csproj (in 15 ms).
+2026-09-28T20:27:50.9737287Z   Restored /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/ServiceDefaults.Tests/ServiceDefaults.Tests.csproj (in 16 ms).
+2026-09-28T20:27:51.4076824Z   Restored /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/Portal/Portal.csproj (in 431 ms).
+2026-09-28T20:27:51.4122516Z   Restored /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/Portal.Tests/Portal.Tests.csproj (in 432 ms).
+2026-09-28T20:27:53.0321995Z   Restored /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/AppHost/AppHost.csproj (in 2.82 sec).
+2026-09-28T20:27:54.2588207Z ##[warning]/home/runner/.nuget/packages/aspire.hosting.apphost/13.5.4/build/Aspire.Hosting.AppHost.targets(157,5): warning ASPIRE010: AppHost is configured with AspireUseCliBundle=false. Some Aspire features require the Aspire CLI bundle. Set AspireUseCliBundle=true to enable those features, or suppress ASPIRE010 to continue without the bundle. See https://aka.ms/aspire/diagnostics/aspire010 for more information. [/home/runner/work/azure-egress-proxy/azure-egress-proxy/src/AppHost/AppHost.csproj]
+2026-09-28T20:27:59.5178038Z   ServiceDefaults -> /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/ServiceDefaults/bin/Release/net10.0/ServiceDefaults.dll
+2026-09-28T20:27:59.5197034Z   EgressProxy.Client -> /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/EgressProxy.Client/bin/Release/net10.0/EgressProxy.Client.dll
+2026-09-28T20:27:59.6162672Z   AllowlistSeeder -> /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/AppHost/AllowlistSeeder/bin/Release/net10.0/AllowlistSeeder.dll
+2026-09-28T20:28:00.1041165Z   EgressProxy.Client.Tests -> /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/EgressProxy.Client.Tests/bin/Release/net10.0/EgressProxy.Client.Tests.dll
+2026-09-28T20:28:02.8212410Z   ControlPlane -> /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/ControlPlane/bin/Release/net10.0/ControlPlane.dll
+2026-09-28T20:28:03.4531065Z   ServiceDefaults.Tests -> /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/ServiceDefaults.Tests/bin/Release/net10.0/ServiceDefaults.Tests.dll
+2026-09-28T20:28:03.5083809Z   SampleApp -> /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/SampleApp/bin/Release/net10.0/SampleApp.dll
+2026-09-28T20:28:06.6858430Z   Portal -> /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/Portal/bin/Release/net10.0/Portal.dll
+2026-09-28T20:28:07.9035622Z   Portal.Tests -> /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/Portal.Tests/bin/Release/net10.0/Portal.Tests.dll
+2026-09-28T20:28:08.8221498Z   ControlPlane.Tests -> /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/ControlPlane.Tests/bin/Release/net10.0/ControlPlane.Tests.dll
+2026-09-28T20:28:09.4586675Z   AppHost -> /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/AppHost/bin/Release/net10.0/AppHost.dll
+2026-09-28T20:28:09.4860488Z 
+2026-09-28T20:28:09.4872049Z Build succeeded.
+2026-09-28T20:28:09.4872569Z 
+2026-09-28T20:28:09.4879931Z ##[warning]/home/runner/.nuget/packages/aspire.hosting.apphost/13.5.4/build/Aspire.Hosting.AppHost.targets(157,5): warning ASPIRE010: AppHost is configured with AspireUseCliBundle=false. Some Aspire features require the Aspire CLI bundle. Set AspireUseCliBundle=true to enable those features, or suppress ASPIRE010 to continue without the bundle. See https://aka.ms/aspire/diagnostics/aspire010 for more information. [/home/runner/work/azure-egress-proxy/azure-egress-proxy/src/AppHost/AppHost.csproj]
+2026-09-28T20:28:09.4884833Z     1 Warning(s)
+2026-09-28T20:28:09.4885243Z     0 Error(s)
+2026-09-28T20:28:09.4885452Z 
+2026-09-28T20:28:09.4885669Z Time Elapsed 00:00:16.05
+2026-09-28T20:28:11.1311794Z Test run for /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/ControlPlane.Tests/bin/Release/net10.0/ControlPlane.Tests.dll (.NETCoreApp,Version=v10.0)
+2026-09-28T20:28:11.2060643Z Test run for /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/EgressProxy.Client.Tests/bin/Release/net10.0/EgressProxy.Client.Tests.dll (.NETCoreApp,Version=v10.0)
+2026-09-28T20:28:11.2241355Z Test run for /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/Portal.Tests/bin/Release/net10.0/Portal.Tests.dll (.NETCoreApp,Version=v10.0)
+2026-09-28T20:28:11.5301897Z Test run for /home/runner/work/azure-egress-proxy/azure-egress-proxy/src/ServiceDefaults.Tests/bin/Release/net10.0/ServiceDefaults.Tests.dll (.NETCoreApp,Version=v10.0)
+2026-09-28T20:28:11.8960825Z A total of 1 test files matched the specified pattern.
+2026-09-28T20:28:11.9060349Z A total of 1 test files matched the specified pattern.
+2026-09-28T20:28:11.9187075Z A total of 1 test files matched the specified pattern.
+2026-09-28T20:28:11.9330599Z A total of 1 test files matched the specified pattern.
+2026-09-28T20:28:13.7943495Z 
+2026-09-28T20:28:13.8054031Z Passed!  - Failed:     0, Passed:    10, Skipped:     0, Total:    10, Duration: 162 ms - EgressProxy.Client.Tests.dll (net10.0)
+2026-09-28T20:28:14.9910162Z 
+2026-09-28T20:28:14.9955560Z Passed!  - Failed:     0, Passed:   171, Skipped:     0, Total:   171, Duration: 749 ms - Portal.Tests.dll (net10.0)
+2026-09-28T20:28:15.2190187Z 
+2026-09-28T20:28:15.2310968Z Passed!  - Failed:     0, Passed:    32, Skipped:     0, Total:    32, Duration: 1 s - ServiceDefaults.Tests.dll (net10.0)
+2026-09-28T20:28:16.2486328Z 
+2026-09-28T20:28:16.2545539Z Passed!  - Failed:     0, Passed:   116, Skipped:     0, Total:   116, Duration: 2 s - ControlPlane.Tests.dll (net10.0)
+2026-09-28T20:28:16.3616547Z Post job cleanup.
+2026-09-28T20:28:16.5070887Z Post job cleanup.
+2026-09-28T20:28:16.6018321Z [command]/usr/bin/git version
+2026-09-28T20:28:16.6081043Z git version 2.55.0
+2026-09-28T20:28:16.6122035Z Temporarily overriding HOME='/home/runner/work/_temp/e48bfb1b-2b66-4409-ba5d-fcc00d3812f0' before making global git config changes
+2026-09-28T20:28:16.6123771Z Adding repository directory to the temporary git global config as a safe directory
+2026-09-28T20:28:16.6128374Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/azure-egress-proxy/azure-egress-proxy
+2026-09-28T20:28:16.6164747Z Removing SSH command configuration
+2026-09-28T20:28:16.6172847Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-09-28T20:28:16.6214368Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-09-28T20:28:16.6620402Z Removing HTTP extra header
+2026-09-28T20:28:16.6629714Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-09-28T20:28:16.6711315Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-09-28T20:28:16.7161539Z Removing includeIf entries pointing to credentials config files
+2026-09-28T20:28:16.7190386Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-09-28T20:28:16.7229926Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-09-28T20:28:16.7817270Z Cleaning up orphan processes
+2026-09-28T20:28:16.8163738Z Terminate orphan process: pid (2606) (dotnet)
+2026-09-28T20:28:16.8199247Z Terminate orphan process: pid (2607) (dotnet)
+2026-09-28T20:28:16.8256728Z Terminate orphan process: pid (2608) (dotnet)
+2026-09-28T20:28:16.8403849Z Terminate orphan process: pid (2739) (VBCSCompiler)
