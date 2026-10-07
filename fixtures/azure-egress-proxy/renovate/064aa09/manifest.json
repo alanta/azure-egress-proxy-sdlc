@@ -1,0 +1,12 @@
+{
+  "subject": "alanta/azure-egress-proxy",
+  "commit": "064aa099ecf7ffea9664b89df29f7d89d6859358",
+  "captured_at": "2026-10-08",
+  "renovate": {
+    "version": "44.145.1",
+    "image": "docker.io/renovate/renovate:44.145.1@sha256:6f1f3e2d9d0c3f99aa1f61f7509d302185de7deb173ac8c5ff88a5ce283ec435"
+  },
+  "mode": "--platform=local --dry-run=lookup --report-type=file",
+  "token": "fine-grained, read-only, azure-egress-proxy only (GITHUB_COM_TOKEN)",
+  "config": "none in the subject; onboarding off, requireConfig optional"
+}

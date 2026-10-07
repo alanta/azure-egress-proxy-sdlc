@@ -164,7 +164,7 @@ The scan SHALL compare its candidates with the updates proposed by open Dependab
 
 #### Scenario: A Dependabot PR is stale for the revision
 
-- **WHEN** a PR's from-version differs from the version declared in the scanned revision
+- **WHEN** a PR's from-version matches neither the version declared nor a version resolved in a lock file of the scanned revision
 - **THEN** the PR is reported as `stale` and not counted as matched or missed
 
 #### Scenario: The scan finds more than Dependabot
