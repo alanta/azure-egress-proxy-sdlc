@@ -1,13 +1,20 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  An agentic SDLC system that keeps a subject repository up to date with as little
+  maintainer effort as possible. The pilot subject is alanta/azure-egress-proxy
+  (.NET 10 + Aspire, a Go proxy, Docker images, Bicep/AVM, GitHub Actions; a Marketplace
+  VM image is planned on its research/marketplace branch).
+  Constraints:
+  - This repository holds the system; the subject repository holds only its code and its
+    policies (update policy in .github/renovate.json5). Never put system code in the subject.
+  - The system works on a copy of the subject and merges back through PRs only.
+  - Deterministic tools are the authority for gates; LLM/agent output cites evidence and
+    can never lower a risk score or relax a gate. Upstream text is untrusted data.
+  - Unknown, skipped or unavailable evidence is reported as such, never as success.
+  - Delivery is in slices; see README.md for the slices and the decisions so far.
+  Tech: Python CLI orchestrating pinned, containerised tools (Renovate, OSV-Scanner,
+  govulncheck, native package-manager queries).
 
 # Per-artifact rules (optional)
 # Add custom rules for specific artifacts.

@@ -1,0 +1,144 @@
+{
+  "repository": "alanta/azure-egress-proxy",
+  "captured_at": "2026-10-07T18:42:07Z",
+  "default_branch": "main",
+  "default_branch_commit": "064aa099ecf7ffea9664b89df29f7d89d6859358",
+  "prs": [
+    {
+      "pr": 75,
+      "state": "open",
+      "head": "0a4a56bd3dd26ce833d364e49c95bb619c64fc1e",
+      "job_logs": [
+        {
+          "job": "109120532135",
+          "conclusion": "success",
+          "log": "available"
+        }
+      ]
+    },
+    {
+      "pr": 76,
+      "state": "open",
+      "head": "deddfe4dcf3a879715d28cac7ed0cd08df3e8c4a",
+      "job_logs": [
+        {
+          "job": "109120614355",
+          "conclusion": "success",
+          "log": "available"
+        },
+        {
+          "job": "109120687233",
+          "conclusion": "success",
+          "log": "available"
+        },
+        {
+          "job": "109120687726",
+          "conclusion": "success",
+          "log": "available"
+        }
+      ]
+    },
+    {
+      "pr": 77,
+      "state": "open",
+      "head": "cc93b67fdf8dcb499b8250ae077e5aeeef8d2a93",
+      "job_logs": [
+        {
+          "job": "109120755299",
+          "conclusion": "success",
+          "log": "available"
+        },
+        {
+          "job": "109120824836",
+          "conclusion": "success",
+          "log": "available"
+        }
+      ]
+    },
+    {
+      "pr": 98,
+      "state": "open",
+      "head": "bc9839dd824d26f2326c9417ebd8b24777e8f29b",
+      "job_logs": [
+        {
+          "job": "111964491663",
+          "conclusion": "success",
+          "log": "available"
+        },
+        {
+          "job": "111966308273",
+          "conclusion": "cancelled",
+          "log": "unavailable"
+        }
+      ]
+    },
+    {
+      "pr": 99,
+      "state": "open",
+      "head": "7aea49513678ed1c3b0aa0f183f45f23e7d65a81",
+      "job_logs": [
+        {
+          "job": "111965053076",
+          "conclusion": "cancelled",
+          "log": "unavailable"
+        }
+      ]
+    },
+    {
+      "pr": 78,
+      "state": "closed",
+      "head": "45c576d39acf19daca095ee503d57e84cb849737",
+      "job_logs": [
+        {
+          "job": "108006144954",
+          "conclusion": "success",
+          "log": "available"
+        },
+        {
+          "job": "108006181327",
+          "conclusion": "failure",
+          "log": "available"
+        }
+      ]
+    },
+    {
+      "pr": 88,
+      "state": "closed",
+      "head": "8a489a6b4e11849377e9277945437e7c5017fc50",
+      "job_logs": [
+        {
+          "job": "109120304100",
+          "conclusion": "success",
+          "log": "available"
+        },
+        {
+          "job": "109120371932",
+          "conclusion": "success",
+          "log": "available"
+        },
+        {
+          "job": "109120372016",
+          "conclusion": "success",
+          "log": "available"
+        }
+      ]
+    },
+    {
+      "pr": 89,
+      "state": "closed",
+      "head": "d5b50e5f8094fc1d322f0cfa40ed2f6e079d059e",
+      "job_logs": [
+        {
+          "job": "109121321718",
+          "conclusion": "success",
+          "log": "available"
+        },
+        {
+          "job": "109121378646",
+          "conclusion": "failure",
+          "log": "available"
+        }
+      ]
+    }
+  ]
+}
