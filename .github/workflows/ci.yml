@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    name: Lint and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          # Pinned so CI resolves the lock file with a known uv; bump with the lock file.
+          version: "0.12.23"
+          enable-cache: true
+      - name: Install from the lock file
+        run: uv sync --locked
+      - name: Lint
+        run: |
+          uv run ruff check
+          uv run ruff format --check
+      - name: Test
+        run: uv run pytest
+
+  specs:
+    name: Validate OpenSpec
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Validate changes and specs
+        # Same OpenSpec version that generated the skills in .claude/ and .agents/.
+        run: npx --yes @fission-ai/openspec@1.14.0 validate --all --strict --no-interactive
+
+  workflows:
+    name: Lint workflows and scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: actionlint
+        # Pinned by digest; the image bundles shellcheck, so run: bodies are checked too.
+        run: >-
+          docker run --rm -v "$PWD:/repo:ro" -w /repo
+          docker.io/rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
+          -color
+      - name: shellcheck
+        run: |
+          mapfile -t scripts < <(find scripts -type f -name '*.sh' | sort)
+          shellcheck "${scripts[@]}"
+
+  result:
+    name: CI result
+    runs-on: ubuntu-latest
+    # The one check to require on main: passes only when every job succeeded.
+    needs: [python, specs, workflows]
+    if: always()
+    steps:
+      - name: Check every job's result
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          python3 - <<'PY'
+          import json, os, sys
+          results = {job: v["result"] for job, v in json.loads(os.environ["NEEDS"]).items()}
+          for job, result in sorted(results.items()):
+              print(f"{job}: {result}")
+          bad = sorted(job for job, result in results.items() if result != "success")
+          if bad:
+              print(f"::error::Not successful: {', '.join(bad)}")
+              sys.exit(1)
+          PY

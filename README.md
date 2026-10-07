@@ -95,6 +95,17 @@ None of it is implemented yet. When it is, this system adds:
 - What evidence makes a release recommendation useful, and which release and versioning conventions apply.
 - Which measures and review period decide whether autonomy can be widened.
 
+## Development
+
+Python 3.12+ with [uv](https://docs.astral.sh/uv/):
+
+```bash
+uv sync                      # install from the lock file
+uv run sdlc scan --help      # the CLI
+uv run pytest                # tests
+uv run ruff check && uv run ruff format --check
+```
+
 ## Further reading
 
 - [Dependency and validation discovery](docs/azure-egress-proxy-dependency-pass.md): manual inventory of the subject at `064aa09`.
