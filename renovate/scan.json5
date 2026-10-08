@@ -1,0 +1,31 @@
+// Renovate configuration the scan always applies, whatever the subject. It adds
+// dependency sources Renovate doesn't read on its own. Subject-specific sources belong in
+// the subject's own policy file instead.
+{
+  customManagers: [
+    {
+      // `pip install "pkg[extra]==1.2.3"` inside a Dockerfile, with no requirements file.
+      customType: "regex",
+      description: "Pinned pip installs in Dockerfiles",
+      managerFilePatterns: ["/(^|/)Dockerfile[^/]*$/"],
+      matchStrings: [
+        "pip3? install[^\\n]*?[\"']?(?<depName>[A-Za-z0-9][A-Za-z0-9._-]*)(?:\\[[^\\]]*\\])?==(?<currentValue>[^\"'\\s]+)",
+      ],
+      datasourceTemplate: "pypi",
+    },
+    {
+      // Bicep public registry modules, such as Azure Verified Modules:
+      // `br/public:avm/res/compute/virtual-machine-scale-set:0.11.1`. The registry
+      // publishes them as OCI artifacts at mcr.microsoft.com/bicep/<path>.
+      customType: "regex",
+      description: "Bicep public registry module versions",
+      managerFilePatterns: ["/\\.bicep$/"],
+      matchStrings: [
+        "br/public:(?<depName>[a-z0-9/._-]+):(?<currentValue>\\d+\\.\\d+\\.\\d+)",
+      ],
+      packageNameTemplate: "mcr.microsoft.com/bicep/{{{depName}}}",
+      datasourceTemplate: "docker",
+      versioningTemplate: "semver",
+    },
+  ],
+}

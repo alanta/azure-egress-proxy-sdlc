@@ -59,6 +59,24 @@ Renovate `44.145.1`, pinned by digest, ran in local lookup mode with `--report-t
   - the majors a policy would hold: Microsoft.OpenApi 3.x and .NET 11 images.
 - **Still not covered, as expected:** AVM module tags, the inline PyJWT pin, and the Aspire CLI version in the devcontainer Dockerfile's `ARG`. These are task 1.4.
 
+### Follow-up: extra Renovate rules (2026-10-08)
+
+Three regex `customManagers` cover the sources Renovate doesn't read by itself. They live in two places:
+- **`renovate/scan.json5`**, applied to every subject: inline `pip install` pins in Dockerfiles, and Bicep public registry modules, looked up as OCI tags at `mcr.microsoft.com/bicep/<path>`.
+- **The subject's trial policy, `policies/azure-egress-proxy.renovate.json5`**: the devcontainer's Aspire CLI `ARG`. It describes that repository's files, so it belongs with its policy.
+
+The scan of `064aa09` with both found 225 entries instead of 191:
+- **PyJWT:** 2.15.0 → 2.15.1.
+- **Aspire CLI:** 13.5.4 → 13.6.1, the same release as the Aspire SDK candidate.
+- **AVM modules:** 32 references, all current. Lookups were confirmed by setting one module back to 0.9.0, which produced 0.11.1.
+
+The report is `fixtures/azure-egress-proxy/renovate/064aa09/report-with-scan-config.json`.
+
+Three things that weren't obvious:
+- **Local mode reads only tracked files.** The trial policy has to be committed into the disposable copy, or Renovate reports "no renovate config file found" and silently skips it. The subject repository itself is never touched.
+- **NuGet versioning reads a bare `13.5.4` as `>= 13.5.4`.** A custom manager on the NuGet datasource therefore reports no update, because 13.6.1 satisfies that range. An exact pin needs `versioningTemplate: "semver"`.
+- **A `/regex/` file pattern containing a `/` breaks** (for example `.devcontainer/Dockerfile`), and the manager matches nothing without a warning. Use a glob instead.
+
 ### Vulnerability evidence
 
 OSV-Scanner `2.6.0` scanned source and lockfiles from the disposable snapshot and emitted JSON. It read the Go module and .NET `packages.lock.json` files; it reported three OSV entries for `golang.org/x/crypto@0.55.0` (`GO-2026-5932`, `GO-2026-6354`, `GO-2026-6355`). This is vulnerability-match evidence, not proof that affected Go code is reachable. The repository already uses `govulncheck` for Go reachability, so adding OSV must demonstrate useful coverage beyond that existing check rather than duplicate its conclusion.

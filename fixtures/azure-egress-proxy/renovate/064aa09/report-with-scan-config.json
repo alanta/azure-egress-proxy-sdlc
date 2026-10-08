@@ -1,0 +1,4118 @@
+{
+  "problems": [],
+  "repositories": {
+    "local": {
+      "branches": [],
+      "libYearsWithStatus": {
+        "dependencyStatus": {
+          "outdated": 24,
+          "total": 122
+        },
+        "libYears": {
+          "managers": {
+            "bicep": 0,
+            "devcontainer": 0,
+            "dockerfile": 0,
+            "github-actions": 0.19144593480466765,
+            "gomod": 0.16976553779807205,
+            "nuget": 0.6717631656519534,
+            "regex": 0.0729014968290208
+          },
+          "total": 1.1058761350837136
+        }
+      },
+      "packageFiles": {
+        "bicep": [
+          {
+            "deps": [
+              {
+                "autoReplaceStringTemplate": "'{{depName}}@{{newValue}}'",
+                "currentValue": "2024-03-01",
+                "currentVersion": "2024-03-01",
+                "datasource": "azure-bicep-resource",
+                "depName": "Microsoft.Resources/resourceGroups",
+                "fixedVersion": "2024-03-01",
+                "isSingleVersion": true,
+                "packageName": "Microsoft.Resources/resourceGroups",
+                "replaceString": "'Microsoft.Resources/resourceGroups@2024-03-01'",
+                "updates": [
+                  {
+                    "branchName": "renovate/microsoft.resources-resourcegroups-20240701.x",
+                    "bucket": "major",
+                    "isBreaking": true,
+                    "newMajor": 20240701,
+                    "newMinor": 0,
+                    "newPatch": 0,
+                    "newValue": "2024-07-01",
+                    "newVersion": "2024-07-01",
+                    "updateType": "major"
+                  }
+                ],
+                "versioning": "azure-rest-api",
+                "warnings": []
+              }
+            ],
+            "packageFile": "infra/main.bicep"
+          },
+          {
+            "deps": [
+              {
+                "autoReplaceStringTemplate": "'{{depName}}@{{newValue}}'",
+                "currentValue": "2023-07-01",
+                "currentVersion": "2023-07-01",
+                "datasource": "azure-bicep-resource",
+                "depName": "Microsoft.ContainerRegistry/registries",
+                "fixedVersion": "2023-07-01",
+                "packageName": "Microsoft.ContainerRegistry/registries",
+                "replaceString": "'Microsoft.ContainerRegistry/registries@2023-07-01'",
+                "updates": [],
+                "versioning": "azure-rest-api",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "'{{depName}}@{{newValue}}'",
+                "currentValue": "2023-05-01",
+                "currentVersion": "2023-05-01",
+                "datasource": "azure-bicep-resource",
+                "depName": "Microsoft.Storage/storageAccounts",
+                "fixedVersion": "2023-05-01",
+                "packageName": "Microsoft.Storage/storageAccounts",
+                "replaceString": "'Microsoft.Storage/storageAccounts@2023-05-01'",
+                "updates": [],
+                "versioning": "azure-rest-api",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "'{{depName}}@{{newValue}}'",
+                "currentValue": "2022-04-01",
+                "currentVersion": "2022-04-01",
+                "datasource": "azure-bicep-resource",
+                "depName": "Microsoft.Authorization/roleAssignments",
+                "fixedVersion": "2022-04-01",
+                "packageName": "Microsoft.Authorization/roleAssignments",
+                "replaceString": "'Microsoft.Authorization/roleAssignments@2022-04-01'",
+                "updates": [],
+                "versioning": "azure-rest-api",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "'{{depName}}@{{newValue}}'",
+                "currentValue": "2022-04-01",
+                "currentVersion": "2022-04-01",
+                "datasource": "azure-bicep-resource",
+                "depName": "Microsoft.Authorization/roleAssignments",
+                "fixedVersion": "2022-04-01",
+                "packageName": "Microsoft.Authorization/roleAssignments",
+                "replaceString": "'Microsoft.Authorization/roleAssignments@2022-04-01'",
+                "updates": [],
+                "versioning": "azure-rest-api",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "'{{depName}}@{{newValue}}'",
+                "currentValue": "2024-05-01",
+                "currentVersion": "2024-05-01",
+                "datasource": "azure-bicep-resource",
+                "depName": "Microsoft.Network/loadBalancers",
+                "fixedVersion": "2024-05-01",
+                "isSingleVersion": true,
+                "packageName": "Microsoft.Network/loadBalancers",
+                "replaceString": "'Microsoft.Network/loadBalancers@2024-05-01'",
+                "updates": [
+                  {
+                    "branchName": "renovate/microsoft.network-loadbalancers-20241001.x",
+                    "bucket": "major",
+                    "isBreaking": true,
+                    "newMajor": 20241001,
+                    "newMinor": 0,
+                    "newPatch": 0,
+                    "newValue": "2024-10-01",
+                    "newVersion": "2024-10-01",
+                    "updateType": "major"
+                  }
+                ],
+                "versioning": "azure-rest-api",
+                "warnings": []
+              }
+            ],
+            "packageFile": "infra/modules/hub.bicep"
+          },
+          {
+            "deps": [
+              {
+                "autoReplaceStringTemplate": "'{{depName}}@{{newValue}}'",
+                "currentValue": "2024-03-01",
+                "currentVersion": "2024-03-01",
+                "datasource": "azure-bicep-resource",
+                "depName": "Microsoft.App/managedEnvironments",
+                "fixedVersion": "2024-03-01",
+                "packageName": "Microsoft.App/managedEnvironments",
+                "replaceString": "'Microsoft.App/managedEnvironments@2024-03-01'",
+                "updates": [],
+                "versioning": "azure-rest-api",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "'{{depName}}@{{newValue}}'",
+                "currentValue": "2021-05-01-preview",
+                "currentVersion": "2021-05-01-preview",
+                "datasource": "azure-bicep-resource",
+                "depName": "Microsoft.Insights/diagnosticSettings",
+                "fixedVersion": "2021-05-01-preview",
+                "packageName": "Microsoft.Insights/diagnosticSettings",
+                "replaceString": "'Microsoft.Insights/diagnosticSettings@2021-05-01-preview'",
+                "updates": [],
+                "versioning": "azure-rest-api",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "'{{depName}}@{{newValue}}'",
+                "currentValue": "2024-03-01",
+                "currentVersion": "2024-03-01",
+                "datasource": "azure-bicep-resource",
+                "depName": "Microsoft.App/containerApps/authConfigs",
+                "fixedVersion": "2024-03-01",
+                "packageName": "Microsoft.App/containerApps/authConfigs",
+                "replaceString": "'Microsoft.App/containerApps/authConfigs@2024-03-01'",
+                "updates": [],
+                "versioning": "azure-rest-api",
+                "warnings": []
+              }
+            ],
+            "packageFile": "infra/modules/mgmt.bicep"
+          },
+          {
+            "deps": [
+              {
+                "autoReplaceStringTemplate": "'{{depName}}@{{newValue}}'",
+                "currentValue": "2023-09-01",
+                "currentVersion": "2023-09-01",
+                "datasource": "azure-bicep-resource",
+                "depName": "Microsoft.OperationalInsights/workspaces/tables",
+                "fixedVersion": "2023-09-01",
+                "packageName": "Microsoft.OperationalInsights/workspaces/tables",
+                "replaceString": "'Microsoft.OperationalInsights/workspaces/tables@2023-09-01'",
+                "updates": [],
+                "versioning": "azure-rest-api",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "'{{depName}}@{{newValue}}'",
+                "currentValue": "2024-11-01",
+                "currentVersion": "2024-11-01",
+                "datasource": "azure-bicep-resource",
+                "depName": "Microsoft.Compute/virtualMachineScaleSets",
+                "fixedVersion": "2024-11-01",
+                "packageName": "Microsoft.Compute/virtualMachineScaleSets",
+                "replaceString": "'Microsoft.Compute/virtualMachineScaleSets@2024-11-01'",
+                "updates": [],
+                "versioning": "azure-rest-api",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "'{{depName}}@{{newValue}}'",
+                "currentValue": "2024-11-01",
+                "currentVersion": "2024-11-01",
+                "datasource": "azure-bicep-resource",
+                "depName": "Microsoft.Compute/virtualMachineScaleSets/extensions",
+                "fixedVersion": "2024-11-01",
+                "packageName": "Microsoft.Compute/virtualMachineScaleSets/extensions",
+                "replaceString": "'Microsoft.Compute/virtualMachineScaleSets/extensions@2024-11-01'",
+                "updates": [],
+                "versioning": "azure-rest-api",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "'{{depName}}@{{newValue}}'",
+                "currentValue": "2022-06-01",
+                "currentVersion": "2022-06-01",
+                "datasource": "azure-bicep-resource",
+                "depName": "Microsoft.Insights/dataCollectionRuleAssociations",
+                "fixedVersion": "2022-06-01",
+                "packageName": "Microsoft.Insights/dataCollectionRuleAssociations",
+                "replaceString": "'Microsoft.Insights/dataCollectionRuleAssociations@2022-06-01'",
+                "updates": [],
+                "versioning": "azure-rest-api",
+                "warnings": []
+              }
+            ],
+            "packageFile": "infra/modules/observability.bicep"
+          },
+          {
+            "deps": [
+              {
+                "autoReplaceStringTemplate": "'{{depName}}@{{newValue}}'",
+                "currentValue": "2025-01-01",
+                "currentVersion": "2025-01-01",
+                "datasource": "azure-bicep-resource",
+                "depName": "Microsoft.Network/virtualNetworks",
+                "fixedVersion": "2025-01-01",
+                "isSingleVersion": true,
+                "packageName": "Microsoft.Network/virtualNetworks",
+                "replaceString": "'Microsoft.Network/virtualNetworks@2025-01-01'",
+                "updates": [
+                  {
+                    "branchName": "renovate/microsoft.network-virtualnetworks-20250501.x",
+                    "bucket": "major",
+                    "isBreaking": true,
+                    "newMajor": 20250501,
+                    "newMinor": 0,
+                    "newPatch": 0,
+                    "newValue": "2025-05-01",
+                    "newVersion": "2025-05-01",
+                    "updateType": "major"
+                  }
+                ],
+                "versioning": "azure-rest-api",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "'{{depName}}@{{newValue}}'",
+                "currentValue": "2025-01-01",
+                "currentVersion": "2025-01-01",
+                "datasource": "azure-bicep-resource",
+                "depName": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+                "fixedVersion": "2025-01-01",
+                "isSingleVersion": true,
+                "packageName": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+                "replaceString": "'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@2025-01-01'",
+                "updates": [
+                  {
+                    "branchName": "renovate/microsoft.network-virtualnetworks-virtualnetworkpeerings-20250501.x",
+                    "bucket": "major",
+                    "isBreaking": true,
+                    "newMajor": 20250501,
+                    "newMinor": 0,
+                    "newPatch": 0,
+                    "newValue": "2025-05-01",
+                    "newVersion": "2025-05-01",
+                    "updateType": "major"
+                  }
+                ],
+                "versioning": "azure-rest-api",
+                "warnings": []
+              }
+            ],
+            "packageFile": "infra/modules/peering.bicep"
+          },
+          {
+            "deps": [
+              {
+                "autoReplaceStringTemplate": "'{{depName}}@{{newValue}}'",
+                "currentValue": "2024-03-01",
+                "currentVersion": "2024-03-01",
+                "datasource": "azure-bicep-resource",
+                "depName": "Microsoft.App/managedEnvironments",
+                "fixedVersion": "2024-03-01",
+                "packageName": "Microsoft.App/managedEnvironments",
+                "replaceString": "'Microsoft.App/managedEnvironments@2024-03-01'",
+                "updates": [],
+                "versioning": "azure-rest-api",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "'{{depName}}@{{newValue}}'",
+                "currentValue": "2021-05-01-preview",
+                "currentVersion": "2021-05-01-preview",
+                "datasource": "azure-bicep-resource",
+                "depName": "Microsoft.Insights/diagnosticSettings",
+                "fixedVersion": "2021-05-01-preview",
+                "packageName": "Microsoft.Insights/diagnosticSettings",
+                "replaceString": "'Microsoft.Insights/diagnosticSettings@2021-05-01-preview'",
+                "updates": [],
+                "versioning": "azure-rest-api",
+                "warnings": []
+              }
+            ],
+            "packageFile": "infra/modules/spoke.bicep"
+          }
+        ],
+        "devcontainer": [
+          {
+            "deps": [
+              {
+                "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+                "currentValue": "2",
+                "currentVersion": "2",
+                "datasource": "docker",
+                "depName": "ghcr.io/devcontainers/features/docker-in-docker",
+                "depType": "feature",
+                "fixedVersion": "2",
+                "isSingleVersion": true,
+                "lookupName": "devcontainers/features/docker-in-docker",
+                "packageName": "ghcr.io/devcontainers/features/docker-in-docker",
+                "pinDigests": false,
+                "registryUrl": "https://ghcr.io",
+                "replaceString": "ghcr.io/devcontainers/features/docker-in-docker:2",
+                "updates": [
+                  {
+                    "branchName": "renovate/ghcr.io-devcontainers-features-docker-in-docker-4.x",
+                    "bucket": "major",
+                    "isBreaking": true,
+                    "newMajor": 4,
+                    "newMinor": null,
+                    "newPatch": null,
+                    "newValue": "4",
+                    "newVersion": "4",
+                    "updateType": "major"
+                  }
+                ],
+                "versioning": "docker",
+                "warnings": []
+              }
+            ],
+            "packageFile": ".devcontainer/devcontainer.json"
+          },
+          {
+            "deps": [
+              {
+                "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+                "currentValue": "2",
+                "currentVersion": "2",
+                "datasource": "docker",
+                "depName": "ghcr.io/devcontainers/features/docker-in-docker",
+                "depType": "feature",
+                "fixedVersion": "2",
+                "isSingleVersion": true,
+                "lookupName": "devcontainers/features/docker-in-docker",
+                "packageName": "ghcr.io/devcontainers/features/docker-in-docker",
+                "pinDigests": false,
+                "registryUrl": "https://ghcr.io",
+                "replaceString": "ghcr.io/devcontainers/features/docker-in-docker:2",
+                "updates": [
+                  {
+                    "branchName": "renovate/ghcr.io-devcontainers-features-docker-in-docker-4.x",
+                    "bucket": "major",
+                    "isBreaking": true,
+                    "newMajor": 4,
+                    "newMinor": null,
+                    "newPatch": null,
+                    "newValue": "4",
+                    "newVersion": "4",
+                    "updateType": "major"
+                  }
+                ],
+                "versioning": "docker",
+                "warnings": []
+              }
+            ],
+            "packageFile": ".devcontainer/worktree/devcontainer.json"
+          }
+        ],
+        "dockerfile": [
+          {
+            "deps": [
+              {
+                "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+                "currentValue": "2.2.3-10.0-noble",
+                "currentVersion": "2.2.3",
+                "datasource": "docker",
+                "depName": "mcr.microsoft.com/devcontainers/dotnet",
+                "depType": "final",
+                "fixedVersion": "2.2.3-10.0-noble",
+                "lookupName": "devcontainers/dotnet",
+                "packageName": "mcr.microsoft.com/devcontainers/dotnet",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "mcr.microsoft.com/devcontainers/dotnet:2.2.3-10.0-noble",
+                "updates": [],
+                "versioning": "docker",
+                "warnings": []
+              },
+              {
+                "datasource": "deb",
+                "depName": "apt-transport-https",
+                "depType": "install",
+                "packageName": "apt-transport-https",
+                "skipReason": "unspecified-version",
+                "updates": []
+              },
+              {
+                "datasource": "deb",
+                "depName": "ca-certificates",
+                "depType": "install",
+                "packageName": "ca-certificates",
+                "skipReason": "unspecified-version",
+                "updates": []
+              },
+              {
+                "datasource": "deb",
+                "depName": "curl",
+                "depType": "install",
+                "packageName": "curl",
+                "skipReason": "unspecified-version",
+                "updates": []
+              },
+              {
+                "datasource": "deb",
+                "depName": "git",
+                "depType": "install",
+                "packageName": "git",
+                "skipReason": "unspecified-version",
+                "updates": []
+              },
+              {
+                "datasource": "deb",
+                "depName": "gnupg",
+                "depType": "install",
+                "packageName": "gnupg",
+                "skipReason": "unspecified-version",
+                "updates": []
+              },
+              {
+                "datasource": "deb",
+                "depName": "jq",
+                "depType": "install",
+                "packageName": "jq",
+                "skipReason": "unspecified-version",
+                "updates": []
+              },
+              {
+                "datasource": "deb",
+                "depName": "lsb-release",
+                "depType": "install",
+                "packageName": "lsb-release",
+                "skipReason": "unspecified-version",
+                "updates": []
+              },
+              {
+                "datasource": "deb",
+                "depName": "shellcheck",
+                "depType": "install",
+                "packageName": "shellcheck",
+                "skipReason": "unspecified-version",
+                "updates": []
+              },
+              {
+                "datasource": "deb",
+                "depName": "unzip",
+                "depType": "install",
+                "packageName": "unzip",
+                "skipReason": "unspecified-version",
+                "updates": []
+              },
+              {
+                "datasource": "deb",
+                "depName": "azure-cli",
+                "depType": "install",
+                "packageName": "azure-cli",
+                "skipReason": "unspecified-version",
+                "updates": []
+              }
+            ],
+            "packageFile": ".devcontainer/Dockerfile"
+          },
+          {
+            "deps": [
+              {
+                "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+                "currentValue": "3.12-alpine",
+                "currentVersion": "3.12",
+                "datasource": "docker",
+                "depName": "python",
+                "depType": "final",
+                "fixedVersion": "3.12-alpine",
+                "homepage": "https://hub.docker.com/_/python",
+                "isSingleVersion": true,
+                "lookupName": "library/python",
+                "packageName": "python",
+                "registryUrl": "https://index.docker.io",
+                "replaceString": "python:3.12-alpine",
+                "sourceUrl": "https://github.com/docker-library/python",
+                "updates": [
+                  {
+                    "branchName": "renovate/python-3.x",
+                    "bucket": "non-major",
+                    "isBreaking": false,
+                    "newMajor": 3,
+                    "newMinor": 14,
+                    "newPatch": null,
+                    "newValue": "3.14-alpine",
+                    "newVersion": "3.14",
+                    "updateType": "minor"
+                  }
+                ],
+                "versioning": "docker",
+                "warnings": []
+              }
+            ],
+            "packageFile": "mock-idp/Dockerfile"
+          },
+          {
+            "deps": [
+              {
+                "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+                "currentValue": "1.25-alpine",
+                "currentVersion": "1.25",
+                "datasource": "docker",
+                "depName": "docker.io/library/golang",
+                "depType": "stage",
+                "fixedVersion": "1.25-alpine",
+                "homepage": "https://hub.docker.com/_/golang",
+                "isSingleVersion": true,
+                "lookupName": "library/golang",
+                "packageName": "docker.io/library/golang",
+                "registryUrl": "https://index.docker.io",
+                "replaceString": "docker.io/library/golang:1.25-alpine",
+                "sourceUrl": "https://github.com/docker-library/golang",
+                "updates": [
+                  {
+                    "branchName": "renovate/docker.io-library-golang-1.x",
+                    "bucket": "non-major",
+                    "isBreaking": false,
+                    "newMajor": 1,
+                    "newMinor": 27,
+                    "newPatch": null,
+                    "newValue": "1.27-alpine",
+                    "newVersion": "1.27",
+                    "updateType": "minor"
+                  }
+                ],
+                "versioning": "docker",
+                "warnings": []
+              },
+              {
+                "datasource": "apk",
+                "depName": "git",
+                "depType": "install",
+                "packageName": "git",
+                "skipReason": "unspecified-version",
+                "updates": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+                "currentValue": "nonroot",
+                "datasource": "docker",
+                "depName": "gcr.io/distroless/static-debian12",
+                "depType": "final",
+                "packageName": "gcr.io/distroless/static-debian12",
+                "replaceString": "gcr.io/distroless/static-debian12:nonroot",
+                "skipReason": "invalid-value",
+                "updates": [],
+                "versioning": "docker",
+                "warnings": []
+              }
+            ],
+            "packageFile": "proxy/Dockerfile"
+          },
+          {
+            "deps": [
+              {
+                "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+                "currentValue": "10.0",
+                "currentVersion": "10.0",
+                "datasource": "docker",
+                "depName": "mcr.microsoft.com/dotnet/sdk",
+                "depType": "stage",
+                "fixedVersion": "10.0",
+                "isSingleVersion": true,
+                "lookupName": "dotnet/sdk",
+                "packageName": "mcr.microsoft.com/dotnet/sdk",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "mcr.microsoft.com/dotnet/sdk:10.0",
+                "sourceUrl": "https://github.com/dotnet/sdk",
+                "updates": [
+                  {
+                    "branchName": "renovate/mcr.microsoft.com-dotnet-sdk-11.x",
+                    "bucket": "major",
+                    "isBreaking": true,
+                    "newMajor": 11,
+                    "newMinor": 0,
+                    "newPatch": null,
+                    "newValue": "11.0",
+                    "newVersion": "11.0",
+                    "updateType": "major"
+                  }
+                ],
+                "versioning": "docker",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+                "currentValue": "10.0",
+                "currentVersion": "10.0",
+                "datasource": "docker",
+                "depName": "mcr.microsoft.com/dotnet/aspnet",
+                "depType": "final",
+                "fixedVersion": "10.0",
+                "isSingleVersion": true,
+                "lookupName": "dotnet/aspnet",
+                "packageName": "mcr.microsoft.com/dotnet/aspnet",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "mcr.microsoft.com/dotnet/aspnet:10.0",
+                "sourceUrl": "https://github.com/dotnet/aspnetcore",
+                "updates": [
+                  {
+                    "branchName": "renovate/mcr.microsoft.com-dotnet-aspnet-11.x",
+                    "bucket": "major",
+                    "isBreaking": true,
+                    "newMajor": 11,
+                    "newMinor": 0,
+                    "newPatch": null,
+                    "newValue": "11.0",
+                    "newVersion": "11.0",
+                    "updateType": "major"
+                  }
+                ],
+                "versioning": "docker",
+                "warnings": []
+              }
+            ],
+            "packageFile": "src/ControlPlane/Dockerfile"
+          },
+          {
+            "deps": [
+              {
+                "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+                "currentValue": "10.0",
+                "currentVersion": "10.0",
+                "datasource": "docker",
+                "depName": "mcr.microsoft.com/dotnet/sdk",
+                "depType": "stage",
+                "fixedVersion": "10.0",
+                "isSingleVersion": true,
+                "lookupName": "dotnet/sdk",
+                "packageName": "mcr.microsoft.com/dotnet/sdk",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "mcr.microsoft.com/dotnet/sdk:10.0",
+                "sourceUrl": "https://github.com/dotnet/sdk",
+                "updates": [
+                  {
+                    "branchName": "renovate/mcr.microsoft.com-dotnet-sdk-11.x",
+                    "bucket": "major",
+                    "isBreaking": true,
+                    "newMajor": 11,
+                    "newMinor": 0,
+                    "newPatch": null,
+                    "newValue": "11.0",
+                    "newVersion": "11.0",
+                    "updateType": "major"
+                  }
+                ],
+                "versioning": "docker",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+                "currentValue": "10.0",
+                "currentVersion": "10.0",
+                "datasource": "docker",
+                "depName": "mcr.microsoft.com/dotnet/aspnet",
+                "depType": "final",
+                "fixedVersion": "10.0",
+                "isSingleVersion": true,
+                "lookupName": "dotnet/aspnet",
+                "packageName": "mcr.microsoft.com/dotnet/aspnet",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "mcr.microsoft.com/dotnet/aspnet:10.0",
+                "sourceUrl": "https://github.com/dotnet/aspnetcore",
+                "updates": [
+                  {
+                    "branchName": "renovate/mcr.microsoft.com-dotnet-aspnet-11.x",
+                    "bucket": "major",
+                    "isBreaking": true,
+                    "newMajor": 11,
+                    "newMinor": 0,
+                    "newPatch": null,
+                    "newValue": "11.0",
+                    "newVersion": "11.0",
+                    "updateType": "major"
+                  }
+                ],
+                "versioning": "docker",
+                "warnings": []
+              }
+            ],
+            "packageFile": "src/Portal/Dockerfile"
+          },
+          {
+            "deps": [
+              {
+                "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+                "currentValue": "10.0",
+                "currentVersion": "10.0",
+                "datasource": "docker",
+                "depName": "mcr.microsoft.com/dotnet/sdk",
+                "depType": "stage",
+                "fixedVersion": "10.0",
+                "isSingleVersion": true,
+                "lookupName": "dotnet/sdk",
+                "packageName": "mcr.microsoft.com/dotnet/sdk",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "mcr.microsoft.com/dotnet/sdk:10.0",
+                "sourceUrl": "https://github.com/dotnet/sdk",
+                "updates": [
+                  {
+                    "branchName": "renovate/mcr.microsoft.com-dotnet-sdk-11.x",
+                    "bucket": "major",
+                    "isBreaking": true,
+                    "newMajor": 11,
+                    "newMinor": 0,
+                    "newPatch": null,
+                    "newValue": "11.0",
+                    "newVersion": "11.0",
+                    "updateType": "major"
+                  }
+                ],
+                "versioning": "docker",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+                "currentValue": "10.0",
+                "currentVersion": "10.0",
+                "datasource": "docker",
+                "depName": "mcr.microsoft.com/dotnet/aspnet",
+                "depType": "final",
+                "fixedVersion": "10.0",
+                "isSingleVersion": true,
+                "lookupName": "dotnet/aspnet",
+                "packageName": "mcr.microsoft.com/dotnet/aspnet",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "mcr.microsoft.com/dotnet/aspnet:10.0",
+                "sourceUrl": "https://github.com/dotnet/aspnetcore",
+                "updates": [
+                  {
+                    "branchName": "renovate/mcr.microsoft.com-dotnet-aspnet-11.x",
+                    "bucket": "major",
+                    "isBreaking": true,
+                    "newMajor": 11,
+                    "newMinor": 0,
+                    "newPatch": null,
+                    "newValue": "11.0",
+                    "newVersion": "11.0",
+                    "updateType": "major"
+                  }
+                ],
+                "versioning": "docker",
+                "warnings": []
+              }
+            ],
+            "packageFile": "src/SampleApp/Dockerfile"
+          }
+        ],
+        "github-actions": [
+          {
+            "deps": [
+              {
+                "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+                "commitMessageTopic": "{{{depName}}} action",
+                "currentDigest": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+                "currentValue": "v7",
+                "currentVersion": "v7.0.1",
+                "currentVersionAgeInDays": 79,
+                "currentVersionTimestamp": "2026-07-20T15:10:05.000Z",
+                "datasource": "github-tags",
+                "depName": "actions/checkout",
+                "depType": "action",
+                "packageName": "actions/checkout",
+                "registryUrl": "https://github.com",
+                "replaceString": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7",
+                "sourceUrl": "https://github.com/actions/checkout",
+                "updates": [],
+                "versioning": "github-actions",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+                "commitMessageTopic": "{{{depName}}} action",
+                "currentDigest": "7ddb5af1ef8758cf1353cf3b42f940aee27ba21c",
+                "currentValue": "v3.0.2",
+                "currentVersion": "v3.0.2",
+                "currentVersionAgeInDays": 43,
+                "currentVersionTimestamp": "2026-08-26T03:17:11.000Z",
+                "datasource": "github-tags",
+                "depName": "azure/login",
+                "depType": "action",
+                "fixedVersion": "v3.0.2",
+                "isSingleVersion": true,
+                "mostRecentTimestamp": "2026-09-10T03:16:59.000Z",
+                "packageName": "azure/login",
+                "registryUrl": "https://github.com",
+                "replaceString": "azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2",
+                "sourceUrl": "https://github.com/azure/login",
+                "updates": [
+                  {
+                    "branchName": "renovate/azure-login-3.x",
+                    "bucket": "non-major",
+                    "isBreaking": false,
+                    "libYears": 0.0410955098934551,
+                    "newDigest": "a641126d1b8aa4d1fa005f4f92df94a3a4c4c906",
+                    "newMajor": 3,
+                    "newMinor": 1,
+                    "newPatch": 0,
+                    "newValue": "v3.1.0",
+                    "newVersion": "v3.1.0",
+                    "newVersionAgeInDays": 28,
+                    "releaseTimestamp": "2026-09-10T03:16:59.000Z",
+                    "updateType": "minor"
+                  }
+                ],
+                "versioning": "github-actions",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}-{{newValue}}",
+                "currentValue": "latest",
+                "datasource": "github-runners",
+                "depName": "ubuntu",
+                "depType": "github-runner",
+                "packageName": "ubuntu",
+                "replaceString": "ubuntu-latest",
+                "skipReason": "invalid-version",
+                "updates": []
+              }
+            ],
+            "packageFile": ".github/workflows/allowlist.yml"
+          },
+          {
+            "deps": [
+              {
+                "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+                "commitMessageTopic": "{{{depName}}} action",
+                "currentDigest": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+                "currentValue": "v7",
+                "currentVersion": "v7.0.1",
+                "currentVersionAgeInDays": 79,
+                "currentVersionTimestamp": "2026-07-20T15:10:05.000Z",
+                "datasource": "github-tags",
+                "depName": "actions/checkout",
+                "depType": "action",
+                "packageName": "actions/checkout",
+                "registryUrl": "https://github.com",
+                "replaceString": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7",
+                "sourceUrl": "https://github.com/actions/checkout",
+                "updates": [],
+                "versioning": "github-actions",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+                "commitMessageTopic": "{{{depName}}} action",
+                "currentDigest": "ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d",
+                "currentValue": "v4.0.3",
+                "currentVersion": "v4.0.3",
+                "currentVersionAgeInDays": 63,
+                "currentVersionTimestamp": "2026-08-05T12:17:06.000Z",
+                "datasource": "github-tags",
+                "depName": "dorny/paths-filter",
+                "depType": "action",
+                "fixedVersion": "v4.0.3",
+                "packageName": "dorny/paths-filter",
+                "registryUrl": "https://github.com",
+                "replaceString": "dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3",
+                "sourceUrl": "https://github.com/dorny/paths-filter",
+                "updates": [],
+                "versioning": "github-actions",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+                "commitMessageTopic": "{{{depName}}} action",
+                "currentDigest": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+                "currentValue": "v7",
+                "currentVersion": "v7.0.1",
+                "currentVersionAgeInDays": 79,
+                "currentVersionTimestamp": "2026-07-20T15:10:05.000Z",
+                "datasource": "github-tags",
+                "depName": "actions/checkout",
+                "depType": "action",
+                "packageName": "actions/checkout",
+                "registryUrl": "https://github.com",
+                "replaceString": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7",
+                "sourceUrl": "https://github.com/actions/checkout",
+                "updates": [],
+                "versioning": "github-actions",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+                "commitMessageTopic": "{{{depName}}} action",
+                "currentDigest": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+                "currentValue": "v7",
+                "currentVersion": "v7.0.1",
+                "currentVersionAgeInDays": 79,
+                "currentVersionTimestamp": "2026-07-20T15:10:05.000Z",
+                "datasource": "github-tags",
+                "depName": "actions/checkout",
+                "depType": "action",
+                "packageName": "actions/checkout",
+                "registryUrl": "https://github.com",
+                "replaceString": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7",
+                "sourceUrl": "https://github.com/actions/checkout",
+                "updates": [],
+                "versioning": "github-actions",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+                "commitMessageTopic": "{{{depName}}} action",
+                "currentDigest": "b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+                "currentValue": "v7",
+                "currentVersion": "v7.0.0",
+                "currentVersionAgeInDays": 84,
+                "currentVersionTimestamp": "2026-07-16T02:47:49.000Z",
+                "datasource": "github-tags",
+                "depName": "actions/setup-go",
+                "depType": "action",
+                "mostRecentTimestamp": "2026-07-16T02:50:50.000Z",
+                "packageName": "actions/setup-go",
+                "registryUrl": "https://github.com",
+                "replaceString": "actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7",
+                "sourceUrl": "https://github.com/actions/setup-go",
+                "updates": [],
+                "versioning": "github-actions",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+                "commitMessageTopic": "{{{depName}}} action",
+                "currentDigest": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+                "currentValue": "v7",
+                "currentVersion": "v7.0.1",
+                "currentVersionAgeInDays": 79,
+                "currentVersionTimestamp": "2026-07-20T15:10:05.000Z",
+                "datasource": "github-tags",
+                "depName": "actions/checkout",
+                "depType": "action",
+                "packageName": "actions/checkout",
+                "registryUrl": "https://github.com",
+                "replaceString": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7",
+                "sourceUrl": "https://github.com/actions/checkout",
+                "updates": [],
+                "versioning": "github-actions",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+                "commitMessageTopic": "{{{depName}}} action",
+                "currentDigest": "a98b56852c35b8e3190ac28c8c2271da59106c68",
+                "currentValue": "v6",
+                "currentVersion": "v6.0.0",
+                "currentVersionAgeInDays": 84,
+                "currentVersionTimestamp": "2026-07-16T02:52:42.000Z",
+                "datasource": "github-tags",
+                "depName": "actions/setup-dotnet",
+                "depType": "action",
+                "mostRecentTimestamp": "2026-07-16T02:56:10.000Z",
+                "packageName": "actions/setup-dotnet",
+                "registryUrl": "https://github.com",
+                "replaceString": "actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6",
+                "sourceUrl": "https://github.com/actions/setup-dotnet",
+                "updates": [],
+                "versioning": "github-actions",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+                "commitMessageTopic": "{{{depName}}} action",
+                "currentDigest": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+                "currentValue": "v7",
+                "currentVersion": "v7.0.1",
+                "currentVersionAgeInDays": 79,
+                "currentVersionTimestamp": "2026-07-20T15:10:05.000Z",
+                "datasource": "github-tags",
+                "depName": "actions/checkout",
+                "depType": "action",
+                "packageName": "actions/checkout",
+                "registryUrl": "https://github.com",
+                "replaceString": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7",
+                "sourceUrl": "https://github.com/actions/checkout",
+                "updates": [],
+                "versioning": "github-actions",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+                "commitMessageTopic": "{{{depName}}} action",
+                "currentDigest": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+                "currentValue": "v7",
+                "currentVersion": "v7.0.1",
+                "currentVersionAgeInDays": 79,
+                "currentVersionTimestamp": "2026-07-20T15:10:05.000Z",
+                "datasource": "github-tags",
+                "depName": "actions/checkout",
+                "depType": "action",
+                "packageName": "actions/checkout",
+                "registryUrl": "https://github.com",
+                "replaceString": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7",
+                "sourceUrl": "https://github.com/actions/checkout",
+                "updates": [],
+                "versioning": "github-actions",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}-{{newValue}}",
+                "currentValue": "latest",
+                "datasource": "github-runners",
+                "depName": "ubuntu",
+                "depType": "github-runner",
+                "packageName": "ubuntu",
+                "replaceString": "ubuntu-latest",
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}-{{newValue}}",
+                "currentValue": "latest",
+                "datasource": "github-runners",
+                "depName": "ubuntu",
+                "depType": "github-runner",
+                "packageName": "ubuntu",
+                "replaceString": "ubuntu-latest",
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}-{{newValue}}",
+                "currentValue": "latest",
+                "datasource": "github-runners",
+                "depName": "ubuntu",
+                "depType": "github-runner",
+                "packageName": "ubuntu",
+                "replaceString": "ubuntu-latest",
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "currentValue": "1.25",
+                "currentVersion": "1.25.14",
+                "currentVersionAgeInDays": 49,
+                "currentVersionTimestamp": "2026-08-20T02:39:51.000Z",
+                "datasource": "github-releases",
+                "depName": "go",
+                "depType": "uses-with",
+                "extractVersion": "^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$",
+                "isSingleVersion": false,
+                "packageName": "actions/go-versions",
+                "registryUrl": "https://github.com",
+                "sourceUrl": "https://github.com/actions/go-versions",
+                "updates": [
+                  {
+                    "branchName": "renovate/go-1.x",
+                    "bucket": "non-major",
+                    "isBreaking": false,
+                    "isRange": true,
+                    "libYears": 0.03560549847792999,
+                    "newMajor": 1,
+                    "newMinor": 27,
+                    "newPatch": 1,
+                    "newValue": "1.27",
+                    "newVersion": "1.27.1",
+                    "newVersionAgeInDays": 36,
+                    "releaseTimestamp": "2026-09-02T02:34:06.000Z",
+                    "updateType": "minor"
+                  }
+                ],
+                "versioning": "npm",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}-{{newValue}}",
+                "currentValue": "latest",
+                "datasource": "github-runners",
+                "depName": "ubuntu",
+                "depType": "github-runner",
+                "packageName": "ubuntu",
+                "replaceString": "ubuntu-latest",
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "currentValue": "10.0.x",
+                "currentVersion": "10.0.401",
+                "currentVersionAgeInDays": 30,
+                "currentVersionTimestamp": "2026-09-08T00:00:00.000Z",
+                "datasource": "dotnet-version",
+                "depName": "dotnet-sdk",
+                "depType": "uses-with",
+                "mostRecentTimestamp": "2026-09-08T00:00:00.000Z",
+                "packageName": "dotnet-sdk",
+                "registryUrl": "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/releases-index.json",
+                "sourceUrl": "https://github.com/dotnet/sdk",
+                "updates": [],
+                "versioning": "npm",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}-{{newValue}}",
+                "currentValue": "latest",
+                "datasource": "github-runners",
+                "depName": "ubuntu",
+                "depType": "github-runner",
+                "packageName": "ubuntu",
+                "replaceString": "ubuntu-latest",
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}-{{newValue}}",
+                "currentValue": "latest",
+                "datasource": "github-runners",
+                "depName": "ubuntu",
+                "depType": "github-runner",
+                "packageName": "ubuntu",
+                "replaceString": "ubuntu-latest",
+                "skipReason": "invalid-version",
+                "updates": []
+              }
+            ],
+            "packageFile": ".github/workflows/ci.yml"
+          },
+          {
+            "deps": [
+              {
+                "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+                "commitMessageTopic": "{{{depName}}} action",
+                "currentDigest": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+                "currentValue": "v7",
+                "currentVersion": "v7.0.1",
+                "currentVersionAgeInDays": 79,
+                "currentVersionTimestamp": "2026-07-20T15:10:05.000Z",
+                "datasource": "github-tags",
+                "depName": "actions/checkout",
+                "depType": "action",
+                "packageName": "actions/checkout",
+                "registryUrl": "https://github.com",
+                "replaceString": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7",
+                "sourceUrl": "https://github.com/actions/checkout",
+                "updates": [],
+                "versioning": "github-actions",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+                "commitMessageTopic": "{{{depName}}} action",
+                "currentDigest": "7ddb5af1ef8758cf1353cf3b42f940aee27ba21c",
+                "currentValue": "v3.0.2",
+                "currentVersion": "v3.0.2",
+                "currentVersionAgeInDays": 43,
+                "currentVersionTimestamp": "2026-08-26T03:17:11.000Z",
+                "datasource": "github-tags",
+                "depName": "azure/login",
+                "depType": "action",
+                "fixedVersion": "v3.0.2",
+                "isSingleVersion": true,
+                "mostRecentTimestamp": "2026-09-10T03:16:59.000Z",
+                "packageName": "azure/login",
+                "registryUrl": "https://github.com",
+                "replaceString": "azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2",
+                "sourceUrl": "https://github.com/azure/login",
+                "updates": [
+                  {
+                    "branchName": "renovate/azure-login-3.x",
+                    "bucket": "non-major",
+                    "isBreaking": false,
+                    "libYears": 0.0410955098934551,
+                    "newDigest": "a641126d1b8aa4d1fa005f4f92df94a3a4c4c906",
+                    "newMajor": 3,
+                    "newMinor": 1,
+                    "newPatch": 0,
+                    "newValue": "v3.1.0",
+                    "newVersion": "v3.1.0",
+                    "newVersionAgeInDays": 28,
+                    "releaseTimestamp": "2026-09-10T03:16:59.000Z",
+                    "updateType": "minor"
+                  }
+                ],
+                "versioning": "github-actions",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}-{{newValue}}",
+                "currentValue": "latest",
+                "datasource": "github-runners",
+                "depName": "ubuntu",
+                "depType": "github-runner",
+                "packageName": "ubuntu",
+                "replaceString": "ubuntu-latest",
+                "skipReason": "invalid-version",
+                "updates": []
+              }
+            ],
+            "packageFile": ".github/workflows/deploy.yml"
+          },
+          {
+            "deps": [
+              {
+                "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+                "commitMessageTopic": "{{{depName}}} action",
+                "currentDigest": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+                "currentValue": "v7",
+                "currentVersion": "v7.0.1",
+                "currentVersionAgeInDays": 79,
+                "currentVersionTimestamp": "2026-07-20T15:10:05.000Z",
+                "datasource": "github-tags",
+                "depName": "actions/checkout",
+                "depType": "action",
+                "packageName": "actions/checkout",
+                "registryUrl": "https://github.com",
+                "replaceString": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7",
+                "sourceUrl": "https://github.com/actions/checkout",
+                "updates": [],
+                "versioning": "github-actions",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+                "commitMessageTopic": "{{{depName}}} action",
+                "currentDigest": "b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
+                "currentValue": "v7",
+                "currentVersion": "v7.0.0",
+                "currentVersionAgeInDays": 84,
+                "currentVersionTimestamp": "2026-07-16T02:47:49.000Z",
+                "datasource": "github-tags",
+                "depName": "actions/setup-go",
+                "depType": "action",
+                "mostRecentTimestamp": "2026-07-16T02:50:50.000Z",
+                "packageName": "actions/setup-go",
+                "registryUrl": "https://github.com",
+                "replaceString": "actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7",
+                "sourceUrl": "https://github.com/actions/setup-go",
+                "updates": [],
+                "versioning": "github-actions",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+                "commitMessageTopic": "{{{depName}}} action",
+                "currentDigest": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+                "currentValue": "v7",
+                "currentVersion": "v7.0.2",
+                "currentVersionAgeInDays": 0,
+                "currentVersionTimestamp": "2026-10-07T10:08:14.000Z",
+                "datasource": "github-tags",
+                "depName": "actions/upload-artifact",
+                "depType": "action",
+                "mostRecentTimestamp": "2026-10-07T10:08:14.000Z",
+                "packageName": "actions/upload-artifact",
+                "registryUrl": "https://github.com",
+                "replaceString": "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7",
+                "sourceUrl": "https://github.com/actions/upload-artifact",
+                "updates": [
+                  {
+                    "branchName": "renovate/actions-upload-artifact-digest",
+                    "newDigest": "cf430e030ddbb5b0abf93d22962f4752f3646cd9",
+                    "newValue": "v7",
+                    "updateType": "digest"
+                  }
+                ],
+                "versioning": "github-actions",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+                "commitMessageTopic": "{{{depName}}} action",
+                "currentDigest": "efb35369e0ad2afab669f228072c1b0d510eae64",
+                "currentValue": "v3.0.3",
+                "currentVersion": "v3.0.3",
+                "currentVersionAgeInDays": 39,
+                "currentVersionTimestamp": "2026-08-30T00:30:08.000Z",
+                "datasource": "github-tags",
+                "depName": "softprops/action-gh-release",
+                "depType": "action",
+                "fixedVersion": "v3.0.3",
+                "mostRecentTimestamp": "2026-08-30T00:30:08.000Z",
+                "packageName": "softprops/action-gh-release",
+                "registryUrl": "https://github.com",
+                "replaceString": "softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3",
+                "sourceUrl": "https://github.com/softprops/action-gh-release",
+                "updates": [],
+                "versioning": "github-actions",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+                "commitMessageTopic": "{{{depName}}} action",
+                "currentDigest": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+                "currentValue": "v7",
+                "currentVersion": "v7.0.1",
+                "currentVersionAgeInDays": 79,
+                "currentVersionTimestamp": "2026-07-20T15:10:05.000Z",
+                "datasource": "github-tags",
+                "depName": "actions/checkout",
+                "depType": "action",
+                "packageName": "actions/checkout",
+                "registryUrl": "https://github.com",
+                "replaceString": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7",
+                "sourceUrl": "https://github.com/actions/checkout",
+                "updates": [],
+                "versioning": "github-actions",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+                "commitMessageTopic": "{{{depName}}} action",
+                "currentDigest": "1f40c72289eff860ee54a304f1438e3cff362e0a",
+                "currentValue": "v4.3.0",
+                "currentVersion": "v4.3.0",
+                "currentVersionAgeInDays": 36,
+                "currentVersionTimestamp": "2026-09-01T10:40:59.000Z",
+                "datasource": "github-tags",
+                "depName": "docker/setup-qemu-action",
+                "depType": "action",
+                "fixedVersion": "v4.3.0",
+                "isSingleVersion": true,
+                "mostRecentTimestamp": "2026-09-15T09:42:21.000Z",
+                "packageName": "docker/setup-qemu-action",
+                "registryUrl": "https://github.com",
+                "replaceString": "docker/setup-qemu-action@1f40c72289eff860ee54a304f1438e3cff362e0a # v4.3.0",
+                "sourceUrl": "https://github.com/docker/setup-qemu-action",
+                "updates": [
+                  {
+                    "branchName": "renovate/docker-setup-qemu-action-4.x",
+                    "bucket": "non-major",
+                    "isBreaking": false,
+                    "libYears": 0.03824460933536276,
+                    "newDigest": "99012661954931238ded8c8b007157a8430204e1",
+                    "newMajor": 4,
+                    "newMinor": 4,
+                    "newPatch": 0,
+                    "newValue": "v4.4.0",
+                    "newVersion": "v4.4.0",
+                    "newVersionAgeInDays": 22,
+                    "releaseTimestamp": "2026-09-15T09:42:21.000Z",
+                    "updateType": "minor"
+                  }
+                ],
+                "versioning": "github-actions",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+                "commitMessageTopic": "{{{depName}}} action",
+                "currentDigest": "37fe631027851001ddb9b187196cc803df7f5f0e",
+                "currentValue": "v4.3.0",
+                "currentVersion": "v4.3.0",
+                "currentVersionAgeInDays": 49,
+                "currentVersionTimestamp": "2026-08-19T09:41:47.000Z",
+                "datasource": "github-tags",
+                "depName": "docker/setup-buildx-action",
+                "depType": "action",
+                "fixedVersion": "v4.3.0",
+                "isSingleVersion": true,
+                "mostRecentTimestamp": "2026-09-16T07:50:21.000Z",
+                "packageName": "docker/setup-buildx-action",
+                "registryUrl": "https://github.com",
+                "replaceString": "docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0",
+                "sourceUrl": "https://github.com/docker/setup-buildx-action",
+                "updates": [
+                  {
+                    "branchName": "renovate/docker-setup-buildx-action-4.x",
+                    "bucket": "non-major",
+                    "isBreaking": false,
+                    "libYears": 0.07650031709791984,
+                    "newDigest": "f87e5991a6d7451dcb8d9637bfbc97413f497069",
+                    "newMajor": 4,
+                    "newMinor": 4,
+                    "newPatch": 1,
+                    "newValue": "v4.4.1",
+                    "newVersion": "v4.4.1",
+                    "newVersionAgeInDays": 22,
+                    "releaseTimestamp": "2026-09-16T07:50:21.000Z",
+                    "updateType": "minor"
+                  }
+                ],
+                "versioning": "github-actions",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+                "commitMessageTopic": "{{{depName}}} action",
+                "currentDigest": "dbcb813823bdd20940b903addbd779551569679f",
+                "currentValue": "v4",
+                "currentVersion": "v4.6.0",
+                "currentVersionAgeInDays": 70,
+                "currentVersionTimestamp": "2026-07-29T12:12:00.000Z",
+                "datasource": "github-tags",
+                "depName": "docker/login-action",
+                "depType": "action",
+                "mostRecentTimestamp": "2026-07-29T12:12:00.000Z",
+                "packageName": "docker/login-action",
+                "registryUrl": "https://github.com",
+                "replaceString": "docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4",
+                "sourceUrl": "https://github.com/docker/login-action",
+                "updates": [],
+                "versioning": "github-actions",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+                "commitMessageTopic": "{{{depName}}} action",
+                "currentDigest": "c3c9e263c25d99ce0380d002d59b67737d91b0dc",
+                "currentValue": "v7.4.0",
+                "currentVersion": "v7.4.0",
+                "currentVersionAgeInDays": 23,
+                "currentVersionTimestamp": "2026-09-15T08:22:01.000Z",
+                "datasource": "github-tags",
+                "depName": "docker/build-push-action",
+                "depType": "action",
+                "fixedVersion": "v7.4.0",
+                "mostRecentTimestamp": "2026-09-15T08:22:01.000Z",
+                "packageName": "docker/build-push-action",
+                "registryUrl": "https://github.com",
+                "replaceString": "docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0",
+                "sourceUrl": "https://github.com/docker/build-push-action",
+                "updates": [],
+                "versioning": "github-actions",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+                "commitMessageTopic": "{{{depName}}} action",
+                "currentDigest": "c3c9e263c25d99ce0380d002d59b67737d91b0dc",
+                "currentValue": "v7.4.0",
+                "currentVersion": "v7.4.0",
+                "currentVersionAgeInDays": 23,
+                "currentVersionTimestamp": "2026-09-15T08:22:01.000Z",
+                "datasource": "github-tags",
+                "depName": "docker/build-push-action",
+                "depType": "action",
+                "fixedVersion": "v7.4.0",
+                "mostRecentTimestamp": "2026-09-15T08:22:01.000Z",
+                "packageName": "docker/build-push-action",
+                "registryUrl": "https://github.com",
+                "replaceString": "docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0",
+                "sourceUrl": "https://github.com/docker/build-push-action",
+                "updates": [],
+                "versioning": "github-actions",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+                "commitMessageTopic": "{{{depName}}} action",
+                "currentDigest": "c3c9e263c25d99ce0380d002d59b67737d91b0dc",
+                "currentValue": "v7.4.0",
+                "currentVersion": "v7.4.0",
+                "currentVersionAgeInDays": 23,
+                "currentVersionTimestamp": "2026-09-15T08:22:01.000Z",
+                "datasource": "github-tags",
+                "depName": "docker/build-push-action",
+                "depType": "action",
+                "fixedVersion": "v7.4.0",
+                "mostRecentTimestamp": "2026-09-15T08:22:01.000Z",
+                "packageName": "docker/build-push-action",
+                "registryUrl": "https://github.com",
+                "replaceString": "docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0",
+                "sourceUrl": "https://github.com/docker/build-push-action",
+                "updates": [],
+                "versioning": "github-actions",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
+                "commitMessageTopic": "{{{depName}}} action",
+                "currentDigest": "c3c9e263c25d99ce0380d002d59b67737d91b0dc",
+                "currentValue": "v7.4.0",
+                "currentVersion": "v7.4.0",
+                "currentVersionAgeInDays": 23,
+                "currentVersionTimestamp": "2026-09-15T08:22:01.000Z",
+                "datasource": "github-tags",
+                "depName": "docker/build-push-action",
+                "depType": "action",
+                "fixedVersion": "v7.4.0",
+                "mostRecentTimestamp": "2026-09-15T08:22:01.000Z",
+                "packageName": "docker/build-push-action",
+                "registryUrl": "https://github.com",
+                "replaceString": "docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0",
+                "sourceUrl": "https://github.com/docker/build-push-action",
+                "updates": [],
+                "versioning": "github-actions",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}-{{newValue}}",
+                "currentValue": "latest",
+                "datasource": "github-runners",
+                "depName": "ubuntu",
+                "depType": "github-runner",
+                "packageName": "ubuntu",
+                "replaceString": "ubuntu-latest",
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "currentValue": "1.25",
+                "currentVersion": "1.25.14",
+                "currentVersionAgeInDays": 49,
+                "currentVersionTimestamp": "2026-08-20T02:39:51.000Z",
+                "datasource": "github-releases",
+                "depName": "go",
+                "depType": "uses-with",
+                "extractVersion": "^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$",
+                "isSingleVersion": false,
+                "packageName": "actions/go-versions",
+                "registryUrl": "https://github.com",
+                "sourceUrl": "https://github.com/actions/go-versions",
+                "updates": [
+                  {
+                    "branchName": "renovate/go-1.x",
+                    "bucket": "non-major",
+                    "isBreaking": false,
+                    "isRange": true,
+                    "libYears": 0.03560549847792999,
+                    "newMajor": 1,
+                    "newMinor": 27,
+                    "newPatch": 1,
+                    "newValue": "1.27",
+                    "newVersion": "1.27.1",
+                    "newVersionAgeInDays": 36,
+                    "releaseTimestamp": "2026-09-02T02:34:06.000Z",
+                    "updateType": "minor"
+                  }
+                ],
+                "versioning": "npm",
+                "warnings": []
+              },
+              {
+                "autoReplaceStringTemplate": "{{depName}}-{{newValue}}",
+                "currentValue": "latest",
+                "datasource": "github-runners",
+                "depName": "ubuntu",
+                "depType": "github-runner",
+                "packageName": "ubuntu",
+                "replaceString": "ubuntu-latest",
+                "skipReason": "invalid-version",
+                "updates": []
+              }
+            ],
+            "packageFile": ".github/workflows/release.yml"
+          }
+        ],
+        "gomod": [
+          {
+            "constraintsVersioning": {
+              "%goMod": "semver-coerced"
+            },
+            "deps": [
+              {
+                "commitMessageTopic": "go module directive",
+                "currentValue": "1.25.14",
+                "currentVersion": "1.25.14",
+                "currentVersionAgeInDays": 50,
+                "currentVersionTimestamp": "2026-08-19T00:00:00.000Z",
+                "datasource": "golang-version",
+                "depName": "go",
+                "depType": "golang",
+                "fixedVersion": "1.25.14",
+                "homepage": "https://go.dev/",
+                "managerData": {
+                  "lineNumber": 2
+                },
+                "mostRecentTimestamp": "2026-09-01T00:00:00.000Z",
+                "packageName": "go",
+                "registryUrl": "https://raw.githubusercontent.com/golang/website",
+                "sourceUrl": "https://github.com/golang/go",
+                "updates": [],
+                "versioning": "go-mod-directive",
+                "warnings": []
+              },
+              {
+                "currentValue": "v1.23.1",
+                "currentVersion": "v1.23.1",
+                "currentVersionAgeInDays": 41,
+                "currentVersionTimestamp": "2026-08-27T18:00:00.000Z",
+                "datasource": "go",
+                "depName": "github.com/Azure/azure-sdk-for-go/sdk/azcore",
+                "depType": "require",
+                "fixedVersion": "v1.23.1",
+                "isSingleVersion": true,
+                "managerData": {
+                  "lineNumber": 5,
+                  "multiLine": true
+                },
+                "mostRecentTimestamp": "2026-10-06T18:00:26.000Z",
+                "packageName": "github.com/Azure/azure-sdk-for-go/sdk/azcore",
+                "sourceUrl": "https://github.com/Azure/azure-sdk-for-go",
+                "updates": [
+                  {
+                    "branchName": "renovate/github.com-azure-azure-sdk-for-go-sdk-azcore-1.x",
+                    "bucket": "non-major",
+                    "isBreaking": false,
+                    "libYears": 0.10958986555048199,
+                    "newMajor": 1,
+                    "newMinor": 23,
+                    "newPatch": 3,
+                    "newValue": "v1.23.3",
+                    "newVersion": "v1.23.3",
+                    "newVersionAgeInDays": 1,
+                    "releaseTimestamp": "2026-10-06T18:00:26.000Z",
+                    "updateType": "patch"
+                  }
+                ],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "v1.14.1",
+                "currentVersion": "v1.14.1",
+                "currentVersionAgeInDays": 41,
+                "currentVersionTimestamp": "2026-08-27T21:54:09.000Z",
+                "datasource": "go",
+                "depName": "github.com/Azure/azure-sdk-for-go/sdk/azidentity",
+                "depType": "require",
+                "fixedVersion": "v1.14.1",
+                "managerData": {
+                  "lineNumber": 6,
+                  "multiLine": true
+                },
+                "mostRecentTimestamp": "2026-08-27T21:54:09.000Z",
+                "packageName": "github.com/Azure/azure-sdk-for-go/sdk/azidentity",
+                "sourceUrl": "https://github.com/Azure/azure-sdk-for-go",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "v1.8.1",
+                "currentVersion": "v1.8.1",
+                "currentVersionAgeInDays": 28,
+                "currentVersionTimestamp": "2026-09-09T18:22:47.000Z",
+                "datasource": "go",
+                "depName": "github.com/Azure/azure-sdk-for-go/sdk/storage/azblob",
+                "depType": "require",
+                "fixedVersion": "v1.8.1",
+                "isSingleVersion": true,
+                "managerData": {
+                  "lineNumber": 7,
+                  "multiLine": true
+                },
+                "mostRecentTimestamp": "2026-10-01T17:31:07.000Z",
+                "packageName": "github.com/Azure/azure-sdk-for-go/sdk/storage/azblob",
+                "sourceUrl": "https://github.com/Azure/azure-sdk-for-go",
+                "updates": [
+                  {
+                    "branchName": "renovate/github.com-azure-azure-sdk-for-go-sdk-storage-azblob-1.x",
+                    "bucket": "non-major",
+                    "isBreaking": false,
+                    "libYears": 0.06017567224759006,
+                    "newMajor": 1,
+                    "newMinor": 8,
+                    "newPatch": 2,
+                    "newValue": "v1.8.2",
+                    "newVersion": "v1.8.2",
+                    "newVersionAgeInDays": 6,
+                    "releaseTimestamp": "2026-10-01T17:31:07.000Z",
+                    "updateType": "patch"
+                  }
+                ],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "v3.8.2",
+                "currentVersion": "v3.8.2",
+                "currentVersionAgeInDays": 33,
+                "currentVersionTimestamp": "2026-09-04T22:58:52.000Z",
+                "datasource": "go",
+                "depName": "github.com/MicahParks/keyfunc/v3",
+                "depType": "require",
+                "fixedVersion": "v3.8.2",
+                "managerData": {
+                  "lineNumber": 8,
+                  "multiLine": true
+                },
+                "mostRecentTimestamp": "2026-09-04T22:58:52.000Z",
+                "packageName": "github.com/MicahParks/keyfunc/v3",
+                "sourceUrl": "https://github.com/MicahParks/keyfunc",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "v5.3.1",
+                "currentVersion": "v5.3.1",
+                "currentVersionAgeInDays": 252,
+                "currentVersionTimestamp": "2026-01-28T19:59:47.000Z",
+                "datasource": "go",
+                "depName": "github.com/golang-jwt/jwt/v5",
+                "depType": "require",
+                "fixedVersion": "v5.3.1",
+                "managerData": {
+                  "lineNumber": 9,
+                  "multiLine": true
+                },
+                "mostRecentTimestamp": "2026-01-28T19:59:47.000Z",
+                "packageName": "github.com/golang-jwt/jwt/v5",
+                "sourceUrl": "https://github.com/golang-jwt/jwt",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "v1.10.2",
+                "currentVersion": "v1.10.2",
+                "currentVersionAgeInDays": 43,
+                "currentVersionTimestamp": "2026-08-25T18:09:05.000Z",
+                "datasource": "go",
+                "depName": "github.com/sirupsen/logrus",
+                "depType": "require",
+                "fixedVersion": "v1.10.2",
+                "managerData": {
+                  "lineNumber": 10,
+                  "multiLine": true
+                },
+                "mostRecentTimestamp": "2026-08-25T18:09:05.000Z",
+                "packageName": "github.com/sirupsen/logrus",
+                "sourceUrl": "https://github.com/sirupsen/logrus",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "v0.1.0",
+                "currentVersion": "v0.1.0",
+                "currentVersionAgeInDays": 16,
+                "currentVersionTimestamp": "2026-09-21T12:19:43.000Z",
+                "datasource": "go",
+                "depName": "github.com/stripe/smokescreen",
+                "depType": "require",
+                "fixedVersion": "v0.1.0",
+                "managerData": {
+                  "lineNumber": 11,
+                  "multiLine": true
+                },
+                "mostRecentTimestamp": "2026-09-21T12:19:43.000Z",
+                "packageName": "github.com/stripe/smokescreen",
+                "sourceUrl": "https://github.com/stripe/smokescreen",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "v1.12.0",
+                "datasource": "go",
+                "depName": "github.com/Azure/azure-sdk-for-go/sdk/internal",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 15,
+                  "multiLine": true
+                },
+                "packageName": "github.com/Azure/azure-sdk-for-go/sdk/internal",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v1.8.0",
+                "datasource": "go",
+                "depName": "github.com/AzureAD/microsoft-authentication-library-for-go",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 16,
+                  "multiLine": true
+                },
+                "packageName": "github.com/AzureAD/microsoft-authentication-library-for-go",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v4.8.3+incompatible",
+                "datasource": "go",
+                "depName": "github.com/DataDog/datadog-go",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 17,
+                  "multiLine": true
+                },
+                "packageName": "github.com/DataDog/datadog-go",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v0.11.3",
+                "datasource": "go",
+                "depName": "github.com/MicahParks/jwkset",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 18,
+                  "multiLine": true
+                },
+                "packageName": "github.com/MicahParks/jwkset",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v0.6.2",
+                "datasource": "go",
+                "depName": "github.com/Microsoft/go-winio",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 19,
+                  "multiLine": true
+                },
+                "packageName": "github.com/Microsoft/go-winio",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v18.7.0",
+                "datasource": "go",
+                "depName": "github.com/apache/arrow-go/v18",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 20,
+                  "multiLine": true
+                },
+                "packageName": "github.com/apache/arrow-go/v18",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v0.1.0",
+                "datasource": "go",
+                "depName": "github.com/armon/go-proxyproto",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 21,
+                  "multiLine": true
+                },
+                "packageName": "github.com/armon/go-proxyproto",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v1.0.1",
+                "datasource": "go",
+                "depName": "github.com/beorn7/perks",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 22,
+                  "multiLine": true
+                },
+                "packageName": "github.com/beorn7/perks",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v0.22.5",
+                "datasource": "go",
+                "depName": "github.com/carlmjohnson/versioninfo",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 23,
+                  "multiLine": true
+                },
+                "packageName": "github.com/carlmjohnson/versioninfo",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v2.3.0",
+                "datasource": "go",
+                "depName": "github.com/cespare/xxhash/v2",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 24,
+                  "multiLine": true
+                },
+                "packageName": "github.com/cespare/xxhash/v2",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v0.10.6",
+                "datasource": "go",
+                "depName": "github.com/goccy/go-json",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 25,
+                  "multiLine": true
+                },
+                "packageName": "github.com/goccy/go-json",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v25.12.19+incompatible",
+                "datasource": "go",
+                "depName": "github.com/google/flatbuffers",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 26,
+                  "multiLine": true
+                },
+                "packageName": "github.com/google/flatbuffers",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v1.6.0",
+                "datasource": "go",
+                "depName": "github.com/google/uuid",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 27,
+                  "multiLine": true
+                },
+                "packageName": "github.com/google/uuid",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v1.0.2",
+                "datasource": "go",
+                "depName": "github.com/hashicorp/golang-lru",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 28,
+                  "multiLine": true
+                },
+                "packageName": "github.com/hashicorp/golang-lru",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v1.19.2",
+                "datasource": "go",
+                "depName": "github.com/klauspost/compress",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 29,
+                  "multiLine": true
+                },
+                "packageName": "github.com/klauspost/compress",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v2.4.0",
+                "datasource": "go",
+                "depName": "github.com/klauspost/cpuid/v2",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 30,
+                  "multiLine": true
+                },
+                "packageName": "github.com/klauspost/cpuid/v2",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v1.1.0",
+                "datasource": "go",
+                "depName": "github.com/kylelemons/godebug",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 31,
+                  "multiLine": true
+                },
+                "packageName": "github.com/kylelemons/godebug",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentDigest": "a7dc8b61c822",
+                "currentValue": "v0.0.0-20191010083416-a7dc8b61c822",
+                "datasource": "go",
+                "depName": "github.com/munnerz/goautoneg",
+                "depType": "indirect",
+                "digestOneAndOnly": true,
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 32,
+                  "multiLine": true
+                },
+                "packageName": "github.com/munnerz/goautoneg",
+                "skipReason": "disabled",
+                "updates": [],
+                "versioning": "loose"
+              },
+              {
+                "currentValue": "v2.1.0+incompatible",
+                "datasource": "go",
+                "depName": "github.com/patrickmn/go-cache",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 33,
+                  "multiLine": true
+                },
+                "packageName": "github.com/patrickmn/go-cache",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v4.1.28",
+                "datasource": "go",
+                "depName": "github.com/pierrec/lz4/v4",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 34,
+                  "multiLine": true
+                },
+                "packageName": "github.com/pierrec/lz4/v4",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentDigest": "5ac0b6a4141c",
+                "currentValue": "v0.0.0-20240102092130-5ac0b6a4141c",
+                "datasource": "go",
+                "depName": "github.com/pkg/browser",
+                "depType": "indirect",
+                "digestOneAndOnly": true,
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 35,
+                  "multiLine": true
+                },
+                "packageName": "github.com/pkg/browser",
+                "skipReason": "disabled",
+                "updates": [],
+                "versioning": "loose"
+              },
+              {
+                "currentValue": "v1.24.1",
+                "datasource": "go",
+                "depName": "github.com/prometheus/client_golang",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 36,
+                  "multiLine": true
+                },
+                "packageName": "github.com/prometheus/client_golang",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v0.6.2",
+                "datasource": "go",
+                "depName": "github.com/prometheus/client_model",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 37,
+                  "multiLine": true
+                },
+                "packageName": "github.com/prometheus/client_model",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v0.70.1",
+                "datasource": "go",
+                "depName": "github.com/prometheus/common",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 38,
+                  "multiLine": true
+                },
+                "packageName": "github.com/prometheus/common",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v0.21.1",
+                "datasource": "go",
+                "depName": "github.com/prometheus/procfs",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 39,
+                  "multiLine": true
+                },
+                "packageName": "github.com/prometheus/procfs",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v1.6.0",
+                "datasource": "go",
+                "depName": "github.com/rs/xid",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 40,
+                  "multiLine": true
+                },
+                "packageName": "github.com/rs/xid",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v0.5.3",
+                "datasource": "go",
+                "depName": "github.com/stretchr/objx",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 41,
+                  "multiLine": true
+                },
+                "packageName": "github.com/stretchr/objx",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentDigest": "0cd07c409a76",
+                "currentValue": "v0.0.0-20260826103935-0cd07c409a76",
+                "datasource": "go",
+                "depName": "github.com/stripe/goproxy",
+                "depType": "indirect",
+                "digestOneAndOnly": true,
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 42,
+                  "multiLine": true
+                },
+                "packageName": "github.com/stripe/goproxy",
+                "skipReason": "disabled",
+                "updates": [],
+                "versioning": "loose"
+              },
+              {
+                "currentValue": "v1.1.0",
+                "datasource": "go",
+                "depName": "github.com/zeebo/xxh3",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 43,
+                  "multiLine": true
+                },
+                "packageName": "github.com/zeebo/xxh3",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v0.55.0",
+                "datasource": "go",
+                "depName": "golang.org/x/crypto",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 44,
+                  "multiLine": true
+                },
+                "packageName": "golang.org/x/crypto",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentDigest": "c1d0aacb2297",
+                "currentValue": "v0.0.0-20260813180055-c1d0aacb2297",
+                "datasource": "go",
+                "depName": "golang.org/x/exp",
+                "depType": "indirect",
+                "digestOneAndOnly": true,
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 45,
+                  "multiLine": true
+                },
+                "packageName": "golang.org/x/exp",
+                "skipReason": "disabled",
+                "updates": [],
+                "versioning": "loose"
+              },
+              {
+                "currentValue": "v0.58.0",
+                "datasource": "go",
+                "depName": "golang.org/x/net",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 46,
+                  "multiLine": true
+                },
+                "packageName": "golang.org/x/net",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v0.22.0",
+                "datasource": "go",
+                "depName": "golang.org/x/sync",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 47,
+                  "multiLine": true
+                },
+                "packageName": "golang.org/x/sync",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v0.47.0",
+                "datasource": "go",
+                "depName": "golang.org/x/sys",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 48,
+                  "multiLine": true
+                },
+                "packageName": "golang.org/x/sys",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v0.41.0",
+                "datasource": "go",
+                "depName": "golang.org/x/text",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 49,
+                  "multiLine": true
+                },
+                "packageName": "golang.org/x/text",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v0.15.0",
+                "datasource": "go",
+                "depName": "golang.org/x/time",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 50,
+                  "multiLine": true
+                },
+                "packageName": "golang.org/x/time",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v1.36.11",
+                "datasource": "go",
+                "depName": "google.golang.org/protobuf",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 51,
+                  "multiLine": true
+                },
+                "packageName": "google.golang.org/protobuf",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v1.20.0",
+                "datasource": "go",
+                "depName": "gopkg.in/urfave/cli.v1",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 52,
+                  "multiLine": true
+                },
+                "packageName": "gopkg.in/urfave/cli.v1",
+                "skipReason": "disabled",
+                "updates": []
+              },
+              {
+                "currentValue": "v2.4.0",
+                "datasource": "go",
+                "depName": "gopkg.in/yaml.v2",
+                "depType": "indirect",
+                "enabled": false,
+                "managerData": {
+                  "lineNumber": 53,
+                  "multiLine": true
+                },
+                "packageName": "gopkg.in/yaml.v2",
+                "skipReason": "disabled",
+                "updates": []
+              }
+            ],
+            "extractedConstraints": {
+              "%goMod": "~1.25.x"
+            },
+            "packageFile": "proxy/go.mod"
+          }
+        ],
+        "nuget": [
+          {
+            "deps": [
+              {
+                "currentValue": "4.0.0",
+                "currentVersion": "4.0.0",
+                "currentVersionAgeInDays": 54,
+                "currentVersionTimestamp": "2026-08-15T01:50:54.810Z",
+                "datasource": "nuget",
+                "depName": "xunit.runner.visualstudio",
+                "depType": "nuget",
+                "mostRecentTimestamp": "2026-08-15T01:50:54.810Z",
+                "packageName": "xunit.runner.visualstudio",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/xunit/visualstudio.xunit",
+                "updates": [],
+                "versioning": "nuget",
+                "warnings": []
+              },
+              {
+                "currentValue": "2.9.3",
+                "currentVersion": "2.9.3",
+                "currentVersionAgeInDays": 637,
+                "currentVersionTimestamp": "2025-01-08T17:32:14.713Z",
+                "datasource": "nuget",
+                "depName": "xunit",
+                "depType": "nuget",
+                "deprecationMessage": "The package `xunit` is deprecated.",
+                "packageName": "xunit",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/xunit/xunit",
+                "updates": [],
+                "versioning": "nuget",
+                "warnings": []
+              },
+              {
+                "currentValue": "8.23.0",
+                "currentVersion": "8.23.0",
+                "currentVersionAgeInDays": 19,
+                "currentVersionTimestamp": "2026-09-18T21:42:11.923Z",
+                "datasource": "nuget",
+                "depName": "System.IdentityModel.Tokens.Jwt",
+                "depType": "nuget",
+                "packageName": "System.IdentityModel.Tokens.Jwt",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet",
+                "updates": [],
+                "versioning": "nuget",
+                "warnings": []
+              },
+              {
+                "currentValue": "2.17.9",
+                "currentVersion": "2.17.9",
+                "currentVersionAgeInDays": 13,
+                "currentVersionTimestamp": "2026-09-24T11:39:35.633Z",
+                "datasource": "nuget",
+                "depName": "Scalar.AspNetCore",
+                "depType": "nuget",
+                "homepage": "https://scalar.com/",
+                "isSingleVersion": false,
+                "mostRecentTimestamp": "2026-10-06T13:35:00.603Z",
+                "packageName": "Scalar.AspNetCore",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/scalar/scalar",
+                "updates": [
+                  {
+                    "branchName": "renovate/scalar.aspnetcore-2.x",
+                    "bucket": "non-major",
+                    "isBreaking": false,
+                    "isBump": true,
+                    "libYears": 0.033096301686960934,
+                    "newMajor": 2,
+                    "newMinor": 17,
+                    "newPatch": 14,
+                    "newValue": "2.17.14",
+                    "newVersion": "2.17.14",
+                    "newVersionAgeInDays": 1,
+                    "releaseTimestamp": "2026-10-06T13:35:00.603Z",
+                    "updateType": "patch"
+                  }
+                ],
+                "versioning": "nuget",
+                "warnings": []
+              },
+              {
+                "currentValue": "1.19.0",
+                "currentVersion": "1.19.0",
+                "currentVersionAgeInDays": 19,
+                "currentVersionTimestamp": "2026-09-18T20:42:21.397Z",
+                "datasource": "nuget",
+                "depName": "OpenTelemetry.Instrumentation.Runtime",
+                "depType": "nuget",
+                "homepage": "https://opentelemetry.io/",
+                "mostRecentTimestamp": "2026-09-18T20:42:21.397Z",
+                "packageName": "OpenTelemetry.Instrumentation.Runtime",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/open-telemetry/opentelemetry-dotnet-contrib",
+                "updates": [],
+                "versioning": "nuget",
+                "warnings": []
+              },
+              {
+                "currentValue": "1.19.0",
+                "currentVersion": "1.19.0",
+                "currentVersionAgeInDays": 19,
+                "currentVersionTimestamp": "2026-09-18T20:12:57.640Z",
+                "datasource": "nuget",
+                "depName": "OpenTelemetry.Instrumentation.Http",
+                "depType": "nuget",
+                "homepage": "https://opentelemetry.io/",
+                "mostRecentTimestamp": "2026-09-18T20:12:57.640Z",
+                "packageName": "OpenTelemetry.Instrumentation.Http",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/open-telemetry/opentelemetry-dotnet-contrib",
+                "updates": [],
+                "versioning": "nuget",
+                "warnings": []
+              },
+              {
+                "currentValue": "1.19.0",
+                "currentVersion": "1.19.0",
+                "currentVersionAgeInDays": 19,
+                "currentVersionTimestamp": "2026-09-18T19:31:55.457Z",
+                "datasource": "nuget",
+                "depName": "OpenTelemetry.Instrumentation.AspNetCore",
+                "depType": "nuget",
+                "homepage": "https://opentelemetry.io/",
+                "mostRecentTimestamp": "2026-09-18T19:31:55.457Z",
+                "packageName": "OpenTelemetry.Instrumentation.AspNetCore",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/open-telemetry/opentelemetry-dotnet-contrib",
+                "updates": [],
+                "versioning": "nuget",
+                "warnings": []
+              },
+              {
+                "currentValue": "1.19.1",
+                "currentVersion": "1.19.1",
+                "currentVersionAgeInDays": 16,
+                "currentVersionTimestamp": "2026-09-21T08:34:49.450Z",
+                "datasource": "nuget",
+                "depName": "OpenTelemetry.Extensions.Hosting",
+                "depType": "nuget",
+                "homepage": "https://opentelemetry.io/",
+                "mostRecentTimestamp": "2026-09-21T08:34:49.450Z",
+                "packageName": "OpenTelemetry.Extensions.Hosting",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/open-telemetry/opentelemetry-dotnet",
+                "updates": [],
+                "versioning": "nuget",
+                "warnings": []
+              },
+              {
+                "currentValue": "1.19.1",
+                "currentVersion": "1.19.1",
+                "currentVersionAgeInDays": 16,
+                "currentVersionTimestamp": "2026-09-21T08:34:48.860Z",
+                "datasource": "nuget",
+                "depName": "OpenTelemetry.Exporter.OpenTelemetryProtocol",
+                "depType": "nuget",
+                "homepage": "https://opentelemetry.io/",
+                "mostRecentTimestamp": "2026-09-21T08:34:48.860Z",
+                "packageName": "OpenTelemetry.Exporter.OpenTelemetryProtocol",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/open-telemetry/opentelemetry-dotnet",
+                "updates": [],
+                "versioning": "nuget",
+                "warnings": []
+              },
+              {
+                "currentValue": "2.12.2",
+                "currentVersion": "2.12.2",
+                "currentVersionAgeInDays": 48,
+                "currentVersionTimestamp": "2026-08-20T20:46:56.367Z",
+                "datasource": "nuget",
+                "depName": "Microsoft.OpenApi",
+                "depType": "nuget",
+                "isSingleVersion": false,
+                "packageName": "Microsoft.OpenApi",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/Microsoft/OpenAPI.NET",
+                "updates": [
+                  {
+                    "branchName": "renovate/microsoft.openapi-3.x",
+                    "bucket": "major",
+                    "isBreaking": true,
+                    "isBump": true,
+                    "newMajor": 3,
+                    "newMinor": 10,
+                    "newPatch": 2,
+                    "newValue": "3.10.2",
+                    "newVersion": "3.10.2",
+                    "newVersionAgeInDays": 48,
+                    "releaseTimestamp": "2026-08-20T19:40:51.200Z",
+                    "updateType": "major"
+                  }
+                ],
+                "versioning": "nuget",
+                "warnings": []
+              },
+              {
+                "currentValue": "18.10.1",
+                "currentVersion": "18.10.1",
+                "currentVersionAgeInDays": 22,
+                "currentVersionTimestamp": "2026-09-15T12:36:29.327Z",
+                "datasource": "nuget",
+                "depName": "Microsoft.NET.Test.Sdk",
+                "depType": "nuget",
+                "mostRecentTimestamp": "2026-09-15T12:36:29.327Z",
+                "packageName": "Microsoft.NET.Test.Sdk",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/microsoft/vstest",
+                "updates": [],
+                "versioning": "nuget",
+                "warnings": []
+              },
+              {
+                "currentValue": "10.10.0",
+                "currentVersion": "10.10.0",
+                "currentVersionAgeInDays": 28,
+                "currentVersionTimestamp": "2026-09-09T16:53:23.390Z",
+                "datasource": "nuget",
+                "depName": "Microsoft.Extensions.ServiceDiscovery",
+                "depType": "nuget",
+                "homepage": "https://dot.net/",
+                "mostRecentTimestamp": "2026-09-09T16:53:23.390Z",
+                "packageName": "Microsoft.Extensions.ServiceDiscovery",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/dotnet/extensions",
+                "updates": [],
+                "versioning": "nuget",
+                "warnings": []
+              },
+              {
+                "currentValue": "10.10.0",
+                "currentVersion": "10.10.0",
+                "currentVersionAgeInDays": 28,
+                "currentVersionTimestamp": "2026-09-09T16:53:18.807Z",
+                "datasource": "nuget",
+                "depName": "Microsoft.Extensions.Http.Resilience",
+                "depType": "nuget",
+                "homepage": "https://dot.net/",
+                "mostRecentTimestamp": "2026-09-09T16:53:18.807Z",
+                "packageName": "Microsoft.Extensions.Http.Resilience",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/dotnet/extensions",
+                "updates": [],
+                "versioning": "nuget",
+                "warnings": []
+              },
+              {
+                "currentValue": "10.0.12",
+                "currentVersion": "10.0.12",
+                "currentVersionAgeInDays": 29,
+                "currentVersionTimestamp": "2026-09-08T19:03:14.370Z",
+                "datasource": "nuget",
+                "depName": "Microsoft.Extensions.Http",
+                "depType": "nuget",
+                "homepage": "https://dot.net/",
+                "packageName": "Microsoft.Extensions.Http",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/dotnet/dotnet",
+                "updates": [],
+                "versioning": "nuget",
+                "warnings": []
+              },
+              {
+                "currentValue": "10.0.12",
+                "currentVersion": "10.0.12",
+                "currentVersionAgeInDays": 29,
+                "currentVersionTimestamp": "2026-09-08T19:03:27.497Z",
+                "datasource": "nuget",
+                "depName": "Microsoft.AspNetCore.OpenApi",
+                "depType": "nuget",
+                "homepage": "https://asp.net/",
+                "packageName": "Microsoft.AspNetCore.OpenApi",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/dotnet/dotnet",
+                "updates": [],
+                "versioning": "nuget",
+                "warnings": []
+              },
+              {
+                "currentValue": "10.0.12",
+                "currentVersion": "10.0.12",
+                "currentVersionAgeInDays": 29,
+                "currentVersionTimestamp": "2026-09-08T19:03:27.183Z",
+                "datasource": "nuget",
+                "depName": "Microsoft.AspNetCore.Mvc.Testing",
+                "depType": "nuget",
+                "homepage": "https://asp.net/",
+                "packageName": "Microsoft.AspNetCore.Mvc.Testing",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/dotnet/dotnet",
+                "updates": [],
+                "versioning": "nuget",
+                "warnings": []
+              },
+              {
+                "currentValue": "10.0.12",
+                "currentVersion": "10.0.12",
+                "currentVersionAgeInDays": 29,
+                "currentVersionTimestamp": "2026-09-08T19:03:34.160Z",
+                "datasource": "nuget",
+                "depName": "Microsoft.AspNetCore.Authentication.JwtBearer",
+                "depType": "nuget",
+                "homepage": "https://asp.net/",
+                "packageName": "Microsoft.AspNetCore.Authentication.JwtBearer",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/dotnet/dotnet",
+                "updates": [],
+                "versioning": "nuget",
+                "warnings": []
+              },
+              {
+                "currentValue": "10.0.1",
+                "currentVersion": "10.0.1",
+                "currentVersionAgeInDays": 143,
+                "currentVersionTimestamp": "2026-05-18T08:04:46.640Z",
+                "datasource": "nuget",
+                "depName": "coverlet.collector",
+                "depType": "nuget",
+                "isSingleVersion": false,
+                "mostRecentTimestamp": "2026-09-27T21:36:27.420Z",
+                "packageName": "coverlet.collector",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/coverlet-coverage/coverlet",
+                "updates": [
+                  {
+                    "branchName": "renovate/coverlet.collector-10.x",
+                    "bucket": "non-major",
+                    "isBreaking": false,
+                    "isBump": true,
+                    "libYears": 0.36318812721968546,
+                    "newMajor": 10,
+                    "newMinor": 1,
+                    "newPatch": 0,
+                    "newValue": "10.1.0",
+                    "newVersion": "10.1.0",
+                    "newVersionAgeInDays": 10,
+                    "releaseTimestamp": "2026-09-27T21:36:27.420Z",
+                    "updateType": "minor"
+                  }
+                ],
+                "versioning": "nuget",
+                "warnings": []
+              },
+              {
+                "currentValue": "12.29.2",
+                "currentVersion": "12.29.2",
+                "currentVersionAgeInDays": 44,
+                "currentVersionTimestamp": "2026-08-24T23:49:39.467Z",
+                "datasource": "nuget",
+                "depName": "Azure.Storage.Blobs",
+                "depType": "nuget",
+                "homepage": "https://github.com/Azure/azure-sdk-for-net/blob/Azure.Storage.Blobs_12.30.1/sdk/storage/Azure.Storage.Blobs/README.md",
+                "isSingleVersion": false,
+                "mostRecentTimestamp": "2026-10-06T19:42:37.800Z",
+                "packageName": "Azure.Storage.Blobs",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/Azure/azure-sdk-for-net",
+                "updates": [
+                  {
+                    "branchName": "renovate/azure.storage.blobs-12.x",
+                    "bucket": "non-major",
+                    "isBreaking": false,
+                    "isBump": true,
+                    "libYears": 0.11733822720065956,
+                    "newMajor": 12,
+                    "newMinor": 30,
+                    "newPatch": 1,
+                    "newValue": "12.30.1",
+                    "newVersion": "12.30.1",
+                    "newVersionAgeInDays": 1,
+                    "releaseTimestamp": "2026-10-06T19:42:37.800Z",
+                    "updateType": "minor"
+                  }
+                ],
+                "versioning": "nuget",
+                "warnings": []
+              },
+              {
+                "currentValue": "1.17.0",
+                "currentVersion": "1.17.0",
+                "currentVersionAgeInDays": 44,
+                "currentVersionTimestamp": "2026-08-25T03:35:01.230Z",
+                "datasource": "nuget",
+                "depName": "Azure.ResourceManager.Network",
+                "depType": "nuget",
+                "homepage": "https://github.com/Azure/azure-sdk-for-net/blob/Azure.ResourceManager.Network_1.17.0/sdk/network/Azure.ResourceManager.Network/README.md",
+                "packageName": "Azure.ResourceManager.Network",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/Azure/azure-sdk-for-net",
+                "updates": [],
+                "versioning": "nuget",
+                "warnings": []
+              },
+              {
+                "currentValue": "1.17.0",
+                "currentVersion": "1.17.0",
+                "currentVersionAgeInDays": 22,
+                "currentVersionTimestamp": "2026-09-16T02:19:09.910Z",
+                "datasource": "nuget",
+                "depName": "Azure.ResourceManager.Compute",
+                "depType": "nuget",
+                "homepage": "https://github.com/Azure/azure-sdk-for-net/blob/Azure.ResourceManager.Compute_1.17.0/sdk/compute/Azure.ResourceManager.Compute/README.md",
+                "mostRecentTimestamp": "2026-09-16T02:19:09.910Z",
+                "packageName": "Azure.ResourceManager.Compute",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/Azure/azure-sdk-for-net",
+                "updates": [],
+                "versioning": "nuget",
+                "warnings": []
+              },
+              {
+                "currentValue": "1.7.1",
+                "currentVersion": "1.7.1",
+                "currentVersionAgeInDays": 421,
+                "currentVersionTimestamp": "2025-08-12T19:33:04.063Z",
+                "datasource": "nuget",
+                "depName": "Azure.Monitor.Query",
+                "depType": "nuget",
+                "deprecationMessage": "The package `Azure.Monitor.Query` is deprecated.",
+                "homepage": "https://github.com/Azure/azure-sdk-for-net/blob/Azure.Monitor.Query_1.7.1/sdk/monitor/Azure.Monitor.Query/README.md",
+                "packageName": "Azure.Monitor.Query",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/Azure/azure-sdk-for-net",
+                "updates": [],
+                "versioning": "nuget",
+                "warnings": []
+              },
+              {
+                "currentValue": "1.6.0",
+                "currentVersion": "1.6.0",
+                "currentVersionAgeInDays": 72,
+                "currentVersionTimestamp": "2026-07-27T20:36:19.927Z",
+                "datasource": "nuget",
+                "depName": "Azure.Monitor.OpenTelemetry.AspNetCore",
+                "depType": "nuget",
+                "homepage": "https://github.com/Azure/azure-sdk-for-net/blob/Azure.Monitor.OpenTelemetry.AspNetCore_1.6.0/sdk/monitor/Azure.Monitor.OpenTelemetry.AspNetCore/README.md",
+                "mostRecentTimestamp": "2026-07-27T20:36:19.927Z",
+                "packageName": "Azure.Monitor.OpenTelemetry.AspNetCore",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/Azure/azure-sdk-for-net",
+                "updates": [],
+                "versioning": "nuget",
+                "warnings": []
+              },
+              {
+                "currentValue": "1.21.0",
+                "currentVersion": "1.21.0",
+                "currentVersionAgeInDays": 180,
+                "currentVersionTimestamp": "2026-04-11T00:38:19.413Z",
+                "datasource": "nuget",
+                "depName": "Azure.Identity",
+                "depType": "nuget",
+                "homepage": "https://github.com/Azure/azure-sdk-for-net/blob/Azure.Identity_1.21.0/sdk/identity/Azure.Identity/README.md",
+                "packageName": "Azure.Identity",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/Azure/azure-sdk-for-net",
+                "updates": [],
+                "versioning": "nuget",
+                "warnings": []
+              },
+              {
+                "currentValue": "1.62.0",
+                "currentVersion": "1.62.0",
+                "currentVersionAgeInDays": 48,
+                "currentVersionTimestamp": "2026-08-20T18:35:38.627Z",
+                "datasource": "nuget",
+                "depName": "Azure.Core",
+                "depType": "nuget",
+                "homepage": "https://github.com/Azure/azure-sdk-for-net/blob/Azure.Core_1.63.0/sdk/core/Azure.Core/README.md",
+                "isSingleVersion": false,
+                "mostRecentTimestamp": "2026-09-25T23:02:04.080Z",
+                "packageName": "Azure.Core",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/Azure/azure-sdk-for-net",
+                "updates": [
+                  {
+                    "branchName": "renovate/azure.core-1.x",
+                    "bucket": "non-major",
+                    "isBreaking": false,
+                    "isBump": true,
+                    "libYears": 0.09913703237569761,
+                    "newMajor": 1,
+                    "newMinor": 63,
+                    "newPatch": 0,
+                    "newValue": "1.63.0",
+                    "newVersion": "1.63.0",
+                    "newVersionAgeInDays": 12,
+                    "releaseTimestamp": "2026-09-25T23:02:04.080Z",
+                    "updateType": "minor"
+                  }
+                ],
+                "versioning": "nuget",
+                "warnings": []
+              }
+            ],
+            "packageFile": "Directory.Packages.props"
+          },
+          {
+            "deps": [
+              {
+                "datasource": "nuget",
+                "depName": "Azure.Storage.Blobs",
+                "depType": "nuget",
+                "packageName": "Azure.Storage.Blobs",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              }
+            ],
+            "lockFiles": [
+              "src/AppHost/AllowlistSeeder/packages.lock.json"
+            ],
+            "packageFile": "src/AppHost/AllowlistSeeder/AllowlistSeeder.csproj"
+          },
+          {
+            "deps": [
+              {
+                "currentValue": "13.5.4",
+                "currentVersion": "13.5.4",
+                "currentVersionAgeInDays": 22,
+                "currentVersionTimestamp": "2026-09-15T17:09:06.197Z",
+                "datasource": "nuget",
+                "depName": "Aspire.AppHost.Sdk",
+                "depType": "msbuild-sdk",
+                "isSingleVersion": false,
+                "mostRecentTimestamp": "2026-10-07T06:01:19.853Z",
+                "packageName": "Aspire.AppHost.Sdk",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "sourceUrl": "https://github.com/microsoft/aspire",
+                "updates": [
+                  {
+                    "branchName": "renovate/aspire.apphost.sdk-13.x",
+                    "bucket": "non-major",
+                    "isBreaking": false,
+                    "isBump": true,
+                    "libYears": 0.05900347716894977,
+                    "newMajor": 13,
+                    "newMinor": 6,
+                    "newPatch": 1,
+                    "newValue": "13.6.1",
+                    "newVersion": "13.6.1",
+                    "newVersionAgeInDays": 1,
+                    "releaseTimestamp": "2026-10-07T06:01:19.853Z",
+                    "updateType": "minor"
+                  }
+                ],
+                "versioning": "nuget",
+                "warnings": []
+              }
+            ],
+            "lockFiles": [
+              "src/AppHost/packages.lock.json"
+            ],
+            "packageFile": "src/AppHost/AppHost.csproj"
+          },
+          {
+            "deps": [
+              {
+                "datasource": "nuget",
+                "depName": "xunit.runner.visualstudio",
+                "depType": "nuget",
+                "packageName": "xunit.runner.visualstudio",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "xunit",
+                "depType": "nuget",
+                "packageName": "xunit",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "System.IdentityModel.Tokens.Jwt",
+                "depType": "nuget",
+                "packageName": "System.IdentityModel.Tokens.Jwt",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "Microsoft.NET.Test.Sdk",
+                "depType": "nuget",
+                "packageName": "Microsoft.NET.Test.Sdk",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "Microsoft.AspNetCore.Mvc.Testing",
+                "depType": "nuget",
+                "packageName": "Microsoft.AspNetCore.Mvc.Testing",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "coverlet.collector",
+                "depType": "nuget",
+                "packageName": "coverlet.collector",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              }
+            ],
+            "lockFiles": [
+              "src/ControlPlane.Tests/packages.lock.json"
+            ],
+            "packageFile": "src/ControlPlane.Tests/ControlPlane.Tests.csproj"
+          },
+          {
+            "deps": [
+              {
+                "datasource": "nuget",
+                "depName": "Scalar.AspNetCore",
+                "depType": "nuget",
+                "packageName": "Scalar.AspNetCore",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "Microsoft.OpenApi",
+                "depType": "nuget",
+                "packageName": "Microsoft.OpenApi",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "Microsoft.AspNetCore.OpenApi",
+                "depType": "nuget",
+                "packageName": "Microsoft.AspNetCore.OpenApi",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "Microsoft.AspNetCore.Authentication.JwtBearer",
+                "depType": "nuget",
+                "packageName": "Microsoft.AspNetCore.Authentication.JwtBearer",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "Azure.Storage.Blobs",
+                "depType": "nuget",
+                "packageName": "Azure.Storage.Blobs",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              }
+            ],
+            "lockFiles": [
+              "src/ControlPlane/packages.lock.json"
+            ],
+            "packageFile": "src/ControlPlane/ControlPlane.csproj"
+          },
+          {
+            "deps": [
+              {
+                "datasource": "nuget",
+                "depName": "xunit.runner.visualstudio",
+                "depType": "nuget",
+                "packageName": "xunit.runner.visualstudio",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "xunit",
+                "depType": "nuget",
+                "packageName": "xunit",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "Microsoft.NET.Test.Sdk",
+                "depType": "nuget",
+                "packageName": "Microsoft.NET.Test.Sdk",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "coverlet.collector",
+                "depType": "nuget",
+                "packageName": "coverlet.collector",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              }
+            ],
+            "lockFiles": [
+              "src/EgressProxy.Client.Tests/packages.lock.json"
+            ],
+            "packageFile": "src/EgressProxy.Client.Tests/EgressProxy.Client.Tests.csproj"
+          },
+          {
+            "deps": [
+              {
+                "datasource": "nuget",
+                "depName": "Microsoft.Extensions.Http",
+                "depType": "nuget",
+                "packageName": "Microsoft.Extensions.Http",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "Azure.Identity",
+                "depType": "nuget",
+                "packageName": "Azure.Identity",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              }
+            ],
+            "lockFiles": [
+              "src/EgressProxy.Client/packages.lock.json"
+            ],
+            "packageFile": "src/EgressProxy.Client/EgressProxy.Client.csproj"
+          },
+          {
+            "deps": [
+              {
+                "datasource": "nuget",
+                "depName": "xunit.runner.visualstudio",
+                "depType": "nuget",
+                "packageName": "xunit.runner.visualstudio",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "xunit",
+                "depType": "nuget",
+                "packageName": "xunit",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "Microsoft.NET.Test.Sdk",
+                "depType": "nuget",
+                "packageName": "Microsoft.NET.Test.Sdk",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "Microsoft.AspNetCore.Mvc.Testing",
+                "depType": "nuget",
+                "packageName": "Microsoft.AspNetCore.Mvc.Testing",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "coverlet.collector",
+                "depType": "nuget",
+                "packageName": "coverlet.collector",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              }
+            ],
+            "lockFiles": [
+              "src/Portal.Tests/packages.lock.json"
+            ],
+            "packageFile": "src/Portal.Tests/Portal.Tests.csproj"
+          },
+          {
+            "deps": [
+              {
+                "datasource": "nuget",
+                "depName": "Azure.ResourceManager.Network",
+                "depType": "nuget",
+                "packageName": "Azure.ResourceManager.Network",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "Azure.ResourceManager.Compute",
+                "depType": "nuget",
+                "packageName": "Azure.ResourceManager.Compute",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "Azure.Monitor.Query",
+                "depType": "nuget",
+                "packageName": "Azure.Monitor.Query",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "Azure.Identity",
+                "depType": "nuget",
+                "packageName": "Azure.Identity",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              }
+            ],
+            "lockFiles": [
+              "src/Portal/packages.lock.json"
+            ],
+            "packageFile": "src/Portal/Portal.csproj"
+          },
+          {
+            "deps": [
+              {
+                "datasource": "nuget",
+                "depName": "xunit.runner.visualstudio",
+                "depType": "nuget",
+                "packageName": "xunit.runner.visualstudio",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "xunit",
+                "depType": "nuget",
+                "packageName": "xunit",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "Microsoft.NET.Test.Sdk",
+                "depType": "nuget",
+                "packageName": "Microsoft.NET.Test.Sdk",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "coverlet.collector",
+                "depType": "nuget",
+                "packageName": "coverlet.collector",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              }
+            ],
+            "lockFiles": [
+              "src/ServiceDefaults.Tests/packages.lock.json"
+            ],
+            "packageFile": "src/ServiceDefaults.Tests/ServiceDefaults.Tests.csproj"
+          },
+          {
+            "deps": [
+              {
+                "datasource": "nuget",
+                "depName": "OpenTelemetry.Instrumentation.Runtime",
+                "depType": "nuget",
+                "packageName": "OpenTelemetry.Instrumentation.Runtime",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "OpenTelemetry.Instrumentation.Http",
+                "depType": "nuget",
+                "packageName": "OpenTelemetry.Instrumentation.Http",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "OpenTelemetry.Instrumentation.AspNetCore",
+                "depType": "nuget",
+                "packageName": "OpenTelemetry.Instrumentation.AspNetCore",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "OpenTelemetry.Extensions.Hosting",
+                "depType": "nuget",
+                "packageName": "OpenTelemetry.Extensions.Hosting",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "OpenTelemetry.Exporter.OpenTelemetryProtocol",
+                "depType": "nuget",
+                "packageName": "OpenTelemetry.Exporter.OpenTelemetryProtocol",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "Microsoft.Extensions.ServiceDiscovery",
+                "depType": "nuget",
+                "packageName": "Microsoft.Extensions.ServiceDiscovery",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "Microsoft.Extensions.Http.Resilience",
+                "depType": "nuget",
+                "packageName": "Microsoft.Extensions.Http.Resilience",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "Azure.Monitor.OpenTelemetry.AspNetCore",
+                "depType": "nuget",
+                "packageName": "Azure.Monitor.OpenTelemetry.AspNetCore",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              },
+              {
+                "datasource": "nuget",
+                "depName": "Azure.Core",
+                "depType": "nuget",
+                "packageName": "Azure.Core",
+                "registryUrls": [
+                  "https://api.nuget.org/v3/index.json"
+                ],
+                "skipReason": "invalid-version",
+                "updates": []
+              }
+            ],
+            "lockFiles": [
+              "src/ServiceDefaults/packages.lock.json"
+            ],
+            "packageFile": "src/ServiceDefaults/ServiceDefaults.csproj"
+          }
+        ],
+        "regex": [
+          {
+            "datasourceTemplate": "pypi",
+            "deps": [
+              {
+                "currentValue": "2.15.0",
+                "currentVersion": "2.15.0",
+                "currentVersionAgeInDays": 14,
+                "currentVersionTimestamp": "2026-09-23T16:55:59.000Z",
+                "datasource": "pypi",
+                "depName": "PyJWT",
+                "fixedVersion": "2.15.0",
+                "isSingleVersion": true,
+                "mostRecentTimestamp": "2026-09-28T18:40:41.000Z",
+                "packageName": "PyJWT",
+                "registryUrl": "https://pypi.org/pypi",
+                "replaceString": "pip install --no-cache-dir \"PyJWT[crypto]==2.15.0",
+                "sourceUrl": "https://github.com/jpadilla/pyjwt",
+                "updates": [
+                  {
+                    "branchName": "renovate/pyjwt-2.x",
+                    "bucket": "non-major",
+                    "isBreaking": false,
+                    "libYears": 0.01389783105022831,
+                    "newMajor": 2,
+                    "newMinor": 15,
+                    "newPatch": 1,
+                    "newValue": "2.15.1",
+                    "newVersion": "2.15.1",
+                    "newVersionAgeInDays": 9,
+                    "releaseTimestamp": "2026-09-28T18:40:41.000Z",
+                    "updateType": "patch"
+                  }
+                ],
+                "versioning": "pep440",
+                "warnings": []
+              }
+            ],
+            "matchStrings": [
+              "pip3? install[^\\n]*?[\"']?(?<depName>[A-Za-z0-9][A-Za-z0-9._-]*)(?:\\[[^\\]]*\\])?==(?<currentValue>[^\"'\\s]+)"
+            ],
+            "packageFile": "mock-idp/Dockerfile"
+          },
+          {
+            "datasourceTemplate": "docker",
+            "deps": [
+              {
+                "currentValue": "0.4.4",
+                "currentVersion": "0.4.4",
+                "datasource": "docker",
+                "depName": "avm/res/resources/resource-group",
+                "fixedVersion": "0.4.4",
+                "lookupName": "bicep/avm/res/resources/resource-group",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/resources/resource-group",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/resources/resource-group:0.4.4",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "0.33.1",
+                "currentVersion": "0.33.1",
+                "datasource": "docker",
+                "depName": "avm/res/storage/storage-account",
+                "fixedVersion": "0.33.1",
+                "lookupName": "bicep/avm/res/storage/storage-account",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/storage/storage-account",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/storage/storage-account:0.33.1",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "0.13.1",
+                "currentVersion": "0.13.1",
+                "datasource": "docker",
+                "depName": "avm/res/container-registry/registry",
+                "fixedVersion": "0.13.1",
+                "lookupName": "bicep/avm/res/container-registry/registry",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/container-registry/registry",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/container-registry/registry:0.13.1",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              }
+            ],
+            "matchStrings": [
+              "br/public:(?<depName>[a-z0-9/._-]+):(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+            ],
+            "packageFile": "infra/bootstrap.bicep",
+            "packageNameTemplate": "mcr.microsoft.com/bicep/{{{depName}}}",
+            "versioningTemplate": "semver"
+          },
+          {
+            "datasourceTemplate": "docker",
+            "deps": [
+              {
+                "currentValue": "0.4.4",
+                "currentVersion": "0.4.4",
+                "datasource": "docker",
+                "depName": "avm/res/resources/resource-group",
+                "fixedVersion": "0.4.4",
+                "lookupName": "bicep/avm/res/resources/resource-group",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/resources/resource-group",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/resources/resource-group:0.4.4",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "0.4.4",
+                "currentVersion": "0.4.4",
+                "datasource": "docker",
+                "depName": "avm/res/resources/resource-group",
+                "fixedVersion": "0.4.4",
+                "lookupName": "bicep/avm/res/resources/resource-group",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/resources/resource-group",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/resources/resource-group:0.4.4",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "0.8.1",
+                "currentVersion": "0.8.1",
+                "datasource": "docker",
+                "depName": "avm/res/network/private-dns-zone",
+                "fixedVersion": "0.8.1",
+                "lookupName": "bicep/avm/res/network/private-dns-zone",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/network/private-dns-zone",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/network/private-dns-zone:0.8.1",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              }
+            ],
+            "matchStrings": [
+              "br/public:(?<depName>[a-z0-9/._-]+):(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+            ],
+            "packageFile": "infra/main.bicep",
+            "packageNameTemplate": "mcr.microsoft.com/bicep/{{{depName}}}",
+            "versioningTemplate": "semver"
+          },
+          {
+            "datasourceTemplate": "docker",
+            "deps": [
+              {
+                "currentValue": "0.6.0",
+                "currentVersion": "0.6.0",
+                "datasource": "docker",
+                "depName": "avm/res/managed-identity/user-assigned-identity",
+                "fixedVersion": "0.6.0",
+                "lookupName": "bicep/avm/res/managed-identity/user-assigned-identity",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/managed-identity/user-assigned-identity",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/managed-identity/user-assigned-identity:0.6.0",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              }
+            ],
+            "matchStrings": [
+              "br/public:(?<depName>[a-z0-9/._-]+):(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+            ],
+            "packageFile": "infra/modules/hub-identity.bicep",
+            "packageNameTemplate": "mcr.microsoft.com/bicep/{{{depName}}}",
+            "versioningTemplate": "semver"
+          },
+          {
+            "datasourceTemplate": "docker",
+            "deps": [
+              {
+                "currentValue": "0.5.3",
+                "currentVersion": "0.5.3",
+                "datasource": "docker",
+                "depName": "avm/res/network/network-security-group",
+                "fixedVersion": "0.5.3",
+                "lookupName": "bicep/avm/res/network/network-security-group",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/network/network-security-group",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/network/network-security-group:0.5.3",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "0.10.2",
+                "currentVersion": "0.10.2",
+                "datasource": "docker",
+                "depName": "avm/res/network/virtual-network",
+                "fixedVersion": "0.10.2",
+                "lookupName": "bicep/avm/res/network/virtual-network",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/network/virtual-network",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/network/virtual-network:0.10.2",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "0.1.2",
+                "currentVersion": "0.1.2",
+                "datasource": "docker",
+                "depName": "avm/ptn/authorization/resource-role-assignment",
+                "fixedVersion": "0.1.2",
+                "lookupName": "bicep/avm/ptn/authorization/resource-role-assignment",
+                "packageName": "mcr.microsoft.com/bicep/avm/ptn/authorization/resource-role-assignment",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/ptn/authorization/resource-role-assignment:0.1.2",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "0.1.2",
+                "currentVersion": "0.1.2",
+                "datasource": "docker",
+                "depName": "avm/ptn/authorization/resource-role-assignment",
+                "fixedVersion": "0.1.2",
+                "lookupName": "bicep/avm/ptn/authorization/resource-role-assignment",
+                "packageName": "mcr.microsoft.com/bicep/avm/ptn/authorization/resource-role-assignment",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/ptn/authorization/resource-role-assignment:0.1.2",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "0.8.0",
+                "currentVersion": "0.8.0",
+                "datasource": "docker",
+                "depName": "avm/res/network/public-ip-prefix",
+                "fixedVersion": "0.8.0",
+                "lookupName": "bicep/avm/res/network/public-ip-prefix",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/network/public-ip-prefix",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/network/public-ip-prefix:0.8.0",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "0.33.1",
+                "currentVersion": "0.33.1",
+                "datasource": "docker",
+                "depName": "avm/res/storage/storage-account",
+                "fixedVersion": "0.33.1",
+                "lookupName": "bicep/avm/res/storage/storage-account",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/storage/storage-account",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/storage/storage-account:0.33.1",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "0.11.1",
+                "currentVersion": "0.11.1",
+                "datasource": "docker",
+                "depName": "avm/res/compute/virtual-machine-scale-set",
+                "fixedVersion": "0.11.1",
+                "lookupName": "bicep/avm/res/compute/virtual-machine-scale-set",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/compute/virtual-machine-scale-set",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/compute/virtual-machine-scale-set:0.11.1",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              }
+            ],
+            "matchStrings": [
+              "br/public:(?<depName>[a-z0-9/._-]+):(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+            ],
+            "packageFile": "infra/modules/hub.bicep",
+            "packageNameTemplate": "mcr.microsoft.com/bicep/{{{depName}}}",
+            "versioningTemplate": "semver"
+          },
+          {
+            "datasourceTemplate": "docker",
+            "deps": [
+              {
+                "currentValue": "0.6.0",
+                "currentVersion": "0.6.0",
+                "datasource": "docker",
+                "depName": "avm/res/managed-identity/user-assigned-identity",
+                "fixedVersion": "0.6.0",
+                "lookupName": "bicep/avm/res/managed-identity/user-assigned-identity",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/managed-identity/user-assigned-identity",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/managed-identity/user-assigned-identity:0.6.0",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "0.6.0",
+                "currentVersion": "0.6.0",
+                "datasource": "docker",
+                "depName": "avm/res/managed-identity/user-assigned-identity",
+                "fixedVersion": "0.6.0",
+                "lookupName": "bicep/avm/res/managed-identity/user-assigned-identity",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/managed-identity/user-assigned-identity",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/managed-identity/user-assigned-identity:0.6.0",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "0.6.0",
+                "currentVersion": "0.6.0",
+                "datasource": "docker",
+                "depName": "avm/res/managed-identity/user-assigned-identity",
+                "fixedVersion": "0.6.0",
+                "lookupName": "bicep/avm/res/managed-identity/user-assigned-identity",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/managed-identity/user-assigned-identity",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/managed-identity/user-assigned-identity:0.6.0",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              }
+            ],
+            "matchStrings": [
+              "br/public:(?<depName>[a-z0-9/._-]+):(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+            ],
+            "packageFile": "infra/modules/mgmt-identity.bicep",
+            "packageNameTemplate": "mcr.microsoft.com/bicep/{{{depName}}}",
+            "versioningTemplate": "semver"
+          },
+          {
+            "datasourceTemplate": "docker",
+            "deps": [
+              {
+                "currentValue": "0.5.3",
+                "currentVersion": "0.5.3",
+                "datasource": "docker",
+                "depName": "avm/res/network/network-security-group",
+                "fixedVersion": "0.5.3",
+                "lookupName": "bicep/avm/res/network/network-security-group",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/network/network-security-group",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/network/network-security-group:0.5.3",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "0.10.2",
+                "currentVersion": "0.10.2",
+                "datasource": "docker",
+                "depName": "avm/res/network/virtual-network",
+                "fixedVersion": "0.10.2",
+                "lookupName": "bicep/avm/res/network/virtual-network",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/network/virtual-network",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/network/virtual-network:0.10.2",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "0.8.0",
+                "currentVersion": "0.8.0",
+                "datasource": "docker",
+                "depName": "avm/res/insights/component",
+                "fixedVersion": "0.8.0",
+                "lookupName": "bicep/avm/res/insights/component",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/insights/component",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/insights/component:0.8.0",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "0.16.0",
+                "currentVersion": "0.16.0",
+                "datasource": "docker",
+                "depName": "avm/res/app/managed-environment",
+                "fixedVersion": "0.16.0",
+                "lookupName": "bicep/avm/res/app/managed-environment",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/app/managed-environment",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/app/managed-environment:0.16.0",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "0.23.0",
+                "currentVersion": "0.23.0",
+                "datasource": "docker",
+                "depName": "avm/res/app/container-app",
+                "fixedVersion": "0.23.0",
+                "lookupName": "bicep/avm/res/app/container-app",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/app/container-app",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/app/container-app:0.23.0",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "0.23.0",
+                "currentVersion": "0.23.0",
+                "datasource": "docker",
+                "depName": "avm/res/app/container-app",
+                "fixedVersion": "0.23.0",
+                "lookupName": "bicep/avm/res/app/container-app",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/app/container-app",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/app/container-app:0.23.0",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              }
+            ],
+            "matchStrings": [
+              "br/public:(?<depName>[a-z0-9/._-]+):(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+            ],
+            "packageFile": "infra/modules/mgmt.bicep",
+            "packageNameTemplate": "mcr.microsoft.com/bicep/{{{depName}}}",
+            "versioningTemplate": "semver"
+          },
+          {
+            "datasourceTemplate": "docker",
+            "deps": [
+              {
+                "currentValue": "0.16.1",
+                "currentVersion": "0.16.1",
+                "datasource": "docker",
+                "depName": "avm/res/operational-insights/workspace",
+                "fixedVersion": "0.16.1",
+                "lookupName": "bicep/avm/res/operational-insights/workspace",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/operational-insights/workspace",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/operational-insights/workspace:0.16.1",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "0.11.0",
+                "currentVersion": "0.11.0",
+                "datasource": "docker",
+                "depName": "avm/res/insights/data-collection-rule",
+                "fixedVersion": "0.11.0",
+                "lookupName": "bicep/avm/res/insights/data-collection-rule",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/insights/data-collection-rule",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/insights/data-collection-rule:0.11.0",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              }
+            ],
+            "matchStrings": [
+              "br/public:(?<depName>[a-z0-9/._-]+):(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+            ],
+            "packageFile": "infra/modules/observability.bicep",
+            "packageNameTemplate": "mcr.microsoft.com/bicep/{{{depName}}}",
+            "versioningTemplate": "semver"
+          },
+          {
+            "datasourceTemplate": "docker",
+            "deps": [
+              {
+                "currentValue": "0.6.0",
+                "currentVersion": "0.6.0",
+                "datasource": "docker",
+                "depName": "avm/res/managed-identity/user-assigned-identity",
+                "fixedVersion": "0.6.0",
+                "lookupName": "bicep/avm/res/managed-identity/user-assigned-identity",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/managed-identity/user-assigned-identity",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/managed-identity/user-assigned-identity:0.6.0",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "0.6.0",
+                "currentVersion": "0.6.0",
+                "datasource": "docker",
+                "depName": "avm/res/managed-identity/user-assigned-identity",
+                "fixedVersion": "0.6.0",
+                "lookupName": "bicep/avm/res/managed-identity/user-assigned-identity",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/managed-identity/user-assigned-identity",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/managed-identity/user-assigned-identity:0.6.0",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              }
+            ],
+            "matchStrings": [
+              "br/public:(?<depName>[a-z0-9/._-]+):(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+            ],
+            "packageFile": "infra/modules/spoke-identity.bicep",
+            "packageNameTemplate": "mcr.microsoft.com/bicep/{{{depName}}}",
+            "versioningTemplate": "semver"
+          },
+          {
+            "datasourceTemplate": "docker",
+            "deps": [
+              {
+                "currentValue": "0.5.3",
+                "currentVersion": "0.5.3",
+                "datasource": "docker",
+                "depName": "avm/res/network/network-security-group",
+                "fixedVersion": "0.5.3",
+                "lookupName": "bicep/avm/res/network/network-security-group",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/network/network-security-group",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/network/network-security-group:0.5.3",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "0.10.2",
+                "currentVersion": "0.10.2",
+                "datasource": "docker",
+                "depName": "avm/res/network/virtual-network",
+                "fixedVersion": "0.10.2",
+                "lookupName": "bicep/avm/res/network/virtual-network",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/network/virtual-network",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/network/virtual-network:0.10.2",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "0.8.0",
+                "currentVersion": "0.8.0",
+                "datasource": "docker",
+                "depName": "avm/res/insights/component",
+                "fixedVersion": "0.8.0",
+                "lookupName": "bicep/avm/res/insights/component",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/insights/component",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/insights/component:0.8.0",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "0.16.0",
+                "currentVersion": "0.16.0",
+                "datasource": "docker",
+                "depName": "avm/res/app/managed-environment",
+                "fixedVersion": "0.16.0",
+                "lookupName": "bicep/avm/res/app/managed-environment",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/app/managed-environment",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/app/managed-environment:0.16.0",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              },
+              {
+                "currentValue": "0.23.0",
+                "currentVersion": "0.23.0",
+                "datasource": "docker",
+                "depName": "avm/res/app/container-app",
+                "fixedVersion": "0.23.0",
+                "lookupName": "bicep/avm/res/app/container-app",
+                "packageName": "mcr.microsoft.com/bicep/avm/res/app/container-app",
+                "registryUrl": "https://mcr.microsoft.com",
+                "replaceString": "br/public:avm/res/app/container-app:0.23.0",
+                "updates": [],
+                "versioning": "semver",
+                "warnings": []
+              }
+            ],
+            "matchStrings": [
+              "br/public:(?<depName>[a-z0-9/._-]+):(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+            ],
+            "packageFile": "infra/modules/spoke.bicep",
+            "packageNameTemplate": "mcr.microsoft.com/bicep/{{{depName}}}",
+            "versioningTemplate": "semver"
+          },
+          {
+            "datasourceTemplate": "nuget",
+            "depNameTemplate": "Aspire.Cli",
+            "deps": [
+              {
+                "currentValue": "13.5.4",
+                "currentVersion": "13.5.4",
+                "currentVersionAgeInDays": 22,
+                "currentVersionTimestamp": "2026-09-15T17:09:25.273Z",
+                "datasource": "nuget",
+                "depName": "Aspire.Cli",
+                "fixedVersion": "13.5.4",
+                "isSingleVersion": true,
+                "mostRecentTimestamp": "2026-10-07T06:01:44.877Z",
+                "packageName": "Aspire.Cli",
+                "registryUrl": "https://api.nuget.org/v3/index.json",
+                "replaceString": "ARG ASPIRE_CLI_VERSION=13.5.4",
+                "sourceUrl": "https://github.com/microsoft/aspire",
+                "updates": [
+                  {
+                    "branchName": "renovate/aspire.cli-13.x",
+                    "bucket": "non-major",
+                    "isBreaking": false,
+                    "libYears": 0.05900366577879249,
+                    "newMajor": 13,
+                    "newMinor": 6,
+                    "newPatch": 1,
+                    "newValue": "13.6.1",
+                    "newVersion": "13.6.1",
+                    "newVersionAgeInDays": 1,
+                    "releaseTimestamp": "2026-10-07T06:01:44.877Z",
+                    "updateType": "minor"
+                  }
+                ],
+                "versioning": "semver",
+                "warnings": []
+              }
+            ],
+            "matchStrings": [
+              "ARG ASPIRE_CLI_VERSION=(?<currentValue>\\S+)"
+            ],
+            "packageFile": ".devcontainer/Dockerfile",
+            "versioningTemplate": "semver"
+          }
+        ]
+      },
+      "problems": []
+    }
+  }
+}
