@@ -18,6 +18,15 @@
       datasourceTemplate: "pypi",
     },
     {
+      // Tools installed with `go install module/path@v1.2.3` in workflows and scripts,
+      // such as govulncheck and actionlint. Nothing else tracks these pins.
+      customType: "regex",
+      description: "go install pins",
+      managerFilePatterns: ["**/*.yml", "**/*.yaml", "**/*.sh", "**/Dockerfile*"],
+      matchStrings: ["go install (?<depName>[a-z0-9.-]+\\.[a-z]+/[^@\\s]+)@(?<currentValue>v\\d+\\.\\d+\\.\\d+)"],
+      datasourceTemplate: "go",
+    },
+    {
       // Bicep public registry modules, such as Azure Verified Modules:
       // `br/public:avm/res/compute/virtual-machine-scale-set:0.11.1`. The registry
       // publishes them as OCI artifacts at mcr.microsoft.com/bicep/<path>.
