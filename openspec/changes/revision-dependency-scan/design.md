@@ -114,7 +114,7 @@ Open PRs by `dependabot[bot]` are read with the read-only credential:
 - **From-versions** come from the `Updates <name> from A to B` lines in the PR body, or the title for a single update, matched with fixed patterns only. PR text is never interpreted beyond that.
 - **Unparseable PRs** are reported as such.
 
-A PR is current for the revision when its from-versions equal the versions declared in the scanned revision; otherwise it is stale.
+A PR is current for the revision when its from-versions equal the versions declared in the scanned revision or resolved in its lock files; otherwise it is stale. Lock files count because Dependabot also updates transitive versions: #77 moves AppHost's locked `Microsoft.Extensions.Http` from 10.0.11 to the 10.0.12 already declared centrally.
 
 Parity holds only at a point in time, because registries move. So the PR list and the lookups are captured in the same run, and both times are recorded.
 

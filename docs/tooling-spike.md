@@ -39,6 +39,26 @@ Limits observed:
 
 **Preliminary conclusion:** Renovate is a promising cross-ecosystem candidate source, especially for Docker, Actions, and devcontainer references. It is not a complete inventory or an authoritative risk/vulnerability assessor. Keep it as a candidate in the spike; do not make it the sole source of truth until lookup results, authentication, and machine-readable output are verified.
 
+### Follow-up: Renovate's report file (2026-10-08)
+
+Renovate `44.145.1`, pinned by digest, ran in local lookup mode with `--report-type=file` and a read-only, single-repository token, against the same `064aa09` snapshot. The report and its run details are in `fixtures/azure-egress-proxy/renovate/064aa09/`.
+
+- **The report file is the contract, not the logs.** It is structured JSON per manager and package file: each dependency has its name, current value, datasource, and candidates per update type (`patch`, `minor`, `major`, `digest`). A dependency Renovate can't handle carries a `skipReason`. No log parsing is needed, so the JSON-log fallback in the design isn't used.
+- **The token fixed lookups.** Without it, 27 entries were skipped with `github-token-required`, every action and the `setup-go` version. With it, none were, and 29 entries had candidates instead of 22. The run took under a minute.
+- **Skip reasons map onto the scan's gap and unknown states:** `unspecified-version` (11 unpinned `apt`/`apk` packages), `invalid-value` (`distroless/static-debian12:nonroot`, trackable only by digest), `invalid-version` (50, mostly `runs-on: ubuntu-latest` and version-less `PackageReference`s whose version is central), and `disabled` (39 indirect Go modules, off by Renovate's default).
+- **Compared with the open Dependabot PRs at that time:**
+  - **#75, #76 and #98:** Renovate found the same updates. #98's Azure.Core, coverlet and Scalar updates still showed up after Dependabot closed that PR on an internal error.
+  - **#99:** Renovate proposed azcore 1.23.3, newer than #99's 1.23.2.
+  - **#77:** not found. The central version is already 10.0.12; #77 fixes AppHost's lock file, which still resolves 10.0.11 through the Aspire SDK. Parity therefore has to compare against lock-file versions, not only declarations.
+- **Found by Renovate only:**
+  - Aspire.AppHost.Sdk 13.5.4 → 13.6.1, from the `Sdk` attribute in `AppHost.csproj`, which no Dependabot PR covered;
+  - Azure.Storage.Blobs 12.29.2 → 12.30.1;
+  - `setup-go` 1.25 → 1.27;
+  - the docker-in-docker devcontainer feature 2 → 4;
+  - four Bicep resource API versions;
+  - the majors a policy would hold: Microsoft.OpenApi 3.x and .NET 11 images.
+- **Still not covered, as expected:** AVM module tags, the inline PyJWT pin, and the Aspire CLI version in the devcontainer Dockerfile's `ARG`. These are task 1.4.
+
 ### Vulnerability evidence
 
 OSV-Scanner `2.6.0` scanned source and lockfiles from the disposable snapshot and emitted JSON. It read the Go module and .NET `packages.lock.json` files; it reported three OSV entries for `golang.org/x/crypto@0.55.0` (`GO-2026-5932`, `GO-2026-6354`, `GO-2026-6355`). This is vulnerability-match evidence, not proof that affected Go code is reachable. The repository already uses `govulncheck` for Go reachability, so adding OSV must demonstrate useful coverage beyond that existing check rather than duplicate its conclusion.
