@@ -62,7 +62,7 @@ Renovate `44.145.1`, pinned by digest, ran in local lookup mode with `--report-t
 ### Follow-up: extra Renovate rules (2026-10-08)
 
 Three regex `customManagers` cover the sources Renovate doesn't read by itself. They live in two places:
-- **`renovate/scan.json5`**, applied to every subject: inline `pip install` pins in Dockerfiles, and Bicep public registry modules, looked up as OCI tags at `mcr.microsoft.com/bicep/<path>`.
+- **`src/sdlc/config/scan.renovate.json5`**, applied to every subject: inline `pip install` pins in Dockerfiles, and Bicep public registry modules, looked up as OCI tags at `mcr.microsoft.com/bicep/<path>`.
 - **The subject's trial policy, `policies/azure-egress-proxy.renovate.json5`**: the devcontainer's Aspire CLI `ARG`. It describes that repository's files, so it belongs with its policy.
 
 The scan of `064aa09` with both found 225 entries instead of 191:

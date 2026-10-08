@@ -2,6 +2,10 @@
 // dependency sources Renovate doesn't read on its own. Subject-specific sources belong in
 // the subject's own policy file instead.
 {
+  // Report the newest patch as well as the newest minor and major, rather than folding
+  // patches into the minor candidate: the scan records a candidate per update type.
+  separateMinorPatch: true,
+
   customManagers: [
     {
       // `pip install "pkg[extra]==1.2.3"` inside a Dockerfile, with no requirements file.
