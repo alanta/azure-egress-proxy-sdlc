@@ -33,8 +33,8 @@ target-version = "py312"
 select = ["E", "F", "W", "I", "B", "UP", "S", "RUF"]
 
 [tool.ruff.lint.per-file-ignores]
-# assert is how pytest tests are written.
-"tests/**" = ["S101"]
+# Tests assert, and drive git directly to build throwaway repositories.
+"tests/**" = ["S101", "S603", "S607"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

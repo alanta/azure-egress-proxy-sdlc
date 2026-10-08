@@ -24,3 +24,15 @@ def test_scan_requires_a_repository(capsys):
         main(["scan"])
     assert exit_info.value.code == 2
     assert "--repo" in capsys.readouterr().err
+
+
+def test_scan_of_an_unknown_ref_fails_without_a_record(monkeypatch, capsys):
+    from sdlc import cli
+    from sdlc.subject import SubjectError
+
+    def unknown(repository, ref):
+        raise SubjectError(f"{repository} has no branch or tag named {ref!r}")
+
+    monkeypatch.setattr(cli, "resolve", unknown)
+    assert main(["scan", "--repo", "alanta/demo", "--ref", "nope"]) == 1
+    assert "no branch or tag named 'nope'; no record written" in capsys.readouterr().err
