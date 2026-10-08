@@ -1,0 +1,20 @@
+// Trial update policy for alanta/azure-egress-proxy, in Renovate's format. It stands in
+// for .github/renovate.json5 in the subject until the maintainer adopts one there (see
+// openspec/changes/revision-dependency-scan, design decision 4). The update rules are
+// task 3.2; this file starts with the subject's own dependency sources.
+{
+  customManagers: [
+    {
+      // The devcontainer installs the Aspire CLI as a dotnet tool, pinned by an ARG.
+      customType: "regex",
+      description: "Aspire CLI version in the devcontainer",
+      managerFilePatterns: [".devcontainer/Dockerfile"],
+      matchStrings: ["ARG ASPIRE_CLI_VERSION=(?<currentValue>\\S+)"],
+      depNameTemplate: "Aspire.Cli",
+      datasourceTemplate: "nuget",
+      // NuGet versioning reads a bare "13.5.4" as the range ">= 13.5.4", which 13.6.1
+      // already satisfies, so it would never propose an update. It is an exact pin.
+      versioningTemplate: "semver",
+    },
+  ],
+}

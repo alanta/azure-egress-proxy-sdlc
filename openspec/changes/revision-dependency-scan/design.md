@@ -48,7 +48,7 @@ The gaps get Renovate `customManagers` in the scan's own configuration, not new 
 - `br/public:avm/...` module tags → regex manager with the Docker datasource on `mcr.microsoft.com/bicep/avm/...`, where the public Bicep registry publishes its modules;
 - devcontainer tool versions such as the Aspire CLI → regex manager with the matching datasource.
 
-The scan merges these managers with the subject's policy file (decision 4), keeping the policy's package rules.
+Managers that apply to any repository live in this repository's scan configuration. Managers that describe one subject's own files, such as the Aspire CLI `ARG` in the devcontainer, live in that subject's policy file (decision 4), next to the code they describe. Renovate combines both.
 
 Task 1.3 verifies the report-file output, and task 1.4 the custom managers. If the report file proves incomplete, the fallback is Renovate's JSON logs (`LOG_FORMAT=json`), parsed by message type. A custom manager that can't be made to work leaves its source reported as unsupported.
 
@@ -66,7 +66,7 @@ There is no cross-tool standard for update policy. `dependabot.yml` and Renovate
 
 So the policy is `.github/renovate.json5` in the subject repository: JSON5 allows a comment with the reason next to each rule. The scan reads it at the scanned revision, so a policy change is reviewed in the same PR as the code it affects.
 
-Until the maintainer merges a policy into the subject, a trial policy kept in this repository is supplied explicitly per run (task 3.2). The record names whichever file was used.
+Until the maintainer merges a policy into the subject, a trial policy kept in this repository is supplied explicitly per run (task 3.2). The record names whichever file was used. The scan places the trial file in its disposable copy of the subject and commits it there, because Renovate's local mode only reads tracked files. The subject repository itself is not touched.
 
 The file is inert while no Renovate app is installed on the subject repository. When Dependabot is retired, the same file can drive Renovate directly, if that is the route taken.
 
