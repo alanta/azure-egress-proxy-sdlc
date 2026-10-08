@@ -7,7 +7,7 @@ from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
 
-from sdlc import coverage, renovate
+from sdlc import coverage, native, renovate
 from sdlc.subject import SubjectError, checkout, resolve
 
 
@@ -58,6 +58,20 @@ def scan(repository: str, ref: str, trial_policy: Path | None = None) -> int:
             )
             inventory = renovate.normalize(report, looked_up_at=looked_up_at, checkout=path)
             gaps = coverage.gaps(path, report)
+            native_updates = []
+            for query, label in (
+                (native.dotnet_updates, "dotnet list package"),
+                (native.go_updates, "go list -m -u"),
+            ):
+                try:
+                    native_updates += query(path)
+                except native.NativeError as error:
+                    gaps.append(
+                        {"kind": "unavailable_source", "subject": label, "reason": str(error)}
+                    )
+            disagreements = native.cross_check(
+                native_updates, inventory.dependencies, inventory.candidates
+            )
     except (SubjectError, renovate.RenovateError) as error:
         print(f"error: {error}; no record written", file=sys.stderr)
         return 1
@@ -70,6 +84,12 @@ def scan(repository: str, ref: str, trial_policy: Path | None = None) -> int:
     )
     for gap in gaps:
         print(f"  gap: {gap['subject']}: {gap['reason']}")
+    print(f"{len(disagreements)} disagreements with the package managers")
+    for d in disagreements:
+        print(
+            f"  {d['source']}: {d['name']} {d['current']} -> {d['native_latest']}, "
+            f"scan has {d['scan_candidates'] or 'nothing'}"
+        )
     # Policy, vulnerabilities, lifecycle, consistency and parity arrive with the rest of
     # slice 1; a record without them would claim there was nothing to find.
     print("error: the scan stops here for now; no record written", file=sys.stderr)

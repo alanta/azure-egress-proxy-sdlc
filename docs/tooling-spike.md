@@ -77,6 +77,17 @@ Three things that weren't obvious:
 - **NuGet versioning reads a bare `13.5.4` as `>= 13.5.4`.** A custom manager on the NuGet datasource therefore reports no update, because 13.6.1 satisfies that range. An exact pin needs `versioningTemplate: "semver"`.
 - **A `/regex/` file pattern containing a `/` breaks** (for example `.devcontainer/Dockerfile`), and the manager matches nothing without a warning. Use a glob instead.
 
+### Follow-up: native cross-check (2026-10-08)
+
+`dotnet list package --outdated --include-transitive` (after a locked restore) and `go list -m -u -json all` ran in pinned containers on the same throwaway checkout. Their output is in `fixtures/azure-egress-proxy/native/064aa09/`.
+
+- **Direct dependencies: no disagreements**, on `064aa09` and on `main` at `a63cf87`. Every NuGet top-level package and every direct Go module the package managers call outdated has the same version as a scan candidate. Renovate also finds things they can't see, such as the Aspire SDK and the custom-manager sources.
+- **Transitive and indirect dependencies are where they add information.** .NET lists 220 outdated transitive packages, and Go 55 indirect modules. Among them:
+  - AppHost locks `Microsoft.Extensions.Http` at 10.0.11 while 10.0.12 is declared centrally. That's PR #77, which Renovate can't see.
+  - `golang.org/x/crypto` is at v0.55.0 while v0.57.0 exists. The OSV advisories from the spike are against that version, and Renovate skips indirect Go modules by default.
+
+  The scan doesn't report these yet; whether and how it should is an open decision.
+
 ### Vulnerability evidence
 
 OSV-Scanner `2.6.0` scanned source and lockfiles from the disposable snapshot and emitted JSON. It read the Go module and .NET `packages.lock.json` files; it reported three OSV entries for `golang.org/x/crypto@0.55.0` (`GO-2026-5932`, `GO-2026-6354`, `GO-2026-6355`). This is vulnerability-match evidence, not proof that affected Go code is reachable. The repository already uses `govulncheck` for Go reachability, so adding OSV must demonstrate useful coverage beyond that existing check rather than duplicate its conclusion.

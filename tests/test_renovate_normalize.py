@@ -40,6 +40,7 @@ def as_record(inventory):
         "vulnerabilities": [],
         "lifecycle": [],
         "inconsistencies": [],
+        "cross_checks": [],
         "parity": {
             "baseline": "dependabot",
             "complete": True,
