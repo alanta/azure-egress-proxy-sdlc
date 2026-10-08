@@ -6,7 +6,7 @@
 - [x] 1.2 Create the Python CLI project (packaging, lint, tests, a CI workflow in this repository) with a `scan` command that prints usage; verify CI passes and `scan --help` runs
 - [x] 1.3 Run pinned Renovate (by digest) in local lookup mode with `reportType=file` and a read-only token against the subject at `064aa09`; verify the report file contains extracted dependencies and lookup results for NuGet, Go modules, Dockerfiles, GitHub Actions and devcontainer features, and record the result and the fallback decision in `docs/tooling-spike.md`
 - [x] 1.4 Add custom managers for the inline PyJWT install, AVM module tags (Docker datasource on MCR) and devcontainer tool versions; verify each yields a current version and candidates on `064aa09`, and record any that don't work as unsupported sources in `docs/tooling-spike.md`
-- [ ] 1.5 Define the scan record JSON Schema v1 (repository, commit, times, tool versions, policy source, inventory, candidates, vulnerabilities, inconsistencies, parity, gaps); verify a valid fixture passes and fixtures with a missing commit, an unknown candidate state or an unknown parity state are rejected
+- [x] 1.5 Define the scan record JSON Schema v1 (repository, commit, times, tool versions, policy source, inventory, candidates, vulnerabilities, inconsistencies, parity, gaps); verify a valid fixture passes and fixtures with a missing commit, an unknown candidate state or an unknown parity state are rejected
 
 ## 2. Inventory, candidates and gaps
 

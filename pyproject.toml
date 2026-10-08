@@ -5,7 +5,9 @@ description = "Keeps alanta/azure-egress-proxy up to date: dependency scans, val
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "jsonschema>=4.23",
+]
 
 [project.scripts]
 sdlc = "sdlc.cli:main"

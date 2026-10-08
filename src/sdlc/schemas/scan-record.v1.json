@@ -1,0 +1,260 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/alanta/azure-egress-proxy-sdlc/schemas/scan-record.v1.json",
+  "title": "Dependency scan record, version 1",
+  "description": "Everything a revision scan found about one pinned commit of a subject repository. Every state is explicit: a gap, a failed lookup or an unavailable source is recorded, never left out.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "subject",
+    "scanned_at",
+    "tools",
+    "policy",
+    "inventory",
+    "candidates",
+    "vulnerabilities",
+    "lifecycle",
+    "inconsistencies",
+    "parity",
+    "gaps"
+  ],
+  "properties": {
+    "schema_version": { "const": "1" },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "ref", "commit"],
+      "properties": {
+        "repository": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" },
+        "ref": { "type": "string", "minLength": 1, "description": "The ref as requested, before resolution." },
+        "commit": { "$ref": "#/$defs/commit" }
+      }
+    },
+    "scanned_at": { "$ref": "#/$defs/timestamp" },
+    "tools": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "version"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "version": { "type": "string", "minLength": 1 },
+          "image": { "type": "string", "description": "Container image, pinned by digest." }
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source"],
+      "properties": {
+        "source": {
+          "enum": ["subject", "trial", "none"],
+          "description": "subject: read from the scanned revision; trial: supplied for this run; none: no policy found, so every candidate is in scope."
+        },
+        "path": { "type": "string", "minLength": 1 }
+      },
+      "if": { "properties": { "source": { "enum": ["subject", "trial"] } } },
+      "then": { "required": ["source", "path"] }
+    },
+    "inventory": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/dependency" }
+    },
+    "candidates": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/candidate" }
+    },
+    "vulnerabilities": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/vulnerability" }
+    },
+    "lifecycle": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/lifecycle" }
+    },
+    "inconsistencies": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/inconsistency" }
+    },
+    "parity": { "$ref": "#/$defs/parity" },
+    "gaps": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/gap" }
+    }
+  },
+  "$defs": {
+    "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "location": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file"],
+      "properties": {
+        "file": { "type": "string", "minLength": 1 },
+        "line": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "ecosystem", "name", "current", "origin", "location", "lookup"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "description": "Unique within the record; candidates and findings refer to it." },
+        "ecosystem": { "type": "string", "minLength": 1, "description": "Package or source type, such as nuget, gomod, docker, github-actions, pypi, bicep-module." },
+        "name": { "type": "string", "minLength": 1 },
+        "current": { "type": ["string", "null"], "description": "Current version or constraint as declared; null when it can't be determined." },
+        "origin": { "enum": ["declared", "locked"], "description": "declared: written in a manifest; locked: resolved in a lock file." },
+        "location": { "$ref": "#/$defs/location" },
+        "lookup": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state"],
+          "properties": {
+            "state": {
+              "enum": ["current", "outdated", "unknown", "skipped"],
+              "description": "current: lookup succeeded, nothing newer; outdated: candidates exist; unknown: lookup failed; skipped: not looked up, see reason."
+            },
+            "datasource": { "type": "string" },
+            "looked_up_at": { "$ref": "#/$defs/timestamp" },
+            "reason": { "type": "string", "minLength": 1 }
+          },
+          "if": { "properties": { "state": { "enum": ["unknown", "skipped"] } } },
+          "then": { "required": ["state", "reason"] }
+        }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dependency", "update_type", "version", "classification"],
+      "properties": {
+        "dependency": { "type": "string", "minLength": 1 },
+        "update_type": { "enum": ["patch", "minor", "major", "digest"] },
+        "version": { "type": "string", "minLength": 1 },
+        "classification": { "enum": ["in_scope", "held_by_policy"] },
+        "held_by": { "type": "string", "minLength": 1, "description": "The policy rule that holds the candidate." }
+      },
+      "if": { "properties": { "classification": { "const": "held_by_policy" } } },
+      "then": { "required": ["dependency", "update_type", "version", "classification", "held_by"] }
+    },
+    "vulnerability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["advisory", "dependency", "affected_version", "fixed_version", "source", "reachability"],
+      "properties": {
+        "advisory": { "type": "string", "minLength": 1 },
+        "aliases": { "type": "array", "items": { "type": "string" } },
+        "dependency": { "type": "string", "minLength": 1 },
+        "affected_version": { "type": "string", "minLength": 1 },
+        "fixed_version": { "type": ["string", "null"], "description": "null when no fix exists." },
+        "fix_reached_by_candidate": { "type": "boolean" },
+        "source": { "type": "string", "minLength": 1 },
+        "reachability": { "enum": ["reachable", "not_reachable", "unknown"] }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["product", "line", "state", "locations"],
+      "properties": {
+        "product": { "type": "string", "minLength": 1, "description": "Platform, toolchain or image, such as go, dotnet, python, debian." },
+        "line": { "type": "string", "minLength": 1, "description": "The version line in use, such as 1.25." },
+        "state": { "enum": ["supported", "nearing_end_of_life", "end_of_life", "unknown"] },
+        "end_of_life": { "type": "string", "format": "date" },
+        "supported_lines": { "type": "array", "items": { "type": "string" } },
+        "source": { "type": "string" },
+        "reason": { "type": "string", "minLength": 1 },
+        "locations": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/location" } }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "state": { "enum": ["nearing_end_of_life", "end_of_life"] } } },
+          "then": { "required": ["end_of_life", "source"] }
+        },
+        {
+          "if": { "properties": { "state": { "const": "unknown" } } },
+          "then": { "required": ["reason"] }
+        }
+      ]
+    },
+    "inconsistency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dependency", "declarations"],
+      "properties": {
+        "dependency": { "type": "string", "minLength": 1, "description": "The logical dependency, such as the Go toolchain." },
+        "declarations": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["location", "version"],
+            "properties": {
+              "location": { "$ref": "#/$defs/location" },
+              "version": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    "parity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseline", "complete", "pull_requests", "scan_only"],
+      "properties": {
+        "baseline": { "const": "dependabot" },
+        "captured_at": { "$ref": "#/$defs/timestamp" },
+        "complete": { "type": "boolean", "description": "False when a PR couldn't be read or parsed." },
+        "pull_requests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["number", "state", "updates"],
+            "properties": {
+              "number": { "type": "integer", "minimum": 1 },
+              "state": { "enum": ["current", "stale", "unparseable"] },
+              "reason": { "type": "string", "minLength": 1 },
+              "updates": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["name", "to", "result"],
+                  "properties": {
+                    "name": { "type": "string", "minLength": 1 },
+                    "from": { "type": "string", "minLength": 1 },
+                    "to": { "type": "string", "minLength": 1 },
+                    "result": { "enum": ["matched", "held_by_policy", "missed", "stale"] },
+                    "candidate": { "type": "string", "minLength": 1, "description": "The scan's candidate version, when matched." },
+                    "reason": { "type": "string", "minLength": 1 }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "scan_only": {
+          "type": "array",
+          "description": "In-scope candidates no open Dependabot PR proposes, as dependency ids.",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "subject", "reason"],
+      "properties": {
+        "kind": { "enum": ["unsupported_source", "unparseable_source", "unavailable_source"] },
+        "subject": { "type": "string", "minLength": 1, "description": "The file, or the data source (such as dependabot-alerts), that couldn't be covered." },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}
