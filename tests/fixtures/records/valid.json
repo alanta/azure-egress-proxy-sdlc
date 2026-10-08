@@ -1,0 +1,120 @@
+{
+  "schema_version": "1",
+  "subject": {
+    "repository": "alanta/azure-egress-proxy",
+    "ref": "main",
+    "commit": "064aa099ecf7ffea9664b89df29f7d89d6859358"
+  },
+  "scanned_at": "2026-10-08T09:00:00+00:00",
+  "tools": [
+    {
+      "name": "renovate",
+      "version": "44.145.1",
+      "image": "docker.io/renovate/renovate:44.145.1@sha256:6f1f3e2d9d0c3f99aa1f61f7509d302185de7deb173ac8c5ff88a5ce283ec435"
+    }
+  ],
+  "policy": { "source": "trial", "path": "policies/azure-egress-proxy.renovate.json5" },
+  "inventory": [
+    {
+      "id": "nuget:src/AppHost/AppHost.csproj:Aspire.AppHost.Sdk",
+      "ecosystem": "nuget",
+      "name": "Aspire.AppHost.Sdk",
+      "current": "13.5.4",
+      "origin": "declared",
+      "location": { "file": "src/AppHost/AppHost.csproj", "line": 1 },
+      "lookup": { "state": "outdated", "datasource": "nuget", "looked_up_at": "2026-10-08T09:00:10+00:00" }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:Microsoft.OpenApi",
+      "ecosystem": "nuget",
+      "name": "Microsoft.OpenApi",
+      "current": "2.12.2",
+      "origin": "declared",
+      "location": { "file": "Directory.Packages.props" },
+      "lookup": { "state": "outdated", "datasource": "nuget", "looked_up_at": "2026-10-08T09:00:10+00:00" }
+    },
+    {
+      "id": "gomod:proxy/go.mod:golang.org/x/crypto",
+      "ecosystem": "gomod",
+      "name": "golang.org/x/crypto",
+      "current": "v0.55.0",
+      "origin": "declared",
+      "location": { "file": "proxy/go.mod" },
+      "lookup": { "state": "current", "datasource": "go", "looked_up_at": "2026-10-08T09:00:12+00:00" }
+    },
+    {
+      "id": "docker:proxy/Dockerfile:gcr.io/distroless/static-debian12",
+      "ecosystem": "docker",
+      "name": "gcr.io/distroless/static-debian12",
+      "current": "nonroot",
+      "origin": "declared",
+      "location": { "file": "proxy/Dockerfile", "line": 25 },
+      "lookup": { "state": "skipped", "reason": "Tag 'nonroot' has no version; only a digest pin could be tracked." }
+    }
+  ],
+  "candidates": [
+    {
+      "dependency": "nuget:src/AppHost/AppHost.csproj:Aspire.AppHost.Sdk",
+      "update_type": "minor",
+      "version": "13.6.1",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "nuget:Directory.Packages.props:Microsoft.OpenApi",
+      "update_type": "major",
+      "version": "3.10.2",
+      "classification": "held_by_policy",
+      "held_by": "Microsoft.OpenApi stays on 2.x until the 3.x migration is planned"
+    }
+  ],
+  "vulnerabilities": [
+    {
+      "advisory": "GO-2026-5932",
+      "dependency": "gomod:proxy/go.mod:golang.org/x/crypto",
+      "affected_version": "v0.55.0",
+      "fixed_version": null,
+      "source": "osv",
+      "reachability": "not_reachable"
+    }
+  ],
+  "lifecycle": [
+    {
+      "product": "go",
+      "line": "1.25",
+      "state": "end_of_life",
+      "end_of_life": "2026-08-19",
+      "supported_lines": ["1.26", "1.27"],
+      "source": "endoflife.date",
+      "locations": [{ "file": "proxy/go.mod", "line": 3 }]
+    }
+  ],
+  "inconsistencies": [],
+  "parity": {
+    "baseline": "dependabot",
+    "captured_at": "2026-10-08T09:00:05+00:00",
+    "complete": true,
+    "pull_requests": [
+      {
+        "number": 77,
+        "state": "current",
+        "updates": [
+          {
+            "name": "Microsoft.Extensions.Http",
+            "from": "10.0.11",
+            "to": "10.0.12",
+            "result": "missed",
+            "reason": "The lock file resolves 10.0.11 through the Aspire SDK; the scan reads declared versions only."
+          }
+        ]
+      }
+    ],
+    "scan_only": ["nuget:src/AppHost/AppHost.csproj:Aspire.AppHost.Sdk"]
+  },
+  "gaps": [
+    {
+      "kind": "unavailable_source",
+      "subject": "dependabot-alerts",
+      "reason": "The credential has no Dependabot alerts permission."
+    }
+  ]
+}
