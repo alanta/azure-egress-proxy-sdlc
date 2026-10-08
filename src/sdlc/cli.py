@@ -7,7 +7,7 @@ from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
 
-from sdlc import renovate
+from sdlc import coverage, renovate
 from sdlc.subject import SubjectError, checkout, resolve
 
 
@@ -57,6 +57,7 @@ def scan(repository: str, ref: str, trial_policy: Path | None = None) -> int:
                 path, trial_policy=trial_policy, token=os.environ.get("SDLC_GITHUB_TOKEN")
             )
             inventory = renovate.normalize(report, looked_up_at=looked_up_at, checkout=path)
+            gaps = coverage.gaps(path, report)
     except (SubjectError, renovate.RenovateError) as error:
         print(f"error: {error}; no record written", file=sys.stderr)
         return 1
@@ -65,8 +66,10 @@ def scan(repository: str, ref: str, trial_policy: Path | None = None) -> int:
     print(
         f"{len(inventory.dependencies)} dependencies "
         f"({', '.join(f'{n} {s}' for s, n in sorted(states.items()))}), "
-        f"{len(inventory.candidates)} update candidates"
+        f"{len(inventory.candidates)} update candidates, {len(gaps)} coverage gaps"
     )
+    for gap in gaps:
+        print(f"  gap: {gap['subject']}: {gap['reason']}")
     # Policy, vulnerabilities, lifecycle, consistency and parity arrive with the rest of
     # slice 1; a record without them would claim there was nothing to find.
     print("error: the scan stops here for now; no record written", file=sys.stderr)
