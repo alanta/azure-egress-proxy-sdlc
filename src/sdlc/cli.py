@@ -1,6 +1,9 @@
 """Command-line entry point: `sdlc <command>`."""
 
 import argparse
+import sys
+
+from sdlc.subject import SubjectError, checkout, resolve
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -29,7 +32,18 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.command == "scan":
-        # The scan itself arrives with tasks 2.x; until then the command only parses.
-        print(f"scan of {args.repo}@{args.ref} is not implemented yet")
-        return 1
+        return scan(args.repo, args.ref)
     return 2
+
+
+def scan(repository: str, ref: str) -> int:
+    try:
+        revision = resolve(repository, ref)
+        with checkout(revision):
+            print(f"{repository}@{ref} is {revision.commit}")
+            # Inventory, lookups and the record arrive with the rest of slice 1.
+            print("error: the scan stops here for now; no record written", file=sys.stderr)
+            return 1
+    except SubjectError as error:
+        print(f"error: {error}; no record written", file=sys.stderr)
+        return 1
