@@ -56,7 +56,7 @@ At `064aa09`, there are 8 advisories on two indirect Go modules: three on `golan
 What it doesn't cover:
 - **A package without a resolved version** is a gap: whether an advisory concerns it is unknown. References to the subject's own projects in NuGet lock files are not packages, so they don't count.
 - **When OSV-Scanner fails**, the record has an `unavailable_source` gap, and makes no claim about vulnerabilities. A lock file missing from its output is a gap too.
-- **Image OS packages, Docker images and GitHub Actions** aren't scanned. The Go standard library is only checked by govulncheck, so when it fails, it isn't checked. Dependabot alerts (task 4.3) are read separately.
+- **Image OS packages, Docker images and GitHub Actions** aren't scanned. The Go standard library is only checked by govulncheck, so when it fails, it isn't checked. Dependabot alerts are compared separately; see [Dependabot alerts](#dependabot-alerts).
 
 ### Reachability
 
@@ -71,6 +71,16 @@ It analyses the module's packages without tests, with cgo off, for linux/amd64 a
 The reachability sits next to OSV-Scanner's version match and doesn't change it. OSV-Scanner doesn't check the Go standard library, so govulncheck's standard library advisories are added with source `govulncheck`, against the `go.mod` directive that sets the toolchain, with the fixed version from the advisory. An advisory govulncheck finds on another module that OSV-Scanner didn't report is added with source `govulncheck` the way OSV-Scanner's are, with a locked entry when the inventory has none for the module.
 
 At `064aa09`, the five `golang.org/x/net` advisories are reachable and the three `golang.org/x/crypto` ones are not: no package of it is imported. Go 1.25.14 has 13 standard library advisories, all fixed in 1.26.9: 9 reachable, 4 not. Both platforms give the same answers. Renovate proposes no newer `go` directive, so no candidate reaches those fixes.
+
+### Dependabot alerts
+
+The repository's open Dependabot alerts are read through the API with the scan's token, which needs `Dependabot alerts: read`. They are a comparison source, like Dependabot's PRs, not findings of the scan: they describe the default branch as Dependabot last analysed it, which need not be the scanned commit. So the record keeps them in their own section, with the branch, its head read just before the alerts, whether that head is the scanned commit, and the time they were read. When it isn't the scanned commit, a difference may be the branch's rather than a miss of the scan, and the scan's output says so.
+
+An alert that shares a GHSA or CVE id with one of the scan's advisories on the same package, in the alert's manifest or a file beside it (such as the lock file next to a project file), is `matched`. When the scan has that advisory on the package only in other files, such as a central version, the alert is `matched_elsewhere`. Either way the vulnerabilities it matched list the alert's number. Any other alert is `unmatched`, so the disagreement shows. A malformed answer, a redirect away from `api.github.com` (never followed, so the token stays with GitHub's API) or a pagination loop makes the source unavailable. Each alert also names the inventory entry for its package in its manifest, when the scan has one.
+
+When the alerts can't be read (no token, no permission, alerts disabled, rate limited, GitHub unreachable), the record has no alerts section and an `unavailable_source` gap for `dependabot-alerts` with the reason. It then says nothing about what the alerts would have said.
+
+On 2026-10-09 the token can read them, and `main` has no open alerts, while it requires the same `golang.org/x/crypto` and `golang.org/x/net` versions as `064aa09`. GitHub's advisory database has no entry for the two of their CVEs checked (CVE-2026-78662 and CVE-2026-78659), which would explain why Dependabot is silent. None of the scan's 21 advisories is corroborated.
 
 ## Coverage gaps
 
@@ -87,4 +97,4 @@ A file type Renovate does read, such as a project file with only project referen
 - **The VM scale set's Marketplace image** (`version: 'latest'` in `hub.bicep`) isn't tracked. It's managed by Azure and upgraded automatically.
 - **`gcr.io/distroless/static-debian12:nonroot`** has no version tag. It could only be tracked by digest, so it is skipped. End-of-life detection (task 4.5) covers its Debian base.
 - **The Marketplace image build** (Packer, platform image, OS packages) isn't covered yet. A Packer template shows up as a coverage gap until it is.
-- **Dependabot alerts, end-of-life lines, cross-file consistency and the Dependabot comparison** are later tasks in `openspec/changes/revision-dependency-scan/tasks.md`.
+- **End-of-life lines, cross-file consistency and the comparison with Dependabot's PRs** are later tasks in `openspec/changes/revision-dependency-scan/tasks.md`.

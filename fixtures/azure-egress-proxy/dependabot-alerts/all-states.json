@@ -1,0 +1,2645 @@
+[
+  {
+    "number": 16,
+    "state": "fixed",
+    "dependency": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "manifest_path": "proxy/go.mod",
+      "scope": "runtime",
+      "relationship": "transitive"
+    },
+    "security_advisory": {
+      "ghsa_id": "GHSA-qpw4-5x99-6vjp",
+      "cve_id": "CVE-2026-39827",
+      "summary": "golang.org/x/crypto: Invoking memory leak when rejecting channels can lead to DoS",
+      "description": "An authenticated SSH client that repeatedly opened channels which were rejected by the server caused unbounded memory growth, eventually crashing the server process and affecting all connected users. Rejected channels are now properly removed from the connection's internal state and released for garbage collection.",
+      "severity": "medium",
+      "identifiers": [
+        {
+          "value": "GHSA-qpw4-5x99-6vjp",
+          "type": "GHSA"
+        },
+        {
+          "value": "CVE-2026-39827",
+          "type": "CVE"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-39827"
+        },
+        {
+          "url": "https://go.dev/cl/781320"
+        },
+        {
+          "url": "https://go.dev/issue/35127"
+        },
+        {
+          "url": "https://groups.google.com/g/golang-announce/c/a082jnz-LvI"
+        },
+        {
+          "url": "https://pkg.go.dev/vuln/GO-2026-5016"
+        },
+        {
+          "url": "https://github.com/advisories/GHSA-qpw4-5x99-6vjp"
+        }
+      ],
+      "published_at": "2026-06-25T22:15:43Z",
+      "updated_at": "2026-07-07T15:24:36Z",
+      "withdrawn_at": null,
+      "vulnerabilities": [
+        {
+          "package": {
+            "ecosystem": "go",
+            "name": "golang.org/x/crypto"
+          },
+          "severity": "medium",
+          "vulnerable_version_range": "< 0.52.0",
+          "first_patched_version": {
+            "identifier": "0.52.0"
+          }
+        }
+      ],
+      "cvss_severities": {
+        "cvss_v3": {
+          "vector_string": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H",
+          "score": 6.5
+        },
+        "cvss_v4": {
+          "vector_string": null,
+          "score": 0.0
+        }
+      },
+      "epss": {
+        "percentage": 0.00281,
+        "percentile": 0.18515
+      },
+      "cvss": {
+        "vector_string": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H",
+        "score": 6.5
+      },
+      "cwes": [
+        {
+          "cwe_id": "CWE-924",
+          "name": "Improper Enforcement of Message Integrity During Transmission in a Communication Channel"
+        }
+      ],
+      "classification": "general"
+    },
+    "security_vulnerability": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "severity": "medium",
+      "vulnerable_version_range": "< 0.52.0",
+      "first_patched_version": {
+        "identifier": "0.52.0"
+      }
+    },
+    "url": "https://api.github.com/repos/alanta/azure-egress-proxy/dependabot/alerts/16",
+    "html_url": "https://github.com/alanta/azure-egress-proxy/security/dependabot/16",
+    "created_at": "2026-07-10T13:23:07Z",
+    "updated_at": "2026-07-27T19:31:46Z",
+    "dismissal_request": null,
+    "assignees": [],
+    "dismissed_at": null,
+    "dismissed_by": null,
+    "dismissed_reason": null,
+    "dismissed_comment": null,
+    "fixed_at": "2026-07-27T19:31:46Z",
+    "auto_dismissed_at": null
+  },
+  {
+    "number": 15,
+    "state": "fixed",
+    "dependency": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "manifest_path": "proxy/go.mod",
+      "scope": "runtime",
+      "relationship": "transitive"
+    },
+    "security_advisory": {
+      "ghsa_id": "GHSA-78mq-xcr3-xm33",
+      "cve_id": "CVE-2026-39835",
+      "summary": "golang.org/x/crypto is vulnerable to invoking server panic during CheckHostKey/Authenticate flow",
+      "description": "SSH servers which use CertChecker as a public key callback without setting IsUserAuthority or IsHostAuthority could be caused to panic by a client presenting a certificate. CertChecker now returns an error instead of panicking when these callbacks are nil.",
+      "severity": "medium",
+      "identifiers": [
+        {
+          "value": "GHSA-78mq-xcr3-xm33",
+          "type": "GHSA"
+        },
+        {
+          "value": "CVE-2026-39835",
+          "type": "CVE"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-39835"
+        },
+        {
+          "url": "https://go.dev/cl/781660"
+        },
+        {
+          "url": "https://go.dev/issue/79563"
+        },
+        {
+          "url": "https://groups.google.com/g/golang-announce/c/a082jnz-LvI"
+        },
+        {
+          "url": "https://pkg.go.dev/vuln/GO-2026-5015"
+        },
+        {
+          "url": "https://access.redhat.com/security/cve/CVE-2026-39835"
+        },
+        {
+          "url": "https://bugzilla.redhat.com/show_bug.cgi?id=2480680"
+        },
+        {
+          "url": "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-39835.json"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:26546"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:26547"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36199"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36207"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36319"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36625"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36648"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37271"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37268"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37123"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37072"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36797"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36796"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36651"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37410"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37387"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37296"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37286"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37272"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:38504"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40974"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40969"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40262"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40118"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40945"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40972"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41019"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41031"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41036"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41066"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:42146"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:42796"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:43052"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:43692"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:46885"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:47735"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:47949"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:48151"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:51033"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:51038"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:52857"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:52910"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:51036"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:54525"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:57194"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:59467"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:59593"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:60520"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:62260"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:65126"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:66022"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:66521"
+        },
+        {
+          "url": "https://github.com/advisories/GHSA-78mq-xcr3-xm33"
+        }
+      ],
+      "published_at": "2026-06-25T22:15:17Z",
+      "updated_at": "2026-09-11T15:33:19Z",
+      "withdrawn_at": null,
+      "vulnerabilities": [
+        {
+          "package": {
+            "ecosystem": "go",
+            "name": "golang.org/x/crypto"
+          },
+          "severity": "medium",
+          "vulnerable_version_range": "< 0.52.0",
+          "first_patched_version": {
+            "identifier": "0.52.0"
+          }
+        }
+      ],
+      "cvss_severities": {
+        "cvss_v3": {
+          "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+          "score": 5.3
+        },
+        "cvss_v4": {
+          "vector_string": null,
+          "score": 0.0
+        }
+      },
+      "epss": {
+        "percentage": 0.00662,
+        "percentile": 0.49528
+      },
+      "cvss": {
+        "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+        "score": 5.3
+      },
+      "cwes": [
+        {
+          "cwe_id": "CWE-295",
+          "name": "Improper Certificate Validation"
+        },
+        {
+          "cwe_id": "CWE-476",
+          "name": "NULL Pointer Dereference"
+        }
+      ],
+      "classification": "general"
+    },
+    "security_vulnerability": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "severity": "medium",
+      "vulnerable_version_range": "< 0.52.0",
+      "first_patched_version": {
+        "identifier": "0.52.0"
+      }
+    },
+    "url": "https://api.github.com/repos/alanta/azure-egress-proxy/dependabot/alerts/15",
+    "html_url": "https://github.com/alanta/azure-egress-proxy/security/dependabot/15",
+    "created_at": "2026-07-10T13:20:09Z",
+    "updated_at": "2026-07-27T19:31:46Z",
+    "dismissal_request": null,
+    "assignees": [],
+    "dismissed_at": null,
+    "dismissed_by": null,
+    "dismissed_reason": null,
+    "dismissed_comment": null,
+    "fixed_at": "2026-07-27T19:31:46Z",
+    "auto_dismissed_at": null
+  },
+  {
+    "number": 14,
+    "state": "fixed",
+    "dependency": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "manifest_path": "proxy/go.mod",
+      "scope": "runtime",
+      "relationship": "transitive"
+    },
+    "security_advisory": {
+      "ghsa_id": "GHSA-jppx-rxg9-jmrx",
+      "cve_id": "CVE-2026-39833",
+      "summary": "golang.org/x/crypto doesn't enforce invoking key constraints",
+      "description": "The in-memory keyring returned by NewKeyring() silently accepted keys with the ConfirmBeforeUse constraint but never enforced it. The key would sign without any confirmation prompt, with no indication to the caller that the constraint was not in effect. NewKeyring() now returns an error when unsupported constraints are requested.",
+      "severity": "critical",
+      "identifiers": [
+        {
+          "value": "GHSA-jppx-rxg9-jmrx",
+          "type": "GHSA"
+        },
+        {
+          "value": "CVE-2026-39833",
+          "type": "CVE"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-39833"
+        },
+        {
+          "url": "https://go.dev/cl/778640"
+        },
+        {
+          "url": "https://go.dev/cl/778641"
+        },
+        {
+          "url": "https://go.dev/issue/79436"
+        },
+        {
+          "url": "https://groups.google.com/g/golang-announce/c/a082jnz-LvI"
+        },
+        {
+          "url": "https://pkg.go.dev/vuln/GO-2026-5005"
+        },
+        {
+          "url": "https://github.com/advisories/GHSA-jppx-rxg9-jmrx"
+        }
+      ],
+      "published_at": "2026-06-25T22:13:31Z",
+      "updated_at": "2026-07-07T15:27:29Z",
+      "withdrawn_at": null,
+      "vulnerabilities": [
+        {
+          "package": {
+            "ecosystem": "go",
+            "name": "golang.org/x/crypto"
+          },
+          "severity": "critical",
+          "vulnerable_version_range": "< 0.52.0",
+          "first_patched_version": {
+            "identifier": "0.52.0"
+          }
+        }
+      ],
+      "cvss_severities": {
+        "cvss_v3": {
+          "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+          "score": 9.1
+        },
+        "cvss_v4": {
+          "vector_string": null,
+          "score": 0.0
+        }
+      },
+      "epss": {
+        "percentage": 0.00487,
+        "percentile": 0.39517
+      },
+      "cvss": {
+        "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+        "score": 9.1
+      },
+      "cwes": [
+        {
+          "cwe_id": "CWE-862",
+          "name": "Missing Authorization"
+        }
+      ],
+      "classification": "general"
+    },
+    "security_vulnerability": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "severity": "critical",
+      "vulnerable_version_range": "< 0.52.0",
+      "first_patched_version": {
+        "identifier": "0.52.0"
+      }
+    },
+    "url": "https://api.github.com/repos/alanta/azure-egress-proxy/dependabot/alerts/14",
+    "html_url": "https://github.com/alanta/azure-egress-proxy/security/dependabot/14",
+    "created_at": "2026-07-10T13:18:32Z",
+    "updated_at": "2026-07-27T19:31:46Z",
+    "dismissal_request": null,
+    "assignees": [],
+    "dismissed_at": null,
+    "dismissed_by": null,
+    "dismissed_reason": null,
+    "dismissed_comment": null,
+    "fixed_at": "2026-07-27T19:31:46Z",
+    "auto_dismissed_at": null
+  },
+  {
+    "number": 13,
+    "state": "fixed",
+    "dependency": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "manifest_path": "proxy/go.mod",
+      "scope": "runtime",
+      "relationship": "transitive"
+    },
+    "security_advisory": {
+      "ghsa_id": "GHSA-w879-237q-wc7r",
+      "cve_id": "CVE-2026-39829",
+      "summary": "golang.org/x/crypto: Invoking pathological RSA/DSA parameters may cause DoS",
+      "description": "The RSA and DSA public key parsers did not enforce size limits on key parameters. A crafted public key with an excessively large modulus or DSA parameter could cause several minutes of CPU consumption during signature verification. This could be triggered by unauthenticated clients during public key authentication. RSA moduli are now limited to 8192 bits, and DSA parameters are validated per FIPS 186-2.",
+      "severity": "high",
+      "identifiers": [
+        {
+          "value": "GHSA-w879-237q-wc7r",
+          "type": "GHSA"
+        },
+        {
+          "value": "CVE-2026-39829",
+          "type": "CVE"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-39829"
+        },
+        {
+          "url": "https://go.dev/cl/781641"
+        },
+        {
+          "url": "https://go.dev/cl/781661"
+        },
+        {
+          "url": "https://go.dev/issue/79565"
+        },
+        {
+          "url": "https://groups.google.com/g/golang-announce/c/a082jnz-LvI"
+        },
+        {
+          "url": "https://pkg.go.dev/vuln/GO-2026-5018"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:29455"
+        },
+        {
+          "url": "https://access.redhat.com/security/cve/CVE-2026-39829"
+        },
+        {
+          "url": "https://bugzilla.redhat.com/show_bug.cgi?id=2480681"
+        },
+        {
+          "url": "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-39829.json"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:26546"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:26547"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:35833"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36648"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36625"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36319"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36207"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36199"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37271"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37268"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37123"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37072"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36883"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36820"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36808"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36797"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36796"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36651"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37272"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37278"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37286"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37296"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37387"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40118"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40119"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40262"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40969"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40974"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40945"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40972"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41019"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41031"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41036"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41066"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41055"
+        },
+        {
+          "url": "https://github.com/advisories/GHSA-w879-237q-wc7r"
+        }
+      ],
+      "published_at": "2026-06-25T22:18:43Z",
+      "updated_at": "2026-07-20T12:32:56Z",
+      "withdrawn_at": null,
+      "vulnerabilities": [
+        {
+          "package": {
+            "ecosystem": "go",
+            "name": "golang.org/x/crypto"
+          },
+          "severity": "high",
+          "vulnerable_version_range": "< 0.52.0",
+          "first_patched_version": {
+            "identifier": "0.52.0"
+          }
+        }
+      ],
+      "cvss_severities": {
+        "cvss_v3": {
+          "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "score": 7.5
+        },
+        "cvss_v4": {
+          "vector_string": null,
+          "score": 0.0
+        }
+      },
+      "epss": {
+        "percentage": 0.00623,
+        "percentile": 0.47563
+      },
+      "cvss": {
+        "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+        "score": 7.5
+      },
+      "cwes": [
+        {
+          "cwe_id": "CWE-347",
+          "name": "Improper Verification of Cryptographic Signature"
+        },
+        {
+          "cwe_id": "CWE-1284",
+          "name": "Improper Validation of Specified Quantity in Input"
+        }
+      ],
+      "classification": "general"
+    },
+    "security_vulnerability": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "severity": "high",
+      "vulnerable_version_range": "< 0.52.0",
+      "first_patched_version": {
+        "identifier": "0.52.0"
+      }
+    },
+    "url": "https://api.github.com/repos/alanta/azure-egress-proxy/dependabot/alerts/13",
+    "html_url": "https://github.com/alanta/azure-egress-proxy/security/dependabot/13",
+    "created_at": "2026-07-10T13:16:15Z",
+    "updated_at": "2026-07-27T19:31:46Z",
+    "dismissal_request": null,
+    "assignees": [],
+    "dismissed_at": null,
+    "dismissed_by": null,
+    "dismissed_reason": null,
+    "dismissed_comment": null,
+    "fixed_at": "2026-07-27T19:31:46Z",
+    "auto_dismissed_at": null
+  },
+  {
+    "number": 12,
+    "state": "fixed",
+    "dependency": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "manifest_path": "proxy/go.mod",
+      "scope": "runtime",
+      "relationship": "transitive"
+    },
+    "security_advisory": {
+      "ghsa_id": "GHSA-45gg-vh54-h5m9",
+      "cve_id": "CVE-2026-39828",
+      "summary": "golang.org/x/crypto vulnerable to invoking bypass of certificate restrictions",
+      "description": "When an SSH server authentication callback returned PartialSuccessError with non-nil Permissions, those permissions were silently discarded, potentially dropping certificate restrictions such as force-command after a second factor succeeded. Returning non-nil Permissions with PartialSuccessError now results in a connection error.",
+      "severity": "medium",
+      "identifiers": [
+        {
+          "value": "GHSA-45gg-vh54-h5m9",
+          "type": "GHSA"
+        },
+        {
+          "value": "CVE-2026-39828",
+          "type": "CVE"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-39828"
+        },
+        {
+          "url": "https://go.dev/cl/781621"
+        },
+        {
+          "url": "https://go.dev/issue/79562"
+        },
+        {
+          "url": "https://groups.google.com/g/golang-announce/c/a082jnz-LvI"
+        },
+        {
+          "url": "https://pkg.go.dev/vuln/GO-2026-5014"
+        },
+        {
+          "url": "https://access.redhat.com/security/cve/CVE-2026-39828"
+        },
+        {
+          "url": "https://bugzilla.redhat.com/show_bug.cgi?id=2480687"
+        },
+        {
+          "url": "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-39828.json"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:26546"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:26547"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36167"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36105"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36207"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36319"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36625"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36648"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37271"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37268"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36808"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36797"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36796"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36651"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37387"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37296"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37286"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37278"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37272"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40974"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40969"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40262"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40119"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40118"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40945"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40972"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41019"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41031"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41036"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41066"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41055"
+        },
+        {
+          "url": "https://github.com/advisories/GHSA-45gg-vh54-h5m9"
+        }
+      ],
+      "published_at": "2026-06-25T22:14:38Z",
+      "updated_at": "2026-07-20T12:32:56Z",
+      "withdrawn_at": null,
+      "vulnerabilities": [
+        {
+          "package": {
+            "ecosystem": "go",
+            "name": "golang.org/x/crypto"
+          },
+          "severity": "medium",
+          "vulnerable_version_range": "< 0.52.0",
+          "first_patched_version": {
+            "identifier": "0.52.0"
+          }
+        }
+      ],
+      "cvss_severities": {
+        "cvss_v3": {
+          "vector_string": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L",
+          "score": 6.3
+        },
+        "cvss_v4": {
+          "vector_string": null,
+          "score": 0.0
+        }
+      },
+      "epss": {
+        "percentage": 0.00539,
+        "percentile": 0.43552
+      },
+      "cvss": {
+        "vector_string": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L",
+        "score": 6.3
+      },
+      "cwes": [
+        {
+          "cwe_id": "CWE-281",
+          "name": "Improper Preservation of Permissions"
+        },
+        {
+          "cwe_id": "CWE-295",
+          "name": "Improper Certificate Validation"
+        }
+      ],
+      "classification": "general"
+    },
+    "security_vulnerability": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "severity": "medium",
+      "vulnerable_version_range": "< 0.52.0",
+      "first_patched_version": {
+        "identifier": "0.52.0"
+      }
+    },
+    "url": "https://api.github.com/repos/alanta/azure-egress-proxy/dependabot/alerts/12",
+    "html_url": "https://github.com/alanta/azure-egress-proxy/security/dependabot/12",
+    "created_at": "2026-07-10T13:15:50Z",
+    "updated_at": "2026-07-27T19:31:46Z",
+    "dismissal_request": null,
+    "assignees": [],
+    "dismissed_at": null,
+    "dismissed_by": null,
+    "dismissed_reason": null,
+    "dismissed_comment": null,
+    "fixed_at": "2026-07-27T19:31:46Z",
+    "auto_dismissed_at": null
+  },
+  {
+    "number": 11,
+    "state": "fixed",
+    "dependency": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "manifest_path": "proxy/go.mod",
+      "scope": "runtime",
+      "relationship": "transitive"
+    },
+    "security_advisory": {
+      "ghsa_id": "GHSA-q4h4-gmj2-qvw2",
+      "cve_id": "CVE-2026-46597",
+      "summary": "golang.org/x/crypto: Invoking byte arithmetic causes underflow and panic",
+      "description": "An incorrectly placed cast from bytes to int allowed for server-side panic in the AES-GCM packet decoder for well-crafted inputs.",
+      "severity": "high",
+      "identifiers": [
+        {
+          "value": "GHSA-q4h4-gmj2-qvw2",
+          "type": "GHSA"
+        },
+        {
+          "value": "CVE-2026-46597",
+          "type": "CVE"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-46597"
+        },
+        {
+          "url": "https://go.dev/cl/781620"
+        },
+        {
+          "url": "https://go.dev/issue/79561"
+        },
+        {
+          "url": "https://groups.google.com/g/golang-announce/c/a082jnz-LvI"
+        },
+        {
+          "url": "https://pkg.go.dev/vuln/GO-2026-5013"
+        },
+        {
+          "url": "https://github.com/advisories/GHSA-q4h4-gmj2-qvw2"
+        }
+      ],
+      "published_at": "2026-06-25T22:14:22Z",
+      "updated_at": "2026-07-07T15:22:54Z",
+      "withdrawn_at": null,
+      "vulnerabilities": [
+        {
+          "package": {
+            "ecosystem": "go",
+            "name": "golang.org/x/crypto"
+          },
+          "severity": "high",
+          "vulnerable_version_range": "< 0.52.0",
+          "first_patched_version": {
+            "identifier": "0.52.0"
+          }
+        }
+      ],
+      "cvss_severities": {
+        "cvss_v3": {
+          "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "score": 7.5
+        },
+        "cvss_v4": {
+          "vector_string": null,
+          "score": 0.0
+        }
+      },
+      "epss": {
+        "percentage": 0.0062,
+        "percentile": 0.47576
+      },
+      "cvss": {
+        "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+        "score": 7.5
+      },
+      "cwes": [
+        {
+          "cwe_id": "CWE-704",
+          "name": "Incorrect Type Conversion or Cast"
+        }
+      ],
+      "classification": "general"
+    },
+    "security_vulnerability": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "severity": "high",
+      "vulnerable_version_range": "< 0.52.0",
+      "first_patched_version": {
+        "identifier": "0.52.0"
+      }
+    },
+    "url": "https://api.github.com/repos/alanta/azure-egress-proxy/dependabot/alerts/11",
+    "html_url": "https://github.com/alanta/azure-egress-proxy/security/dependabot/11",
+    "created_at": "2026-07-10T13:15:41Z",
+    "updated_at": "2026-07-27T19:31:46Z",
+    "dismissal_request": null,
+    "assignees": [],
+    "dismissed_at": null,
+    "dismissed_by": null,
+    "dismissed_reason": null,
+    "dismissed_comment": null,
+    "fixed_at": "2026-07-27T19:31:46Z",
+    "auto_dismissed_at": null
+  },
+  {
+    "number": 10,
+    "state": "fixed",
+    "dependency": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "manifest_path": "proxy/go.mod",
+      "scope": "runtime",
+      "relationship": "transitive"
+    },
+    "security_advisory": {
+      "ghsa_id": "GHSA-vgwf-h737-ff37",
+      "cve_id": "CVE-2026-39830",
+      "summary": "golang.org/x/crypto: Invoking client can cause server deadlock on unexpected responses",
+      "description": "A malicious SSH peer could send unsolicited global request responses to fill an internal buffer, blocking the connection's read loop. The blocked goroutine could not be released by calling Close(), resulting in a resource leak per connection. Unsolicited global responses are now discarded.",
+      "severity": "critical",
+      "identifiers": [
+        {
+          "value": "GHSA-vgwf-h737-ff37",
+          "type": "GHSA"
+        },
+        {
+          "value": "CVE-2026-39830",
+          "type": "CVE"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-39830"
+        },
+        {
+          "url": "https://go.dev/cl/781640"
+        },
+        {
+          "url": "https://go.dev/cl/781664"
+        },
+        {
+          "url": "https://go.dev/issue/79564"
+        },
+        {
+          "url": "https://groups.google.com/g/golang-announce/c/a082jnz-LvI"
+        },
+        {
+          "url": "https://pkg.go.dev/vuln/GO-2026-5017"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:29455"
+        },
+        {
+          "url": "https://access.redhat.com/security/cve/CVE-2026-39830"
+        },
+        {
+          "url": "https://bugzilla.redhat.com/show_bug.cgi?id=2480684"
+        },
+        {
+          "url": "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-39830.json"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:35833"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36199"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36207"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36319"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36625"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36648"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37271"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37268"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37072"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36808"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36797"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36796"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36651"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37387"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37296"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37286"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37278"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37275"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37272"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40118"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40262"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40969"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40974"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40945"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40972"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41019"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41031"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41036"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41066"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:42146"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:42796"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:43052"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:43692"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:46885"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:47735"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:48151"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:49944"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:51033"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:52857"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:52910"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:54400"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:54531"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:57194"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:57801"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:59467"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:60520"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:61314"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:65964"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:66022"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:66521"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:67450"
+        },
+        {
+          "url": "https://github.com/advisories/GHSA-vgwf-h737-ff37"
+        }
+      ],
+      "published_at": "2026-06-25T22:18:17Z",
+      "updated_at": "2026-09-15T12:32:44Z",
+      "withdrawn_at": null,
+      "vulnerabilities": [
+        {
+          "package": {
+            "ecosystem": "go",
+            "name": "golang.org/x/crypto"
+          },
+          "severity": "critical",
+          "vulnerable_version_range": "< 0.52.0",
+          "first_patched_version": {
+            "identifier": "0.52.0"
+          }
+        }
+      ],
+      "cvss_severities": {
+        "cvss_v3": {
+          "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:H",
+          "score": 9.1
+        },
+        "cvss_v4": {
+          "vector_string": null,
+          "score": 0.0
+        }
+      },
+      "epss": {
+        "percentage": 0.00621,
+        "percentile": 0.47573
+      },
+      "cvss": {
+        "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:H",
+        "score": 9.1
+      },
+      "cwes": [
+        {
+          "cwe_id": "CWE-119",
+          "name": "Improper Restriction of Operations within the Bounds of a Memory Buffer"
+        },
+        {
+          "cwe_id": "CWE-772",
+          "name": "Missing Release of Resource after Effective Lifetime"
+        }
+      ],
+      "classification": "general"
+    },
+    "security_vulnerability": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "severity": "critical",
+      "vulnerable_version_range": "< 0.52.0",
+      "first_patched_version": {
+        "identifier": "0.52.0"
+      }
+    },
+    "url": "https://api.github.com/repos/alanta/azure-egress-proxy/dependabot/alerts/10",
+    "html_url": "https://github.com/alanta/azure-egress-proxy/security/dependabot/10",
+    "created_at": "2026-07-10T13:15:17Z",
+    "updated_at": "2026-07-27T19:31:46Z",
+    "dismissal_request": null,
+    "assignees": [],
+    "dismissed_at": null,
+    "dismissed_by": null,
+    "dismissed_reason": null,
+    "dismissed_comment": null,
+    "fixed_at": "2026-07-27T19:31:46Z",
+    "auto_dismissed_at": null
+  },
+  {
+    "number": 9,
+    "state": "fixed",
+    "dependency": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "manifest_path": "proxy/go.mod",
+      "scope": "runtime",
+      "relationship": "transitive"
+    },
+    "security_advisory": {
+      "ghsa_id": "GHSA-5cgq-3rg8-m6cv",
+      "cve_id": "CVE-2026-42508",
+      "summary": "golang.org/x/crypto vulnerable to auth bypass via unenforced @revoked status",
+      "description": "Previously, a revoked 'SignatureKey' belonging to a CA was not correctly checked for revocation. Now, both the 'key' and 'key.SignatureKey' are checked for @revoked.",
+      "severity": "critical",
+      "identifiers": [
+        {
+          "value": "GHSA-5cgq-3rg8-m6cv",
+          "type": "GHSA"
+        },
+        {
+          "value": "CVE-2026-42508",
+          "type": "CVE"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-42508"
+        },
+        {
+          "url": "https://go.dev/cl/781220"
+        },
+        {
+          "url": "https://go.dev/issue/79568"
+        },
+        {
+          "url": "https://groups.google.com/g/golang-announce/c/a082jnz-LvI"
+        },
+        {
+          "url": "https://pkg.go.dev/vuln/GO-2026-5021"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:23262"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:23264"
+        },
+        {
+          "url": "https://access.redhat.com/security/cve/CVE-2026-42508"
+        },
+        {
+          "url": "https://bugzilla.redhat.com/show_bug.cgi?id=2480688"
+        },
+        {
+          "url": "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-42508.json"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:26546"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:26547"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:35833"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36648"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37123"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37072"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36808"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36797"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36796"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36651"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37387"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40262"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40138"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40118"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41066"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41064"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41036"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41031"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41019"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40945"
+        },
+        {
+          "url": "https://github.com/advisories/GHSA-5cgq-3rg8-m6cv"
+        }
+      ],
+      "published_at": "2026-06-25T22:22:04Z",
+      "updated_at": "2026-07-17T15:32:15Z",
+      "withdrawn_at": null,
+      "vulnerabilities": [
+        {
+          "package": {
+            "ecosystem": "go",
+            "name": "golang.org/x/crypto"
+          },
+          "severity": "critical",
+          "vulnerable_version_range": "< 0.52.0",
+          "first_patched_version": {
+            "identifier": "0.52.0"
+          }
+        }
+      ],
+      "cvss_severities": {
+        "cvss_v3": {
+          "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+          "score": 9.1
+        },
+        "cvss_v4": {
+          "vector_string": null,
+          "score": 0.0
+        }
+      },
+      "epss": {
+        "percentage": 0.00654,
+        "percentile": 0.49515
+      },
+      "cvss": {
+        "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+        "score": 9.1
+      },
+      "cwes": [
+        {
+          "cwe_id": "CWE-295",
+          "name": "Improper Certificate Validation"
+        }
+      ],
+      "classification": "general"
+    },
+    "security_vulnerability": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "severity": "critical",
+      "vulnerable_version_range": "< 0.52.0",
+      "first_patched_version": {
+        "identifier": "0.52.0"
+      }
+    },
+    "url": "https://api.github.com/repos/alanta/azure-egress-proxy/dependabot/alerts/9",
+    "html_url": "https://github.com/alanta/azure-egress-proxy/security/dependabot/9",
+    "created_at": "2026-07-10T13:15:05Z",
+    "updated_at": "2026-07-27T19:31:45Z",
+    "dismissal_request": null,
+    "assignees": [],
+    "dismissed_at": null,
+    "dismissed_by": null,
+    "dismissed_reason": null,
+    "dismissed_comment": null,
+    "fixed_at": "2026-07-27T19:31:45Z",
+    "auto_dismissed_at": null
+  },
+  {
+    "number": 8,
+    "state": "fixed",
+    "dependency": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "manifest_path": "proxy/go.mod",
+      "scope": "runtime",
+      "relationship": "transitive"
+    },
+    "security_advisory": {
+      "ghsa_id": "GHSA-x527-x647-q7gg",
+      "cve_id": "CVE-2026-46595",
+      "summary": "golang.org/x/crypto: Invoking VerifiedPublicKeyCallback permissions skip enforcement",
+      "description": "Previously, CVE-2024-45337 fixed an authorization bypass for misused ssh server configurations; if any other type of callback is passed other than public key, then the source-address validation would be skipped.",
+      "severity": "critical",
+      "identifiers": [
+        {
+          "value": "GHSA-x527-x647-q7gg",
+          "type": "GHSA"
+        },
+        {
+          "value": "CVE-2026-46595",
+          "type": "CVE"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-45337"
+        },
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-46595"
+        },
+        {
+          "url": "https://go.dev/cl/781642"
+        },
+        {
+          "url": "https://go.dev/issue/79570"
+        },
+        {
+          "url": "https://groups.google.com/g/golang-announce/c/a082jnz-LvI"
+        },
+        {
+          "url": "https://pkg.go.dev/vuln/GO-2026-5023"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:23262"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:23264"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:26546"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:26547"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:30650"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:30651"
+        },
+        {
+          "url": "https://access.redhat.com/security/cve/CVE-2026-46595"
+        },
+        {
+          "url": "https://bugzilla.redhat.com/show_bug.cgi?id=2480689"
+        },
+        {
+          "url": "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-46595.json"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:33531"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:33524"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36648"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36207"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36820"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36808"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36797"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36796"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36651"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37387"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37275"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40118"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41036"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41019"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40945"
+        },
+        {
+          "url": "https://github.com/advisories/GHSA-x527-x647-q7gg"
+        }
+      ],
+      "published_at": "2026-06-25T22:23:16Z",
+      "updated_at": "2026-07-17T15:32:15Z",
+      "withdrawn_at": null,
+      "vulnerabilities": [
+        {
+          "package": {
+            "ecosystem": "go",
+            "name": "golang.org/x/crypto"
+          },
+          "severity": "critical",
+          "vulnerable_version_range": "< 0.52.0",
+          "first_patched_version": {
+            "identifier": "0.52.0"
+          }
+        }
+      ],
+      "cvss_severities": {
+        "cvss_v3": {
+          "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:L",
+          "score": 10.0
+        },
+        "cvss_v4": {
+          "vector_string": null,
+          "score": 0.0
+        }
+      },
+      "epss": {
+        "percentage": 0.00503,
+        "percentile": 0.40747
+      },
+      "cvss": {
+        "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:L",
+        "score": 10.0
+      },
+      "cwes": [
+        {
+          "cwe_id": "CWE-303",
+          "name": "Incorrect Implementation of Authentication Algorithm"
+        },
+        {
+          "cwe_id": "CWE-863",
+          "name": "Incorrect Authorization"
+        }
+      ],
+      "classification": "general"
+    },
+    "security_vulnerability": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "severity": "critical",
+      "vulnerable_version_range": "< 0.52.0",
+      "first_patched_version": {
+        "identifier": "0.52.0"
+      }
+    },
+    "url": "https://api.github.com/repos/alanta/azure-egress-proxy/dependabot/alerts/8",
+    "html_url": "https://github.com/alanta/azure-egress-proxy/security/dependabot/8",
+    "created_at": "2026-07-10T13:15:01Z",
+    "updated_at": "2026-07-27T19:31:45Z",
+    "dismissal_request": null,
+    "assignees": [],
+    "dismissed_at": null,
+    "dismissed_by": null,
+    "dismissed_reason": null,
+    "dismissed_comment": null,
+    "fixed_at": "2026-07-27T19:31:45Z",
+    "auto_dismissed_at": null
+  },
+  {
+    "number": 7,
+    "state": "fixed",
+    "dependency": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "manifest_path": "proxy/go.mod",
+      "scope": "runtime",
+      "relationship": "transitive"
+    },
+    "security_advisory": {
+      "ghsa_id": "GHSA-9m57-25v3-79x9",
+      "cve_id": "CVE-2026-46598",
+      "summary": "golang.org/x/crypto: Invoking pathological inputs can lead to client panic",
+      "description": "For certain crafted inputs, a 'ed25519.PrivateKey' was created by casting malformed wire bytes, leading to a panic when used.",
+      "severity": "medium",
+      "identifiers": [
+        {
+          "value": "GHSA-9m57-25v3-79x9",
+          "type": "GHSA"
+        },
+        {
+          "value": "CVE-2026-46598",
+          "type": "CVE"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-46598"
+        },
+        {
+          "url": "https://go.dev/cl/781360"
+        },
+        {
+          "url": "https://go.dev/issue/79596"
+        },
+        {
+          "url": "https://groups.google.com/g/golang-announce/c/a082jnz-LvI"
+        },
+        {
+          "url": "https://pkg.go.dev/vuln/GO-2026-5033"
+        },
+        {
+          "url": "https://github.com/advisories/GHSA-9m57-25v3-79x9"
+        }
+      ],
+      "published_at": "2026-06-25T22:12:52Z",
+      "updated_at": "2026-07-07T15:28:17Z",
+      "withdrawn_at": null,
+      "vulnerabilities": [
+        {
+          "package": {
+            "ecosystem": "go",
+            "name": "golang.org/x/crypto"
+          },
+          "severity": "medium",
+          "vulnerable_version_range": "< 0.52.0",
+          "first_patched_version": {
+            "identifier": "0.52.0"
+          }
+        }
+      ],
+      "cvss_severities": {
+        "cvss_v3": {
+          "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+          "score": 5.3
+        },
+        "cvss_v4": {
+          "vector_string": null,
+          "score": 0.0
+        }
+      },
+      "epss": {
+        "percentage": 0.00515,
+        "percentile": 0.41532
+      },
+      "cvss": {
+        "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+        "score": 5.3
+      },
+      "cwes": [
+        {
+          "cwe_id": "CWE-129",
+          "name": "Improper Validation of Array Index"
+        }
+      ],
+      "classification": "general"
+    },
+    "security_vulnerability": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "severity": "medium",
+      "vulnerable_version_range": "< 0.52.0",
+      "first_patched_version": {
+        "identifier": "0.52.0"
+      }
+    },
+    "url": "https://api.github.com/repos/alanta/azure-egress-proxy/dependabot/alerts/7",
+    "html_url": "https://github.com/alanta/azure-egress-proxy/security/dependabot/7",
+    "created_at": "2026-07-10T13:14:55Z",
+    "updated_at": "2026-07-27T19:31:45Z",
+    "dismissal_request": null,
+    "assignees": [],
+    "dismissed_at": null,
+    "dismissed_by": null,
+    "dismissed_reason": null,
+    "dismissed_comment": null,
+    "fixed_at": "2026-07-27T19:31:45Z",
+    "auto_dismissed_at": null
+  },
+  {
+    "number": 6,
+    "state": "fixed",
+    "dependency": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "manifest_path": "proxy/go.mod",
+      "scope": "runtime",
+      "relationship": "transitive"
+    },
+    "security_advisory": {
+      "ghsa_id": "GHSA-f5wc-c3c7-36mc",
+      "cve_id": "CVE-2026-39832",
+      "summary": "golang.org/x/crypto doesn't drop invoking agent constraints when forwarding keys",
+      "description": "When adding a key to a remote agent constraint extensions such as restrict-destination-v00@openssh.com were not serialized in the request. Destination restrictions were silently stripped when forwarding keys, allowing unrestricted use of the key on the remote host. The client now serializes all constraint extensions. Additionally, the in-memory keyring returned by NewKeyring() now rejects keys with unsupported constraint extensions instead of silently ignoring them.",
+      "severity": "critical",
+      "identifiers": [
+        {
+          "value": "GHSA-f5wc-c3c7-36mc",
+          "type": "GHSA"
+        },
+        {
+          "value": "CVE-2026-39832",
+          "type": "CVE"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-39832"
+        },
+        {
+          "url": "https://go.dev/cl/778642"
+        },
+        {
+          "url": "https://go.dev/issue/79435"
+        },
+        {
+          "url": "https://groups.google.com/g/golang-announce/c/a082jnz-LvI"
+        },
+        {
+          "url": "https://pkg.go.dev/vuln/GO-2026-5006"
+        },
+        {
+          "url": "https://access.redhat.com/security/cve/CVE-2026-39832"
+        },
+        {
+          "url": "https://bugzilla.redhat.com/show_bug.cgi?id=2480685"
+        },
+        {
+          "url": "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-39832.json"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:35833"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36199"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36319"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36625"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36648"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37271"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37123"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37072"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36797"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36796"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:36651"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37410"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:37387"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40262"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40118"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41066"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41036"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41031"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:41019"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40972"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:40945"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:42146"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:42796"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:43052"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:43692"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:49944"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:52857"
+        },
+        {
+          "url": "https://access.redhat.com/errata/RHSA-2026:52910"
+        },
+        {
+          "url": "https://github.com/advisories/GHSA-f5wc-c3c7-36mc"
+        }
+      ],
+      "published_at": "2026-06-25T22:14:00Z",
+      "updated_at": "2026-08-11T15:31:42Z",
+      "withdrawn_at": null,
+      "vulnerabilities": [
+        {
+          "package": {
+            "ecosystem": "go",
+            "name": "golang.org/x/crypto"
+          },
+          "severity": "critical",
+          "vulnerable_version_range": "< 0.52.0",
+          "first_patched_version": {
+            "identifier": "0.52.0"
+          }
+        }
+      ],
+      "cvss_severities": {
+        "cvss_v3": {
+          "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+          "score": 9.1
+        },
+        "cvss_v4": {
+          "vector_string": null,
+          "score": 0.0
+        }
+      },
+      "epss": {
+        "percentage": 0.00716,
+        "percentile": 0.51674
+      },
+      "cvss": {
+        "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+        "score": 9.1
+      },
+      "cwes": [
+        {
+          "cwe_id": "CWE-281",
+          "name": "Improper Preservation of Permissions"
+        },
+        {
+          "cwe_id": "CWE-502",
+          "name": "Deserialization of Untrusted Data"
+        }
+      ],
+      "classification": "general"
+    },
+    "security_vulnerability": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "severity": "critical",
+      "vulnerable_version_range": "< 0.52.0",
+      "first_patched_version": {
+        "identifier": "0.52.0"
+      }
+    },
+    "url": "https://api.github.com/repos/alanta/azure-egress-proxy/dependabot/alerts/6",
+    "html_url": "https://github.com/alanta/azure-egress-proxy/security/dependabot/6",
+    "created_at": "2026-07-10T13:14:43Z",
+    "updated_at": "2026-07-27T19:31:45Z",
+    "dismissal_request": null,
+    "assignees": [],
+    "dismissed_at": null,
+    "dismissed_by": null,
+    "dismissed_reason": null,
+    "dismissed_comment": null,
+    "fixed_at": "2026-07-27T19:31:45Z",
+    "auto_dismissed_at": null
+  },
+  {
+    "number": 5,
+    "state": "fixed",
+    "dependency": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "manifest_path": "proxy/go.mod",
+      "scope": "runtime",
+      "relationship": "transitive"
+    },
+    "security_advisory": {
+      "ghsa_id": "GHSA-89gr-r52h-f8rx",
+      "cve_id": "CVE-2026-39831",
+      "summary": "golang.org/x/crypto: FIDO/U2F security key physical presence check can be bypassed",
+      "description": "The Verify() method for FIDO/U2F security key types (sk-ecdsa-sha2-nistp256@openssh.com, sk-ssh-ed25519@openssh.com) did not check the User Presence flag. Signatures generated without physical touch were accepted, allowing unattended use of a hardware security key. To restore the previous behavior, return a \"no-touch-required\" extension in Permissions.Extensions from PublicKeyCallback.",
+      "severity": "critical",
+      "identifiers": [
+        {
+          "value": "GHSA-89gr-r52h-f8rx",
+          "type": "GHSA"
+        },
+        {
+          "value": "CVE-2026-39831",
+          "type": "CVE"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-39831"
+        },
+        {
+          "url": "https://go.dev/cl/781662"
+        },
+        {
+          "url": "https://go.dev/issue/79566"
+        },
+        {
+          "url": "https://groups.google.com/g/golang-announce/c/a082jnz-LvI"
+        },
+        {
+          "url": "https://pkg.go.dev/vuln/GO-2026-5019"
+        },
+        {
+          "url": "https://github.com/advisories/GHSA-89gr-r52h-f8rx"
+        }
+      ],
+      "published_at": "2026-06-25T22:21:12Z",
+      "updated_at": "2026-07-07T15:25:58Z",
+      "withdrawn_at": null,
+      "vulnerabilities": [
+        {
+          "package": {
+            "ecosystem": "go",
+            "name": "golang.org/x/crypto"
+          },
+          "severity": "critical",
+          "vulnerable_version_range": "< 0.52.0",
+          "first_patched_version": {
+            "identifier": "0.52.0"
+          }
+        }
+      ],
+      "cvss_severities": {
+        "cvss_v3": {
+          "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+          "score": 9.1
+        },
+        "cvss_v4": {
+          "vector_string": null,
+          "score": 0.0
+        }
+      },
+      "epss": {
+        "percentage": 0.00487,
+        "percentile": 0.39518
+      },
+      "cvss": {
+        "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+        "score": 9.1
+      },
+      "cwes": [
+        {
+          "cwe_id": "CWE-862",
+          "name": "Missing Authorization"
+        }
+      ],
+      "classification": "general"
+    },
+    "security_vulnerability": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "severity": "critical",
+      "vulnerable_version_range": "< 0.52.0",
+      "first_patched_version": {
+        "identifier": "0.52.0"
+      }
+    },
+    "url": "https://api.github.com/repos/alanta/azure-egress-proxy/dependabot/alerts/5",
+    "html_url": "https://github.com/alanta/azure-egress-proxy/security/dependabot/5",
+    "created_at": "2026-07-10T13:14:28Z",
+    "updated_at": "2026-07-27T19:31:45Z",
+    "dismissal_request": null,
+    "assignees": [],
+    "dismissed_at": null,
+    "dismissed_by": null,
+    "dismissed_reason": null,
+    "dismissed_comment": null,
+    "fixed_at": "2026-07-27T19:31:45Z",
+    "auto_dismissed_at": null
+  },
+  {
+    "number": 4,
+    "state": "fixed",
+    "dependency": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "manifest_path": "proxy/go.mod",
+      "scope": "runtime",
+      "relationship": "transitive"
+    },
+    "security_advisory": {
+      "ghsa_id": "GHSA-rm3j-f69w-wqmq",
+      "cve_id": "CVE-2026-39834",
+      "summary": "golang.org/x/crypto vulnerable to infinite loop on large channel writes",
+      "description": "When writing data larger than 4GB in a single Write call on an SSH channel, an integer overflow in the internal payload size calculation caused the write loop to spin indefinitely, sending empty packets without making progress. The size comparison now uses int64 to prevent truncation.",
+      "severity": "critical",
+      "identifiers": [
+        {
+          "value": "GHSA-rm3j-f69w-wqmq",
+          "type": "GHSA"
+        },
+        {
+          "value": "CVE-2026-39834",
+          "type": "CVE"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-39834"
+        },
+        {
+          "url": "https://go.dev/cl/781663"
+        },
+        {
+          "url": "https://go.dev/issue/79567"
+        },
+        {
+          "url": "https://groups.google.com/g/golang-announce/c/a082jnz-LvI"
+        },
+        {
+          "url": "https://pkg.go.dev/vuln/GO-2026-5020"
+        },
+        {
+          "url": "https://github.com/advisories/GHSA-rm3j-f69w-wqmq"
+        }
+      ],
+      "published_at": "2026-06-25T22:21:40Z",
+      "updated_at": "2026-07-07T15:26:18Z",
+      "withdrawn_at": null,
+      "vulnerabilities": [
+        {
+          "package": {
+            "ecosystem": "go",
+            "name": "golang.org/x/crypto"
+          },
+          "severity": "critical",
+          "vulnerable_version_range": "< 0.52.0",
+          "first_patched_version": {
+            "identifier": "0.52.0"
+          }
+        }
+      ],
+      "cvss_severities": {
+        "cvss_v3": {
+          "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:H",
+          "score": 9.1
+        },
+        "cvss_v4": {
+          "vector_string": null,
+          "score": 0.0
+        }
+      },
+      "epss": {
+        "percentage": 0.00637,
+        "percentile": 0.48561
+      },
+      "cvss": {
+        "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:H",
+        "score": 9.1
+      },
+      "cwes": [
+        {
+          "cwe_id": "CWE-190",
+          "name": "Integer Overflow or Wraparound"
+        }
+      ],
+      "classification": "general"
+    },
+    "security_vulnerability": {
+      "package": {
+        "ecosystem": "go",
+        "name": "golang.org/x/crypto"
+      },
+      "severity": "critical",
+      "vulnerable_version_range": "< 0.52.0",
+      "first_patched_version": {
+        "identifier": "0.52.0"
+      }
+    },
+    "url": "https://api.github.com/repos/alanta/azure-egress-proxy/dependabot/alerts/4",
+    "html_url": "https://github.com/alanta/azure-egress-proxy/security/dependabot/4",
+    "created_at": "2026-07-10T13:14:18Z",
+    "updated_at": "2026-07-27T19:31:45Z",
+    "dismissal_request": null,
+    "assignees": [],
+    "dismissed_at": null,
+    "dismissed_by": null,
+    "dismissed_reason": null,
+    "dismissed_comment": null,
+    "fixed_at": "2026-07-27T19:31:45Z",
+    "auto_dismissed_at": null
+  },
+  {
+    "number": 3,
+    "state": "fixed",
+    "dependency": {
+      "package": {
+        "ecosystem": "nuget",
+        "name": "OpenTelemetry.Exporter.OpenTelemetryProtocol"
+      },
+      "manifest_path": "src/ServiceDefaults/ServiceDefaults.csproj",
+      "scope": "runtime",
+      "relationship": "unknown"
+    },
+    "security_advisory": {
+      "ghsa_id": "GHSA-4625-4j76-fww9",
+      "cve_id": "CVE-2026-42191",
+      "summary": "OpenTelemetry's disk retry default temp path enables local blob injection via OTLP Exporter",
+      "description": "### Summary\n\nThe OTLP disk retry feature in `OpenTelemetry.Exporter.OpenTelemetryProtocol` silently fell back to `Path.GetTempPath()` when `OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY=disk` was set but `OTEL_DOTNET_EXPERIMENTAL_OTLP_DISK_RETRY_DIRECTORY_PATH` was not configured.\n\nThe exporter stored and loaded `*.blob` files under fixed, signal-named subdirectories (`traces`, `metrics`, `logs`) beneath that shared temporary root path.\n\nOn multi-user systems where the temporary directory is accessible to other local accounts, this exposed three attack surfaces:\n\n- **Blob injection (integrity):** an attacker could write crafted `*.blob` files into the predictable path; the exporter picks them up on the next retry cycle and forwards them to the configured OTLP endpoint under the application's identity.\n- **Telemetry disclosure (confidentiality):** an attacker reads `*.blob` files written by the application between export failures, recovering encoded telemetry payloads (spans, metric data points, log records).\n- **Resource exhaustion (availability):** an attacker deposits numerous or oversized blob files, degrading retry-loop performance or consuming disk space.\n\n### Details\n\n#### Preconditions\n\n1. `OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY` is set to `disk`.\n2. `OTEL_DOTNET_EXPERIMENTAL_OTLP_DISK_RETRY_DIRECTORY_PATH` is not set, causing the exporter to resolve the blob storage root using the `System.IO.Path.GetTempPath()` API.\n3. A local attacker has read or write access to the process' temporary directory (e.g., `/tmp` on Linux, or `%TEMP%` on a multi-user Windows installation).\n\n#### Exploit path\n\n1. A target application starts with `OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY=disk` and no explicit blob directory. The exporter resolves the storage root to `Path.GetTempPath()`, producing paths such as `%TEMP%\\traces`, `%TEMP%\\metrics`, and `%TEMP%\\logs` (or `/tmp/traces` etc. on Linux).\n2. **Injection scenario:** before or during the application's retry window, an attacker writes crafted `*.blob` files into one of those signal subdirectories. On the next retry interval (by default every 60 seconds), [`OtlpExporterPersistentStorageTransmissionHandler`](https://github.com/open-telemetry/opentelemetry-dotnet/blob/c724f4bd6fd88e9a599af1668bf7af9487155b62/src/OpenTelemetry.Exporter.OpenTelemetryProtocol/Implementation/Transmission/OtlpExporterPersistentStorageTransmissionHandler.cs) scans the directory, loads the attacker-supplied blobs, and forwards them to the configured OTLP endpoint using the application's identity and transport credentials.\n3. **Disclosure scenario:** the attacker reads `*.blob` files that the application wrote after a transient export failure, recovering the full serialized telemetry payloads (spans, metric data points, or log records in Protobuf encoding).\n5. **DoS scenario:** the attacker deposits a large number of oversized blob files in the temporary subdirectories, causing the retry loop to consume excess CPU/IO processing them, potentially exhausting available disk space.\n\n### Mitigations\n\nIf an immediate upgrade to a patched version is not possible:\n\n1. Avoid enabling disk retry in shared environments.\n2. Configure a dedicated directory with strict ACL/ownership and least privilege.\n3. Ensure the directory is not shared across tenants/users.\n4. Monitor for unexpected `*.blob` files or abnormal retry backlog growth.\n\n### Resources\n\n- [#7106](https://github.com/open-telemetry/opentelemetry-dotnet/pull/7106)",
+      "severity": "medium",
+      "identifiers": [
+        {
+          "value": "GHSA-4625-4j76-fww9",
+          "type": "GHSA"
+        },
+        {
+          "value": "CVE-2026-42191",
+          "type": "CVE"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://github.com/open-telemetry/opentelemetry-dotnet/security/advisories/GHSA-4625-4j76-fww9"
+        },
+        {
+          "url": "https://github.com/open-telemetry/opentelemetry-dotnet/pull/7106"
+        },
+        {
+          "url": "https://github.com/open-telemetry/opentelemetry-dotnet/commit/78dffdc5ebdf3dc090fdb94e3f1a32d3d1e26dfd"
+        },
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-42191"
+        },
+        {
+          "url": "https://github.com/advisories/GHSA-4625-4j76-fww9"
+        }
+      ],
+      "published_at": "2026-04-30T18:34:30Z",
+      "updated_at": "2026-05-13T16:27:21Z",
+      "withdrawn_at": null,
+      "vulnerabilities": [
+        {
+          "package": {
+            "ecosystem": "nuget",
+            "name": "OpenTelemetry.Exporter.OpenTelemetryProtocol"
+          },
+          "severity": "medium",
+          "vulnerable_version_range": ">= 1.8.0, <= 1.15.2",
+          "first_patched_version": {
+            "identifier": "1.15.3"
+          }
+        }
+      ],
+      "cvss_severities": {
+        "cvss_v3": {
+          "vector_string": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:L",
+          "score": 6.5
+        },
+        "cvss_v4": {
+          "vector_string": null,
+          "score": 0.0
+        }
+      },
+      "epss": {
+        "percentage": 0.00148,
+        "percentile": 0.03502
+      },
+      "cvss": {
+        "vector_string": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:L",
+        "score": 6.5
+      },
+      "cwes": [
+        {
+          "cwe_id": "CWE-379",
+          "name": "Creation of Temporary File in Directory with Insecure Permissions"
+        }
+      ],
+      "classification": "general"
+    },
+    "security_vulnerability": {
+      "package": {
+        "ecosystem": "nuget",
+        "name": "OpenTelemetry.Exporter.OpenTelemetryProtocol"
+      },
+      "severity": "medium",
+      "vulnerable_version_range": ">= 1.8.0, <= 1.15.2",
+      "first_patched_version": {
+        "identifier": "1.15.3"
+      }
+    },
+    "url": "https://api.github.com/repos/alanta/azure-egress-proxy/dependabot/alerts/3",
+    "html_url": "https://github.com/alanta/azure-egress-proxy/security/dependabot/3",
+    "created_at": "2026-07-02T14:14:05Z",
+    "updated_at": "2026-07-02T14:15:13Z",
+    "dismissal_request": null,
+    "assignees": [],
+    "dismissed_at": null,
+    "dismissed_by": null,
+    "dismissed_reason": null,
+    "dismissed_comment": null,
+    "fixed_at": "2026-07-02T14:15:13Z",
+    "auto_dismissed_at": null
+  },
+  {
+    "number": 2,
+    "state": "fixed",
+    "dependency": {
+      "package": {
+        "ecosystem": "nuget",
+        "name": "OpenTelemetry.Exporter.OpenTelemetryProtocol"
+      },
+      "manifest_path": "src/ServiceDefaults/ServiceDefaults.csproj",
+      "scope": "runtime",
+      "relationship": "unknown"
+    },
+    "security_advisory": {
+      "ghsa_id": "GHSA-mr8r-92fq-pj8p",
+      "cve_id": "CVE-2026-40891",
+      "summary": "OpenTelemetry dotnet: Unbounded `grpc-status-details-bin` parsing in OTLP/gRPC retry handling",
+      "description": "### Summary\n\nWhen exporting telemetry over gRPC using the OpenTelemetry Protocol (OTLP), the exporter may parse a server-provided `grpc-status-details-bin` trailer during retry handling. Prior to the fix, a malformed trailer could encode an extremely large length-delimited protobuf field which was used directly for allocation, allowing excessive memory allocation and potential denial of service (DoS).\n\n### Details\n\n#5980 introduced a retry path that parses `grpc-status-details-bin` to extract gRPC retry delay information for retryable responses.\n\nOn that path:\n\n- `OtlpGrpcExportClient` captures `grpc-status-details-bin` from retryable status responses (`ResourceExhausted` / `Unavailable`).\n- `OtlpRetry` invokes `GrpcStatusDeserializer.TryGetGrpcRetryDelay` using this untrusted trailer value.\n- `GrpcStatusDeserializer.DecodeBytes` decoded a protobuf varint length and allocated `new byte[length]` without validating the bounds against the remaining payload size.\n\nA malicious or compromised collector (or a MitM in weakly-protected deployments) could return a crafted `grpc-status-details-bin` payload that forces oversized allocation and memory exhaustion in the instrumented process.\n\n### Impact\n\nIf an OTLP/gRPC endpoint is attacker-controlled (or traffic is intercepted), a crafted retryable response can trigger large allocations during trailer parsing, which may exhaust memory and cause process instability/crash (availability impact / DoS).\n\n### Mitigation\n\nThe application's configured back-end/collector endpoint needs to behave maliciously. If the collector/back-end is a well-behaved implementation response bodies should not be excessively large if a request error occurs.\n\n### Workarounds\n\nNone known.\n\n### Remediation\n\n[#7064](https://github.com/open-telemetry/opentelemetry-dotnet/pull/7064) updates `GrpcStatusDeserializer` to validate decoded length-delimited field sizes before allocation by ensuring the requested length is sane and does not exceed the remaining payload.\n\nThis causes malformed or truncated `grpc-status-details-bin` payloads to fail safely instead of attempting unbounded allocation.",
+      "severity": "medium",
+      "identifiers": [
+        {
+          "value": "GHSA-mr8r-92fq-pj8p",
+          "type": "GHSA"
+        },
+        {
+          "value": "CVE-2026-40891",
+          "type": "CVE"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://github.com/open-telemetry/opentelemetry-dotnet/security/advisories/GHSA-mr8r-92fq-pj8p"
+        },
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-40891"
+        },
+        {
+          "url": "https://github.com/open-telemetry/opentelemetry-dotnet/pull/5980"
+        },
+        {
+          "url": "https://github.com/open-telemetry/opentelemetry-dotnet/pull/7064"
+        },
+        {
+          "url": "https://github.com/advisories/GHSA-mr8r-92fq-pj8p"
+        }
+      ],
+      "published_at": "2026-04-23T21:40:29Z",
+      "updated_at": "2026-04-23T21:40:31Z",
+      "withdrawn_at": null,
+      "vulnerabilities": [
+        {
+          "package": {
+            "ecosystem": "nuget",
+            "name": "OpenTelemetry.Exporter.OpenTelemetryProtocol"
+          },
+          "severity": "medium",
+          "vulnerable_version_range": ">= 1.13.1, < 1.15.3",
+          "first_patched_version": {
+            "identifier": "1.15.3"
+          }
+        }
+      ],
+      "cvss_severities": {
+        "cvss_v3": {
+          "vector_string": "CVSS:3.1/AV:A/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "score": 5.3
+        },
+        "cvss_v4": {
+          "vector_string": null,
+          "score": 0.0
+        }
+      },
+      "epss": {
+        "percentage": 0.00287,
+        "percentile": 0.18839
+      },
+      "cvss": {
+        "vector_string": "CVSS:3.1/AV:A/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+        "score": 5.3
+      },
+      "cwes": [
+        {
+          "cwe_id": "CWE-789",
+          "name": "Memory Allocation with Excessive Size Value"
+        }
+      ],
+      "classification": "general"
+    },
+    "security_vulnerability": {
+      "package": {
+        "ecosystem": "nuget",
+        "name": "OpenTelemetry.Exporter.OpenTelemetryProtocol"
+      },
+      "severity": "medium",
+      "vulnerable_version_range": ">= 1.13.1, < 1.15.3",
+      "first_patched_version": {
+        "identifier": "1.15.3"
+      }
+    },
+    "url": "https://api.github.com/repos/alanta/azure-egress-proxy/dependabot/alerts/2",
+    "html_url": "https://github.com/alanta/azure-egress-proxy/security/dependabot/2",
+    "created_at": "2026-07-02T14:14:05Z",
+    "updated_at": "2026-07-02T14:15:13Z",
+    "dismissal_request": null,
+    "assignees": [],
+    "dismissed_at": null,
+    "dismissed_by": null,
+    "dismissed_reason": null,
+    "dismissed_comment": null,
+    "fixed_at": "2026-07-02T14:15:13Z",
+    "auto_dismissed_at": null
+  },
+  {
+    "number": 1,
+    "state": "fixed",
+    "dependency": {
+      "package": {
+        "ecosystem": "nuget",
+        "name": "OpenTelemetry.Exporter.OpenTelemetryProtocol"
+      },
+      "manifest_path": "src/ServiceDefaults/ServiceDefaults.csproj",
+      "scope": "runtime",
+      "relationship": "unknown"
+    },
+    "security_advisory": {
+      "ghsa_id": "GHSA-q834-8qmm-v933",
+      "cve_id": "CVE-2026-40182",
+      "summary": "OpenTelemetry dotnet: OTLP exporter reads unbounded HTTP response bodies",
+      "description": "### Summary\n\nWhen exporting telemetry to a back-end/collector over gRPC or HTTP using OpenTelemetry Protocol format (OTLP), if the request results in a unsuccessful request (i.e. HTTP 4xx or 5xx), the response is read into memory with no upper-bound on the number of bytes consumed.\n\nThis could cause memory exhaustion in the consuming application if the configured back-end/collector endpoint is attacker-controlled (or a network attacker can MitM the connection) and an extremely large body is returned by the response.\n\n### Details\n\nhttps://github.com/open-telemetry/opentelemetry-dotnet/pull/6564 introduced a change to read the response body when a non-200 HTTP status code is received when exporting telemetry to aid debugging by operators so that the error response is included in the logs emitted by the exporter for both [gRPC](https://github.com/open-telemetry/opentelemetry-dotnet/blob/640cf63628567b76b348b26988920dbc0b5c1662/src/OpenTelemetry.Exporter.OpenTelemetryProtocol/Implementation/ExportClient/OtlpGrpcExportClient.cs#L123-L134) and [HTTP/protobuf](https://github.com/open-telemetry/opentelemetry-dotnet/blob/640cf63628567b76b348b26988920dbc0b5c1662/src/OpenTelemetry.Exporter.OpenTelemetryProtocol/Implementation/ExportClient/OtlpHttpExportClient.cs#L36-L41).\n\nAn unintended consequence of this change is that the response body is [fully read into memory when received with no upper-bound](https://github.com/open-telemetry/opentelemetry-dotnet/blob/640cf63628567b76b348b26988920dbc0b5c1662/src/OpenTelemetry.Exporter.OpenTelemetryProtocol/Implementation/ExportClient/OtlpExportClient.cs#L68-L89).\n\nThis vulnerability was surfaced during the investigation of GHSA-w8rr-5gcm-pp58.\n\n### Impact\n\nIf an application using the OTLP exporter is configured to use a back-end/collector endpoint that is attacker-controlled (or a network attacker can MitM the connection) and an extremely large body is returned by the response the application could have its memory exhausted and create a denial-of-service condition.\n\n### Mitigation\n\nThe application's configured back-end/collector endpoint needs to behave maliciously. If the collector/back-end is a well-behaved implementation response bodies should not be excessively large if a request error occurs.\n\n### Workarounds\n\nNone known.\n\n### Remediation\n\n[#7017](https://github.com/open-telemetry/opentelemetry-dotnet/pull/7017) updates the OTLP exporter for both gRPC and HTTP to:\n\n- Limit the number of bytes read from the response body in an error condition to 4MiB (see https://github.com/open-telemetry/opentelemetry-proto/pull/781);\n- Only attempt to read the response body if OpenTelemetry error logging is enabled.",
+      "severity": "medium",
+      "identifiers": [
+        {
+          "value": "GHSA-q834-8qmm-v933",
+          "type": "GHSA"
+        },
+        {
+          "value": "CVE-2026-40182",
+          "type": "CVE"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://github.com/open-telemetry/opentelemetry-dotnet/security/advisories/GHSA-q834-8qmm-v933"
+        },
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-40182"
+        },
+        {
+          "url": "https://github.com/open-telemetry/opentelemetry-dotnet/pull/6564"
+        },
+        {
+          "url": "https://github.com/open-telemetry/opentelemetry-dotnet/pull/7017"
+        },
+        {
+          "url": "https://github.com/open-telemetry/opentelemetry-proto/pull/781"
+        },
+        {
+          "url": "https://github.com/advisories/GHSA-q834-8qmm-v933"
+        }
+      ],
+      "published_at": "2026-04-23T21:26:10Z",
+      "updated_at": "2026-04-23T21:26:11Z",
+      "withdrawn_at": null,
+      "vulnerabilities": [
+        {
+          "package": {
+            "ecosystem": "nuget",
+            "name": "OpenTelemetry.Exporter.OpenTelemetryProtocol"
+          },
+          "severity": "medium",
+          "vulnerable_version_range": ">= 1.13.1, < 1.15.2",
+          "first_patched_version": {
+            "identifier": "1.15.2"
+          }
+        }
+      ],
+      "cvss_severities": {
+        "cvss_v3": {
+          "vector_string": "CVSS:3.1/AV:A/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "score": 5.3
+        },
+        "cvss_v4": {
+          "vector_string": null,
+          "score": 0.0
+        }
+      },
+      "epss": {
+        "percentage": 0.00558,
+        "percentile": 0.44518
+      },
+      "cvss": {
+        "vector_string": "CVSS:3.1/AV:A/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+        "score": 5.3
+      },
+      "cwes": [
+        {
+          "cwe_id": "CWE-789",
+          "name": "Memory Allocation with Excessive Size Value"
+        }
+      ],
+      "classification": "general"
+    },
+    "security_vulnerability": {
+      "package": {
+        "ecosystem": "nuget",
+        "name": "OpenTelemetry.Exporter.OpenTelemetryProtocol"
+      },
+      "severity": "medium",
+      "vulnerable_version_range": ">= 1.13.1, < 1.15.2",
+      "first_patched_version": {
+        "identifier": "1.15.2"
+      }
+    },
+    "url": "https://api.github.com/repos/alanta/azure-egress-proxy/dependabot/alerts/1",
+    "html_url": "https://github.com/alanta/azure-egress-proxy/security/dependabot/1",
+    "created_at": "2026-07-02T14:14:05Z",
+    "updated_at": "2026-07-02T14:15:13Z",
+    "dismissal_request": null,
+    "assignees": [],
+    "dismissed_at": null,
+    "dismissed_by": null,
+    "dismissed_reason": null,
+    "dismissed_comment": null,
+    "fixed_at": "2026-07-02T14:15:13Z",
+    "auto_dismissed_at": null
+  }
+]

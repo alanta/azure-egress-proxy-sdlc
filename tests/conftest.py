@@ -32,7 +32,14 @@ def record_from():
                 "pull_requests": [],
                 "scan_only": [],
             },
-            "gaps": [],
+            # A record either has the alerts or says why it doesn't.
+            "gaps": [
+                {
+                    "kind": "unavailable_source",
+                    "subject": "dependabot-alerts",
+                    "reason": "Not read in this test.",
+                }
+            ],
         }
 
     return as_record

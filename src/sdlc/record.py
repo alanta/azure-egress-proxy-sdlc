@@ -41,6 +41,8 @@ def _consistency_problems(record: dict[str, Any]) -> list[str]:
     ]
     if "captured_at" in record["parity"]:
         timestamps.append(("$.parity.captured_at", record["parity"]["captured_at"]))
+    if "dependabot_alerts" in record:
+        timestamps.append(("$.dependabot_alerts.read_at", record["dependabot_alerts"]["read_at"]))
     for path, value in timestamps:
         try:
             parsed = datetime.fromisoformat(value)
@@ -70,6 +72,12 @@ def _consistency_problems(record: dict[str, Any]) -> list[str]:
         (f"$.parity.scan_only[{i}]", dep_id)
         for i, dep_id in enumerate(record["parity"]["scan_only"])
     ]
+    alerts = record.get("dependabot_alerts", {}).get("alerts", [])
+    references += [
+        (f"$.dependabot_alerts.alerts[{i}].dependency", a["dependency"])
+        for i, a in enumerate(alerts)
+        if "dependency" in a
+    ]
     for path, dep_id in references:
         if dep_id not in lookup_state:
             problems.append(f"{path}: unknown dependency id {dep_id!r}")
@@ -81,8 +89,50 @@ def _consistency_problems(record: dict[str, Any]) -> list[str]:
         if state != "outdated" and dep_id in with_candidates:
             problems.append(f"$.candidates: {dep_id!r} has candidates but its lookup is {state!r}")
 
+    problems += _alert_problems(record)
+
     pull_requests = record["parity"]["pull_requests"]
     if any(pr["state"] == "unparseable" for pr in pull_requests) and record["parity"]["complete"]:
         problems.append("$.parity.complete: true although a pull request is unparseable")
 
+    return problems
+
+
+def _alert_problems(record: dict[str, Any]) -> list[str]:
+    """The alerts are either read or a gap says why not; matches point both ways."""
+    problems = []
+    unread = any(
+        g["kind"] == "unavailable_source" and g["subject"] == "dependabot-alerts"
+        for g in record["gaps"]
+    )
+    section = record.get("dependabot_alerts")
+    if section is None and not unread:
+        problems.append("$.dependabot_alerts: missing, and no gap says why the alerts weren't read")
+    if section is not None and unread:
+        problems.append("$.dependabot_alerts: present, but a gap says the alerts weren't read")
+
+    if section is not None and section["is_scanned_commit"] != (
+        section["commit"] == record["subject"]["commit"]
+    ):
+        problems.append("$.dependabot_alerts.is_scanned_commit: disagrees with the commits")
+
+    results: dict[int, str] = {}
+    for i, a in enumerate((section or {}).get("alerts", [])):
+        if a["number"] in results:
+            problems.append(f"$.dependabot_alerts.alerts[{i}]: duplicate alert {a['number']}")
+        results[a["number"]] = a["result"]
+    matched = ("matched", "matched_elsewhere")
+    cited: set[int] = set()
+    for i, v in enumerate(record["vulnerabilities"]):
+        for number in v.get("dependabot_alerts", []):
+            cited.add(number)
+            if results.get(number) not in matched:
+                problems.append(
+                    f"$.vulnerabilities[{i}].dependabot_alerts: alert {number} isn't matched"
+                )
+    for number, result in results.items():
+        if result in matched and number not in cited:
+            problems.append(
+                f"$.dependabot_alerts: alert {number} is matched but no vulnerability lists it"
+            )
     return problems
