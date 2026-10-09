@@ -24,33 +24,6 @@ def candidates_for(inventory, dep_id):
     }
 
 
-def as_record(inventory):
-    return {
-        "schema_version": "1",
-        "subject": {
-            "repository": "alanta/azure-egress-proxy",
-            "ref": "main",
-            "commit": "064aa099ecf7ffea9664b89df29f7d89d6859358",
-        },
-        "scanned_at": AT,
-        "tools": [{"name": "renovate", "version": "44.145.1"}],
-        "policy": {"source": "none"},
-        "inventory": inventory.dependencies,
-        "candidates": inventory.candidates,
-        "vulnerabilities": [],
-        "lifecycle": [],
-        "inconsistencies": [],
-        "cross_checks": [],
-        "parity": {
-            "baseline": "dependabot",
-            "complete": True,
-            "pull_requests": [],
-            "scan_only": [],
-        },
-        "gaps": [],
-    }
-
-
 @pytest.fixture(scope="module")
 def scanned():
     return normalize(load("report-with-scan-config.json"), looked_up_at=AT)
@@ -72,8 +45,8 @@ def test_every_dependency_in_the_report_is_in_the_inventory(scanned):
 
 
 @pytest.mark.parametrize("name", ["report-with-scan-config.json", "report-without-token.json"])
-def test_normalized_reports_make_valid_records(name):
-    assert validate_record(as_record(normalize(load(name), looked_up_at=AT))) == []
+def test_normalized_reports_make_valid_records(name, record_from):
+    assert validate_record(record_from(normalize(load(name), looked_up_at=AT))) == []
 
 
 def test_outdated_dependency_gets_its_candidate_and_lookup_details(scanned):

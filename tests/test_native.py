@@ -63,3 +63,67 @@ def test_a_direct_update_the_scan_lacks_is_a_disagreement(dotnet, scanned):
 def test_transitive_updates_are_not_cross_checked(scanned):
     transitive = NativeUpdate("dotnet", "Some.Transitive", "1.0.0", "2.0.0", False, "a.csproj")
     assert cross_check([transitive], scanned.dependencies, scanned.candidates) == []
+
+
+def test_lock_drift_lists_locked_entries_older_than_declared(dotnet, scanned):
+    from sdlc.native import lock_drift
+
+    entries, candidates = lock_drift(dotnet, scanned.dependencies, looked_up_at=AT)
+    drift = {
+        (e["location"]["file"], e["name"]): (e["current"], c["version"], c["update_type"])
+        for e, c in zip(entries, candidates, strict=True)
+    }
+    assert drift == {
+        ("src/AppHost/packages.lock.json", "Microsoft.Extensions.Http"): (
+            "10.0.11",
+            "10.0.12",
+            "patch",
+        ),
+        ("src/AppHost/packages.lock.json", "OpenTelemetry.Exporter.OpenTelemetryProtocol"): (
+            "1.15.3",
+            "1.19.1",
+            "minor",
+        ),
+        ("src/AppHost/packages.lock.json", "OpenTelemetry.Extensions.Hosting"): (
+            "1.15.3",
+            "1.19.1",
+            "minor",
+        ),
+        ("src/ControlPlane/packages.lock.json", "System.IdentityModel.Tokens.Jwt"): (
+            "8.19.2",
+            "8.23.0",
+            "minor",
+        ),
+        ("src/EgressProxy.Client.Tests/packages.lock.json", "Azure.Core"): (
+            "1.53.0",
+            "1.62.0",
+            "minor",
+        ),
+        ("src/EgressProxy.Client/packages.lock.json", "Azure.Core"): ("1.53.0", "1.62.0", "minor"),
+        ("src/AppHost/AllowlistSeeder/packages.lock.json", "Azure.Core"): (
+            "1.55.0",
+            "1.62.0",
+            "minor",
+        ),
+    }
+    assert all(e["origin"] == "locked" for e in entries)
+
+
+def test_lock_drift_entries_make_a_valid_record(dotnet, scanned, record_from):
+    from sdlc.native import lock_drift
+    from sdlc.record import validate_record
+
+    entries, candidates = lock_drift(dotnet, scanned.dependencies, looked_up_at=AT)
+    inventory = type(scanned)(scanned.dependencies + entries, scanned.candidates + candidates)
+    assert validate_record(record_from(inventory)) == []
+
+
+def test_up_to_date_and_undeclared_transitive_packages_are_not_drift(scanned):
+    from sdlc.native import lock_drift
+
+    native = [
+        NativeUpdate("dotnet", "Azure.Core", "1.62.0", "1.63.0", False, "src/A/A.csproj"),
+        NativeUpdate("dotnet", "Not.Declared", "1.0.0", "2.0.0", False, "src/A/A.csproj"),
+        NativeUpdate("go", "golang.org/x/crypto", "v0.55.0", "v0.57.0", False, "proxy/go.mod"),
+    ]
+    assert lock_drift(native, scanned.dependencies, looked_up_at=AT) == ([], [])

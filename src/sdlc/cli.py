@@ -72,6 +72,12 @@ def scan(repository: str, ref: str, trial_policy: Path | None = None) -> int:
             disagreements = native.cross_check(
                 native_updates, inventory.dependencies, inventory.candidates
             )
+            drifted, drift_candidates = native.lock_drift(
+                native_updates, inventory.dependencies, looked_up_at=looked_up_at, checkout=path
+            )
+            inventory = renovate.Inventory(
+                inventory.dependencies + drifted, inventory.candidates + drift_candidates
+            )
     except (SubjectError, renovate.RenovateError) as error:
         print(f"error: {error}; no record written", file=sys.stderr)
         return 1
@@ -84,6 +90,8 @@ def scan(repository: str, ref: str, trial_policy: Path | None = None) -> int:
     )
     for gap in gaps:
         print(f"  gap: {gap['subject']}: {gap['reason']}")
+    for dep in drifted:
+        print(f"  lock drift: {dep['location']['file']}: {dep['name']} {dep['current']}")
     print(f"{len(disagreements)} disagreements with the package managers")
     for d in disagreements:
         print(

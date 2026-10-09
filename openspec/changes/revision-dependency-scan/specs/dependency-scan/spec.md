@@ -22,7 +22,7 @@ The scan SHALL take a subject repository and a ref, resolve the ref to a commit 
 
 ### Requirement: Inventory declared dependencies
 
-The scan SHALL list every dependency declared in the revision for each supported source type, with its ecosystem, name, current version or constraint, whether it is direct or resolved from a lockfile, and the file and location that declares it.
+The scan SHALL list every dependency declared in the revision for each supported source type, with its ecosystem, name, current version or constraint, and the file and location that declares it. Dependencies that are only resolved in a lock file are listed only as the next two requirements describe.
 
 #### Scenario: Supported sources appear in the inventory
 
@@ -33,6 +33,20 @@ The scan SHALL list every dependency declared in the revision for each supported
 
 - **WHEN** one dependency is declared in more than one file
 - **THEN** the inventory lists each declaration with its own location and version
+
+### Requirement: Report lock-file drift
+
+When a lock file resolves a dependency at an older version than the repository declares for it elsewhere, such as a central package version, the scan SHALL list the locked entry with its lock file, its locked version, and the newer version as a candidate. Other dependencies that only appear in lock files SHALL NOT be listed.
+
+#### Scenario: A lock file lags behind the central version
+
+- **WHEN** `Directory.Packages.props` declares `Microsoft.Extensions.Http` 10.0.12 and AppHost's lock file resolves it at 10.0.11
+- **THEN** the inventory lists AppHost's locked entry at 10.0.11, with 10.0.12 as a candidate
+
+#### Scenario: A transitive dependency is merely outdated
+
+- **WHEN** a lock file resolves a dependency the repository doesn't declare, and a newer version exists
+- **THEN** the dependency is not listed, unless a known vulnerability concerns it
 
 ### Requirement: Report coverage gaps
 
@@ -99,6 +113,11 @@ The scan SHALL report known vulnerabilities in the inventoried versions, with th
 
 - **WHEN** an inventoried version matches an advisory with a fixed version
 - **THEN** the record lists the advisory, the fixed version, and whether an update candidate reaches the fixed version
+
+#### Scenario: A vulnerability concerns an indirect dependency
+
+- **WHEN** an advisory matches a dependency that only appears in a lock file or as an indirect module
+- **THEN** the inventory lists that dependency as a locked entry, so the vulnerability can refer to it
 
 #### Scenario: Reachability can't be determined
 
