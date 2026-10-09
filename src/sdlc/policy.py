@@ -229,6 +229,58 @@ def _as_list(value: Any) -> list:
     return [value] if isinstance(value, str) else list(value)
 
 
+def reconcile(
+    baseline: Inventory,
+    main: Inventory,
+    dependencies: dict[str, dict[str, Any]],
+    policy: Policy,
+) -> tuple[Inventory, Inventory]:
+    """Both runs, with a dependency only one of them could look up made `unknown` in both.
+
+    Classifying needs both lookups: the run with the policy says which candidates it lets
+    through, and the run without its holds finds the candidates they hold. When the lookup
+    failed in either run (a registry hiccup, a rate limit), the difference between them says
+    nothing about the policy. So the dependency becomes `unknown` with the run and Renovate's
+    message, its candidates are dropped from both runs instead of being guessed at, and the
+    scan carries on. A skip under the policy counts as a failure too, unless a rule turns the
+    whole dependency off. Lookups that failed in both runs alike are left as they are.
+    """
+    main_lookups = {d["id"]: d["lookup"] for d in main.dependencies}
+    failed: dict[str, str] = {}
+    for dep in baseline.dependencies:
+        dep_id, lookup = dep["id"], dep["lookup"]
+        other = main_lookups.get(dep_id)
+        if lookup["state"] in ("outdated", "current"):
+            if other is None:
+                failed[dep_id] = "Renovate's run with the policy didn't list it"
+            elif other["state"] == "unknown":
+                failed[dep_id] = f"Renovate's lookup with the policy failed: {other['reason']}"
+            elif other["state"] == "skipped" and not _disabling(
+                dependencies[dep_id], policy, dependency_level=True
+            ):
+                failed[dep_id] = f"Renovate skipped it with the policy: {other['reason']}"
+        elif lookup["state"] == "unknown" and other and other["state"] in ("outdated", "current"):
+            failed[dep_id] = (
+                f"Renovate's lookup without the policy's holds failed: {lookup['reason']}"
+            )
+    if not failed:
+        return baseline, main
+
+    def unknown(dep: dict[str, Any]) -> dict[str, Any]:
+        if dep["id"] not in failed:
+            return dep
+        reason = f"{failed[dep['id']].rstrip('.')}; so its candidates can't be classified."
+        return {**dep, "lookup": {**dep["lookup"], "state": "unknown", "reason": reason}}
+
+    def kept(inventory: Inventory) -> Inventory:
+        return Inventory(
+            [unknown(d) for d in inventory.dependencies],
+            [c for c in inventory.candidates if c["dependency"] not in failed],
+        )
+
+    return kept(baseline), kept(main)
+
+
 def classify(
     baseline: list[dict[str, Any]],
     main: Inventory | None,
@@ -258,7 +310,8 @@ def classify(
             if not holding:
                 lookup = lookups.get(dep_id, {"state": "missing"})
                 if lookup["state"] not in ("outdated", "current"):
-                    # Without a lookup, a missing candidate says nothing about the policy.
+                    # Without a lookup, a missing candidate says nothing about the policy;
+                    # reconcile() turns such dependencies into `unknown` before this.
                     raise PolicyError(
                         f"Renovate's lookup of {dep_id} with the policy ended "
                         f"{lookup['state']} ({lookup.get('reason', 'no reason given')}), so "

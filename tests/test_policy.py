@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+from sdlc import osv
 from sdlc.policy import (
     NO_POLICY,
     PolicyError,
@@ -11,6 +12,7 @@ from sdlc.policy import (
     load,
     match_list,
     matches,
+    reconcile,
 )
 from sdlc.record import validate_record
 from sdlc.renovate import Inventory, match_fields, normalize
@@ -475,3 +477,160 @@ def test_an_unreadable_trial_policy_fails(tmp_path, checkout):
     (tmp_path / "trial.json5").write_bytes(b"\xff\xfe{")
     with pytest.raises(PolicyError, match="can't be read"):
         load(checkout, tmp_path / "trial.json5", validate=accept)
+
+
+def reconciled(baseline, main, active):
+    """Both runs reconciled, then classified, as the scan does it."""
+    inventory, with_policy = reconcile(
+        normalize(baseline, looked_up_at=AT),
+        normalize(main, looked_up_at=AT),
+        match_fields(baseline),
+        active,
+    )
+    candidates = classify(inventory.candidates, with_policy, match_fields(baseline), active)
+    lookups = {d["id"].split(":")[-1]: d["lookup"] for d in inventory.dependencies}
+    return Inventory(inventory.dependencies, candidates), lookups
+
+
+def failing(found, name, **fields):
+    """The report with one dependency's lookup failed as Renovate reports it."""
+    found = json.loads(json.dumps(found))
+    for dep in found["repositories"]["local"]["packageFiles"]["nuget"][0]["deps"]:
+        if dep["depName"] == name:
+            dep["updates"] = []
+            dep.update(fields)
+    return found
+
+
+NO_RESULT = {"warnings": [{"message": "Failed to look up nuget package Humanizer.Core: no-result"}]}
+
+
+def test_a_lookup_failing_only_with_the_policy_makes_the_dependency_unknown(
+    tmp_path, checkout, record_from
+):
+    active = policy_from(tmp_path, HUMANIZER_CAP)
+    baseline = report(
+        ("Humanizer.Core", "2.8.26", {"2.14.1": "minor"}), ("Serilog", "4.3.0", {"4.4.0": "minor"})
+    )
+    main = failing(baseline, "Humanizer.Core", **NO_RESULT)
+    inventory, lookups = reconciled(baseline, main, active)
+
+    assert lookups["Humanizer.Core"]["state"] == "unknown"
+    assert lookups["Humanizer.Core"]["reason"] == (
+        "Renovate's lookup with the policy failed: Failed to look up nuget package "
+        "Humanizer.Core: no-result; so its candidates can't be classified."
+    )
+    # Its candidate is dropped rather than guessed at; the rest of the scan carries on.
+    assert [(c["dependency"].split(":")[-1], c["version"]) for c in inventory.candidates] == [
+        ("Serilog", "4.4.0")
+    ]
+    assert lookups["Serilog"]["state"] == "outdated"
+    assert validate_record(record_from(inventory)) == []
+
+
+def test_a_lookup_failing_only_without_the_holds_makes_the_dependency_unknown(
+    tmp_path, checkout, record_from
+):
+    active = policy_from(tmp_path, HUMANIZER_CAP)
+    main = report(("Humanizer.Core", "2.8.26", {"2.9.9": "minor"}))
+    # Rate limited in the run that finds what the holds hold back.
+    baseline = failing(main, "Humanizer.Core", skipReason="rate-limited")
+    inventory, lookups = reconciled(baseline, main, active)
+
+    assert lookups["Humanizer.Core"]["state"] == "unknown"
+    assert lookups["Humanizer.Core"]["reason"].startswith(
+        "Renovate's lookup without the policy's holds failed: "
+    )
+    # 2.9.9 is only in the run with the policy; alone, it would have failed the scan.
+    assert inventory.candidates == []
+    assert validate_record(record_from(inventory)) == []
+
+
+def test_a_skip_only_with_the_policy_is_unknown_unless_a_rule_explains_it(tmp_path, checkout):
+    baseline = report(("Serilog", "4.3.0", {"5.0.0": "major"}))
+    main = failing(baseline, "Serilog", skipReason="invalid-version")
+    _, lookups = reconciled(baseline, main, policy_from(tmp_path, HUMANIZER_CAP))
+    assert lookups["Serilog"]["state"] == "unknown"
+    assert "Renovate skipped it with the policy" in lookups["Serilog"]["reason"]
+
+    # ignoreDeps turns the whole dependency off: the skip is the policy's, and it holds.
+    main = failing(baseline, "Serilog", skipReason="ignored")
+    inventory, lookups = reconciled(
+        baseline, main, policy_from(tmp_path, '{ignoreDeps: ["Serilog"]}')
+    )
+    assert lookups["Serilog"]["state"] == "outdated"
+    assert [c["held_by"] for c in inventory.candidates] == ["ignoreDeps"]
+
+
+def test_a_lookup_failing_in_both_runs_is_left_as_renovate_reported_it(tmp_path, checkout):
+    found = failing(report(("Serilog", "4.3.0", {})), "Serilog", skipReason="rate-limited")
+    _, lookups = reconciled(found, found, policy_from(tmp_path, HUMANIZER_CAP))
+    assert lookups["Serilog"] == {
+        "state": "unknown",
+        "reason": "Renovate skipped it: rate-limited.",
+        "datasource": "nuget",
+    }
+
+
+def test_a_candidate_a_successful_lookup_drops_for_no_rule_still_fails(tmp_path, checkout):
+    active = policy_from(tmp_path, HUMANIZER_CAP)
+    baseline = report(("Serilog", "4.3.0", {"5.0.0": "major"}))
+    main = report(("Serilog", "4.3.0", {}))
+    with pytest.raises(PolicyError, match="no hold rule in the policy matches it"):
+        reconciled(baseline, main, active)
+
+
+@pytest.mark.parametrize(("fails", "reached"), [(False, True), (True, "unknown")])
+def test_a_fix_is_not_judged_on_candidates_that_were_dropped(tmp_path, checkout, fails, reached):
+    active = policy_from(tmp_path, HUMANIZER_CAP)
+    baseline = report(("Humanizer.Core", "2.8.26", {"2.9.9": "minor"}))
+    main = failing(baseline, "Humanizer.Core", **NO_RESULT) if fails else baseline
+    inventory, _ = reconciled(baseline, main, active)
+    output = {
+        "results": [
+            {
+                "source": {"path": "/src/src/App/packages.lock.json"},
+                "packages": [
+                    {
+                        "package": {
+                            "ecosystem": "NuGet",
+                            "name": "Humanizer.Core",
+                            "version": "2.8.26",
+                        },
+                        "vulnerabilities": [
+                            {
+                                "id": "GHSA-aaaa-bbbb-cccc",
+                                "affected": [
+                                    {
+                                        "package": {"ecosystem": "NuGet", "name": "Humanizer.Core"},
+                                        "ranges": [
+                                            {
+                                                "type": "ECOSYSTEM",
+                                                "events": [{"introduced": "0"}, {"fixed": "2.9.0"}],
+                                            }
+                                        ],
+                                    }
+                                ],
+                            }
+                        ],
+                    }
+                ],
+            }
+        ]
+    }
+    found = osv.findings(
+        output, inventory.dependencies, inventory.candidates, indirect=set(), looked_up_at=AT
+    )
+    (vulnerability,) = found.vulnerabilities
+    # Without its candidates, nothing says whether an update reaches the fix: unknown, not no.
+    assert vulnerability["fix_reached_by_candidate"] == reached
+    assert found.candidates == []
+    # govulncheck's standard library findings go through the same judgement.
+    (entry,) = inventory.dependencies
+    advisory = osv.Advisory(
+        "GHSA-aaaa-bbbb-cccc", [], output["results"][0]["packages"][0]["vulnerabilities"]
+    )
+    judged = osv.vulnerability(
+        entry, inventory.candidates, advisory, "NuGet", "Humanizer.Core", "2.8.26"
+    )
+    assert judged["fix_reached_by_candidate"] == reached
