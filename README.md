@@ -109,4 +109,5 @@ uv run ruff check && uv run ruff format --check
 ## Further reading
 
 - [Dependency and validation discovery](docs/azure-egress-proxy-dependency-pass.md): manual inventory of the subject at `064aa09`.
+- [What the scan covers](docs/scan-coverage.md): sources, lookup states, locked entries and known gaps.
 - [Tooling spike](docs/tooling-spike.md): Renovate, OSV-Scanner and the PydanticAI/Copilot trial.
