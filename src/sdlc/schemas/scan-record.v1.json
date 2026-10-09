@@ -366,10 +366,25 @@
             "string",
             "null"
           ],
-          "description": "null when no fix exists."
+          "description": "null when the advisory names no fixed version."
+        },
+        "last_affected": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The advisory's last affected version, when it states that instead of a fixed version: a fix exists, and any version above this one has it."
         },
         "fix_reached_by_candidate": {
-          "type": "boolean"
+          "enum": [
+            true,
+            false,
+            "unknown"
+          ],
+          "description": "Whether an in-scope update candidate of the dependency is outside the advisory; unknown when its lookup failed or the advisory's ranges can't be evaluated. Present whenever a fixed or last affected version is."
+        },
+        "fix_held_by": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The policy rule holding the only candidates that reach the fix."
         },
         "source": {
           "type": "string",
@@ -382,7 +397,49 @@
             "unknown"
           ]
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "fixed_version": {
+                "type": "string"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "fix_reached_by_candidate"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "last_affected"
+            ]
+          },
+          "then": {
+            "required": [
+              "fix_reached_by_candidate"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "fix_held_by"
+            ]
+          },
+          "then": {
+            "properties": {
+              "fix_reached_by_candidate": {
+                "const": false
+              }
+            }
+          }
+        }
+      ]
     },
     "lifecycle": {
       "type": "object",

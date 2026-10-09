@@ -286,6 +286,19 @@ def match_fields(report: dict) -> dict[str, dict[str, Any]]:
     }
 
 
+def indirect(report: dict) -> set[str]:
+    """Ids of the Go modules go.mod requires only indirectly.
+
+    Renovate lists them but skips them by default. They record what the build resolved, not
+    what the repository asks for, so the scan treats them like lock-file entries.
+    """
+    return {
+        dep_id
+        for manager, _, dep, dep_id in _dependencies(report)
+        if manager == "gomod" and dep.get("depType") == "indirect"
+    }
+
+
 def _dependencies(report: dict) -> Iterator[tuple[str, str, dict, str]]:
     """Each dependency in the report with its manager, file and id, in report order."""
     repositories = report.get("repositories") or {}

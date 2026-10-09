@@ -247,7 +247,7 @@ def lock_drift(
 
         dep_id = f"locked:{lock_file}:{update.name}"
         location: dict[str, Any] = {"file": lock_file}
-        line = _line_naming(checkout, lock_file, update.name)
+        line = line_naming(checkout, lock_file, update.name)
         if line:
             location["line"] = line
         entries.append(
@@ -284,7 +284,8 @@ def update_type(current: Version, target: Version) -> str:
     return "patch"
 
 
-def _line_naming(checkout: Path | None, file: str, name: str) -> int | None:
+def line_naming(checkout: Path | None, file: str, name: str) -> int | None:
+    """The line a `packages.lock.json` entry for the package starts on."""
     if checkout is None or not (checkout / file).exists():
         return None
     for number, line in enumerate((checkout / file).read_text().splitlines(), 1):

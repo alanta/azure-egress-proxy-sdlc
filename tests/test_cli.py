@@ -43,7 +43,7 @@ def offline_scan(monkeypatch, tmp_path):
     """Run `scan` against an empty checkout, with Renovate and the native queries faked."""
     from contextlib import contextmanager
 
-    from sdlc import cli, coverage, native, renovate
+    from sdlc import cli, coverage, native, osv, renovate
     from sdlc.subject import Revision
 
     @contextmanager
@@ -75,6 +75,8 @@ def offline_scan(monkeypatch, tmp_path):
     monkeypatch.setattr(coverage, "gaps", lambda path, report: [])
     monkeypatch.setattr(native, "dotnet_updates", lambda path: [])
     monkeypatch.setattr(native, "go_updates", lambda path: [])
+    monkeypatch.setattr(osv, "lock_files", lambda path: [])
+    monkeypatch.setattr(osv, "run", lambda path, files: {"results": []})
     return runs
 
 
@@ -110,3 +112,19 @@ def test_scan_with_an_invalid_policy_fails_before_renovate_runs(offline_scan, tm
     err = capsys.readouterr().err
     assert "has no description to name it by; no record written" in err
     assert offline_scan == []
+
+
+def test_scan_without_osv_scanner_reports_vulnerabilities_as_unknown(
+    offline_scan, monkeypatch, capsys
+):
+    from sdlc import osv
+
+    def broken(path, files):
+        raise osv.OsvError("OSV-Scanner failed (127): could not reach api.osv.dev")
+
+    monkeypatch.setattr(osv, "run", broken)
+    assert main(["scan", "--repo", "alanta/demo"]) == 1
+    out = capsys.readouterr().out
+    assert "gap: osv-scanner: OSV-Scanner failed (127): could not reach api.osv.dev" in out
+    assert "vulnerabilities: unknown" in out
+    assert "advisories" not in out
