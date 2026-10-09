@@ -124,6 +124,14 @@
       ]
     }
   ],
+  "consistency": [
+    {
+      "dependency": "Aspire",
+      "compared": [
+        "nuget:src/AppHost/AppHost.csproj:Aspire.AppHost.Sdk"
+      ]
+    }
+  ],
   "inconsistencies": [],
   "cross_checks": [],
   "parity": {

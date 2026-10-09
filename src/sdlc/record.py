@@ -78,6 +78,11 @@ def _consistency_problems(record: dict[str, Any]) -> list[str]:
         for i, a in enumerate(alerts)
         if "dependency" in a
     ]
+    references += [
+        (f"$.consistency[{i}].compared[{j}]", dep_id)
+        for i, alias in enumerate(record["consistency"])
+        for j, dep_id in enumerate(alias["compared"])
+    ]
     for path, dep_id in references:
         if dep_id not in lookup_state:
             problems.append(f"{path}: unknown dependency id {dep_id!r}")
@@ -90,11 +95,31 @@ def _consistency_problems(record: dict[str, Any]) -> list[str]:
             problems.append(f"$.candidates: {dep_id!r} has candidates but its lookup is {state!r}")
 
     problems += _alert_problems(record)
+    problems += _inconsistency_problems(record)
 
     pull_requests = record["parity"]["pull_requests"]
     if any(pr["state"] == "unparseable" for pr in pull_requests) and record["parity"]["complete"]:
         problems.append("$.parity.complete: true although a pull request is unparseable")
 
+    return problems
+
+
+def _inconsistency_problems(record: dict[str, Any]) -> list[str]:
+    """A flagged alias lists what was compared for it, each where its inventory entry is."""
+    problems = []
+    compared = {a["dependency"]: a["compared"] for a in record["consistency"]}
+    files = {d["id"]: d["location"]["file"] for d in record["inventory"]}
+    for i, inconsistency in enumerate(record["inconsistencies"]):
+        path = f"$.inconsistencies[{i}]"
+        ids = [d["dependency"] for d in inconsistency["declarations"]]
+        if compared.get(inconsistency["dependency"]) != ids:
+            problems.append(f"{path}: its declarations aren't what $.consistency compared")
+        for j, d in enumerate(inconsistency["declarations"]):
+            dep_id = d["dependency"]
+            if dep_id not in files:
+                problems.append(f"{path}.declarations[{j}]: unknown dependency id {dep_id!r}")
+            elif d["location"]["file"] != files[dep_id]:
+                problems.append(f"{path}.declarations[{j}].location: not the file of {dep_id!r}")
     return problems
 
 

@@ -24,6 +24,7 @@ def record_from():
             "candidates": inventory.candidates,
             "vulnerabilities": [],
             "lifecycle": [],
+            "consistency": [],
             "inconsistencies": [],
             "cross_checks": [],
             "parity": {

@@ -117,7 +117,7 @@ Renovate knows versions, not support windows. Without this, staying on a line th
 Logical dependencies declared through different ecosystems are listed in a table in this repository:
 
 - **Go toolchain:** the `go` and `toolchain` directives, `setup-go` `go-version`, and `golang` image tags.
-- **.NET SDK and runtime:** `global.json`, `setup-dotnet` `dotnet-version`, and `mcr.microsoft.com/dotnet/*` tags.
+- **.NET SDK and runtime:** `global.json`, `setup-dotnet` `dotnet-version`, `mcr.microsoft.com/dotnet/*` tags, and the .NET line in the devcontainer image's tag.
 - **Aspire:** the AppHost SDK version and the CLI version in the devcontainer.
 
 Versions are compared at the precision each declares: `1.25` agrees with `1.25.14`, and `1.25` disagrees with `1.27`. The table is extended when a missed inconsistency is found.

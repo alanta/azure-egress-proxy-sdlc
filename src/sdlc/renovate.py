@@ -286,6 +286,11 @@ def match_fields(report: dict) -> dict[str, dict[str, Any]]:
     }
 
 
+def entries(report: dict) -> dict[str, tuple[str, dict[str, Any]]]:
+    """Per dependency id, its manager and Renovate's own entry for it, as reported."""
+    return {dep_id: (manager, dep) for manager, _, dep, dep_id in _dependencies(report)}
+
+
 def indirect(report: dict) -> set[str]:
     """Ids of the Go modules go.mod requires only indirectly.
 

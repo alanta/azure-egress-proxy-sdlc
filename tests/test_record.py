@@ -134,6 +134,53 @@ def test_schema_rejects(record, description, change, expected):
             "alert 3 isn't matched",
         ),
         (
+            "an inconsistency declared by an unknown dependency",
+            lambda r: r["inconsistencies"].append(
+                {
+                    "dependency": "Aspire",
+                    "declarations": [
+                        {
+                            "dependency": r["inventory"][0]["id"],
+                            "location": r["inventory"][0]["location"],
+                            "version": "13.5.4",
+                        },
+                        {
+                            "dependency": "regex:.devcontainer/Dockerfile:Aspire.Cli",
+                            "location": {"file": ".devcontainer/Dockerfile", "line": 4},
+                            "version": "13.6.1",
+                        },
+                    ],
+                }
+            ),
+            "unknown dependency id 'regex:.devcontainer/Dockerfile:Aspire.Cli'",
+        ),
+        (
+            "an inconsistency that lists other declarations than were compared",
+            lambda r: r["inconsistencies"].append(
+                {
+                    "dependency": "Aspire",
+                    "declarations": [
+                        {
+                            "dependency": r["inventory"][0]["id"],
+                            "location": r["inventory"][0]["location"],
+                            "version": "13.5.4",
+                        },
+                        {
+                            "dependency": r["inventory"][0]["id"],
+                            "location": r["inventory"][0]["location"],
+                            "version": "13.6.1",
+                        },
+                    ],
+                }
+            ),
+            "its declarations aren't what $.consistency compared",
+        ),
+        (
+            "a compared declaration that isn't in the inventory",
+            lambda r: r["consistency"][0]["compared"].append("nuget:nowhere:Nothing"),
+            "$.consistency[0].compared[1]: unknown dependency id 'nuget:nowhere:Nothing'",
+        ),
+        (
             "complete parity with an unparseable PR",
             lambda r: r["parity"]["pull_requests"][0].update(state="unparseable"),
             "true although a pull request is unparseable",
