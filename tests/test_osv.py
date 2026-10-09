@@ -260,10 +260,10 @@ def test_the_cli_says_when_only_held_candidates_reach_the_fix(
     from sdlc.cli import print_vulnerabilities
 
     found = find(scanned, inventory, report, classify=holding_x_minors(tmp_path))
-    print_vulnerabilities(found, merged(inventory, found))
+    print_vulnerabilities(found.vulnerabilities, merged(inventory, found), found)
     out = capsys.readouterr().out
     assert (
-        "GO-2026-6354: fixed in v0.56.0, an in-scope candidate reaches it: no, "
+        "GO-2026-6354 (osv, unknown): fixed in v0.56.0, an in-scope candidate reaches it: no, "
         "only held candidates do (x/ modules wait)" in out
     )
 

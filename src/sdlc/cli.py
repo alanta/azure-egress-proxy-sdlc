@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from pathlib import Path
 
-from sdlc import coverage, native, osv, policy, renovate
+from sdlc import coverage, govulncheck, native, osv, policy, renovate
 from sdlc.subject import SubjectError, checkout, resolve
 
 
@@ -104,6 +104,26 @@ def scan(repository: str, ref: str, trial_policy: Path | None = None) -> int:
             found, inventory = find_vulnerabilities(
                 path, inventory, renovate.indirect(baseline), subject_policy, gaps
             )
+            runs = govulncheck.scan(path)
+            reached = govulncheck.apply(
+                runs,
+                found.vulnerabilities if found else [],
+                inventory.dependencies,
+                inventory.candidates,
+                toolchains=renovate.go_toolchains(baseline),
+                indirect=renovate.indirect(baseline),
+                looked_up_at=datetime.now(UTC).isoformat(timespec="seconds"),
+                classify=lambda candidates, fields: policy.classify(
+                    candidates, None, fields, subject_policy
+                ),
+                checkout=path,
+            )
+            gaps += reached.gaps
+            updated = {d["id"]: d for d in reached.updated}
+            inventory = renovate.Inventory(
+                [updated.get(d["id"], d) for d in inventory.dependencies] + reached.dependencies,
+                inventory.candidates + reached.candidates,
+            )
     except (SubjectError, renovate.RenovateError, policy.PolicyError) as error:
         print(f"error: {error}; no record written", file=sys.stderr)
         return 1
@@ -130,10 +150,20 @@ def scan(repository: str, ref: str, trial_policy: Path | None = None) -> int:
             f"  {d['source']}: {d['name']} {d['current']} -> {d['native_latest']}, "
             f"scan has {d['scan_candidates'] or 'nothing'}"
         )
+    for run in runs:
+        if run.platforms is not None:
+            db, modified = run.database or ("?", "?")
+            print(
+                f"govulncheck {govulncheck.VERSION} on {run.go_mod} with {run.go_version} "
+                f"for {', '.join(run.platforms)}, database {db} modified {modified}"
+            )
     if found is None:
+        # govulncheck's own findings still count, but no total may suggest that's all.
         print("vulnerabilities: unknown, OSV-Scanner didn't run (see its gap)")
+        if reached.vulnerabilities:
+            print_vulnerabilities(reached.vulnerabilities, inventory, found)
     else:
-        print_vulnerabilities(found, inventory)
+        print_vulnerabilities(reached.vulnerabilities, inventory, found)
     # Lifecycle, consistency and parity arrive with the rest of slice 1; a
     # record without them would claim there was nothing to find.
     print("error: the scan stops here for now; no record written", file=sys.stderr)
@@ -179,13 +209,23 @@ def find_vulnerabilities(
     )
 
 
-def print_vulnerabilities(found: osv.Findings, inventory: renovate.Inventory) -> None:
+def print_vulnerabilities(
+    vulnerabilities: list[dict], inventory: renovate.Inventory, found: osv.Findings | None
+) -> None:
     by_dependency: dict[str, list[dict]] = {}
-    for v in found.vulnerabilities:
+    for v in vulnerabilities:
         by_dependency.setdefault(v["dependency"], []).append(v)
+    sources = Counter(v["source"] for v in vulnerabilities)
+    reachability = Counter(v["reachability"] for v in vulnerabilities)
+    unchecked = f", {len(found.gaps)} packages OSV-Scanner couldn't check" if found else ""
     print(
-        f"{len(found.vulnerabilities)} advisories on {len(by_dependency)} dependencies "
-        f"from OSV-Scanner, {len(found.gaps)} packages it couldn't check; reachability unknown"
+        f"{len(vulnerabilities)} advisories on {len(by_dependency)} dependencies "
+        f"({', '.join(f'{n} from {s}' for s, n in sorted(sources.items())) or 'none'})"
+        f"{unchecked}; reachability: "
+        + ", ".join(
+            f"{reachability[r]} {r.replace('_', ' ')}"
+            for r in ("reachable", "not_reachable", "unknown")
+        )
     )
     entries = {d["id"]: d for d in inventory.dependencies}
     for dep_id, advisories in by_dependency.items():
@@ -200,16 +240,20 @@ def print_vulnerabilities(found: osv.Findings, inventory: renovate.Inventory) ->
             f"{dep['location']['file']}), candidates {', '.join(candidates) or 'none'}"
         )
         for v in advisories:
+            reach = v["reachability"].replace("_", " ")
             if v["fixed_version"]:
                 fix = f"fixed in {v['fixed_version']}"
             elif "last_affected" in v:
                 fix = f"fixed after {v['last_affected']}"
             else:
-                print(f"    {v['advisory']}: no fixed version")
+                print(f"    {v['advisory']} ({v['source']}, {reach}): no fixed version")
                 continue
             reached = {True: "yes", False: "no"}.get(v["fix_reached_by_candidate"], "unknown")
             held = f", only held candidates do ({v['fix_held_by']})" if "fix_held_by" in v else ""
-            print(f"    {v['advisory']}: {fix}, an in-scope candidate reaches it: {reached}{held}")
+            print(
+                f"    {v['advisory']} ({v['source']}, {reach}): {fix}, "
+                f"an in-scope candidate reaches it: {reached}{held}"
+            )
 
 
 def describe(subject_policy: policy.Policy) -> str:

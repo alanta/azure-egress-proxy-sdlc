@@ -299,6 +299,25 @@ def indirect(report: dict) -> set[str]:
     }
 
 
+def go_toolchains(report: dict) -> dict[str, str]:
+    """Per go.mod, the id of the directive that sets its Go toolchain.
+
+    That is the `toolchain` directive when there is one, otherwise the `go` directive.
+    Renovate names both `go`; their dependency type tells them apart. `toolchain default`
+    means no toolchain directive, as for govulncheck: Renovate's pattern doesn't take it
+    today, and if it ever does, it still won't count.
+    """
+    toolchains: dict[str, str] = {}
+    for manager, file, dep, dep_id in _dependencies(report):
+        if manager != "gomod":
+            continue
+        if (dep.get("depType") == "toolchain" and dep.get("currentValue") != "default") or (
+            dep.get("depType") == "golang" and file not in toolchains
+        ):
+            toolchains[file] = dep_id
+    return toolchains
+
+
 def _dependencies(report: dict) -> Iterator[tuple[str, str, dict, str]]:
     """Each dependency in the report with its manager, file and id, in report order."""
     repositories = report.get("repositories") or {}

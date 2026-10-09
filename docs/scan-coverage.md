@@ -54,10 +54,23 @@ The record gives the fixed version: the end of the advisory's range that contain
 At `064aa09`, there are 8 advisories on two indirect Go modules: three on `golang.org/x/crypto` (one without a fix, two fixed in v0.56.0) and five on `golang.org/x/net` (fixed in v0.60.0). No NuGet package has one.
 
 What it doesn't cover:
-- **Reachability** is `unknown` for every finding. govulncheck will supply it for Go (task 4.2).
 - **A package without a resolved version** is a gap: whether an advisory concerns it is unknown. References to the subject's own projects in NuGet lock files are not packages, so they don't count.
 - **When OSV-Scanner fails**, the record has an `unavailable_source` gap, and makes no claim about vulnerabilities. A lock file missing from its output is a gap too.
-- **Image OS packages, Docker images, GitHub Actions and the Go standard library** aren't scanned by it. Dependabot alerts (task 4.3) are read separately.
+- **Image OS packages, Docker images and GitHub Actions** aren't scanned. The Go standard library is only checked by govulncheck, so when it fails, it isn't checked. Dependabot alerts (task 4.3) are read separately.
+
+### Reachability
+
+govulncheck runs on each `go.mod` the go command would treat as a module (not under `testdata`, `vendor`, or a directory starting with `_` or `.`), in the pinned Go image, with the toolchain the module declares: its `toolchain` directive, or else its `go` directive (`go 1.25.14` → go1.25.14; `go 1.25` → go1.25.0). The image builds govulncheck itself, then `GOTOOLCHAIN` has the `go` command download that exact toolchain from the Go module proxy, checked against the checksum database. The module is analysed on its own (`GOWORK=off`), from its vendored sources when it has `vendor/modules.txt`. The govulncheck version, the toolchain it reports using, the platforms and its database's modification time are recorded as tools.
+
+It analyses the module's packages without tests, with cgo off, for linux/amd64 and linux/arm64, the platforms the subject releases for, so the result doesn't depend on the host. Each advisory counts at the most precise level found on either platform:
+- **`reachable`:** a call path leads from the module's code to a vulnerable function.
+- **`not reachable`:** a vulnerable package is imported but none of its vulnerable functions is called, or the module is only required at an affected version.
+  So `not reachable` means there is no static call path from non-test code on the analysed platforms. Reflection, `go:linkname`, cgo and tests are outside the analysis.
+- **`unknown`:** everything else. That covers every ecosystem other than Go, a Go advisory govulncheck has no finding for (its database lacks it, or it judges the version unaffected), and every Go advisory of a module where govulncheck failed. A failure is an `unavailable_source` gap, and the scan carries on.
+
+The reachability sits next to OSV-Scanner's version match and doesn't change it. OSV-Scanner doesn't check the Go standard library, so govulncheck's standard library advisories are added with source `govulncheck`, against the `go.mod` directive that sets the toolchain, with the fixed version from the advisory. An advisory govulncheck finds on another module that OSV-Scanner didn't report is added with source `govulncheck` the way OSV-Scanner's are, with a locked entry when the inventory has none for the module.
+
+At `064aa09`, the five `golang.org/x/net` advisories are reachable and the three `golang.org/x/crypto` ones are not: no package of it is imported. Go 1.25.14 has 13 standard library advisories, all fixed in 1.26.9: 9 reachable, 4 not. Both platforms give the same answers. Renovate proposes no newer `go` directive, so no candidate reaches those fixes.
 
 ## Coverage gaps
 
@@ -74,4 +87,4 @@ A file type Renovate does read, such as a project file with only project referen
 - **The VM scale set's Marketplace image** (`version: 'latest'` in `hub.bicep`) isn't tracked. It's managed by Azure and upgraded automatically.
 - **`gcr.io/distroless/static-debian12:nonroot`** has no version tag. It could only be tracked by digest, so it is skipped. End-of-life detection (task 4.5) covers its Debian base.
 - **The Marketplace image build** (Packer, platform image, OS packages) isn't covered yet. A Packer template shows up as a coverage gap until it is.
-- **Reachability, Dependabot alerts, end-of-life lines, cross-file consistency and the Dependabot comparison** are later tasks in `openspec/changes/revision-dependency-scan/tasks.md`.
+- **Dependabot alerts, end-of-life lines, cross-file consistency and the Dependabot comparison** are later tasks in `openspec/changes/revision-dependency-scan/tasks.md`.

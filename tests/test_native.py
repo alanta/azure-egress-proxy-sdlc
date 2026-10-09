@@ -127,3 +127,12 @@ def test_up_to_date_and_undeclared_transitive_packages_are_not_drift(scanned):
         NativeUpdate("go", "golang.org/x/crypto", "v0.55.0", "v0.57.0", False, "proxy/go.mod"),
     ]
     assert lock_drift(native, scanned.dependencies, looked_up_at=AT) == ([], [])
+
+
+def test_go_mods_skips_what_the_go_command_ignores(tmp_path):
+    from sdlc.native import go_mods
+
+    for directory in ("proxy", "tools/lint", "proxy/testdata/x", "vendor/y", "_old", ".hidden"):
+        (tmp_path / directory).mkdir(parents=True)
+        (tmp_path / directory / "go.mod").write_text("module m\n")
+    assert go_mods(tmp_path) == ["proxy/go.mod", "tools/lint/go.mod"]
