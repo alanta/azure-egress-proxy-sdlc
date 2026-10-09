@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from sdlc.native import NativeUpdate, cross_check, parse_dotnet, parse_go
+from sdlc.native import NativeUpdate, cross_check, failure, parse_dotnet, parse_go
 from sdlc.renovate import normalize
 
 FIXTURES = Path(__file__).parents[1] / "fixtures" / "azure-egress-proxy"
@@ -136,3 +136,19 @@ def test_go_mods_skips_what_the_go_command_ignores(tmp_path):
         (tmp_path / directory).mkdir(parents=True)
         (tmp_path / directory / "go.mod").write_text("module m\n")
     assert go_mods(tmp_path) == ["proxy/go.mod", "tools/lint/go.mod"]
+
+
+NOTICE = "Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.\n"
+
+
+def test_failure_drops_podmans_notice_and_keeps_the_exit_code():
+    message = failure(1, NOTICE + "go: example.com/x: dial tcp: i/o timeout\n", "")
+    assert message == "exit 1: go: example.com/x: dial tcp: i/o timeout"
+
+
+def test_failure_falls_back_to_stdout_when_stderr_is_only_the_notice():
+    assert failure(1, NOTICE, '{"Error": "no go.mod"}\n') == 'exit 1: {"Error": "no go.mod"}'
+
+
+def test_failure_of_a_killed_container_still_says_how_it_ended():
+    assert failure(137, NOTICE, "") == "exit 137, no output"

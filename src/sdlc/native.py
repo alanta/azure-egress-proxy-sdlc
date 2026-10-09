@@ -77,8 +77,20 @@ def container(
         args, capture_output=True, text=True, check=False
     )
     if result.returncode != 0:
-        raise NativeError(result.stderr.strip()[-1500:] or result.stdout.strip()[-1500:])
+        raise NativeError(failure(result.returncode, result.stderr, result.stdout))
     return result.stdout
+
+
+def failure(returncode: int, stderr: str, stdout: str) -> str:
+    """Why a container run failed, from what it printed.
+
+    Podman's Docker emulation announces itself on stderr on every call, so that line alone
+    says nothing: without it, stdout is the next place to look. The exit code stays in the
+    message, because a container that was killed prints nothing at all.
+    """
+    lines = [line for line in stderr.splitlines() if not line.startswith("Emulate Docker CLI")]
+    output = "\n".join(lines).strip() or stdout.strip()
+    return f"exit {returncode}: {output[-1500:]}" if output else f"exit {returncode}, no output"
 
 
 def dotnet_updates(checkout: Path) -> list[NativeUpdate]:
