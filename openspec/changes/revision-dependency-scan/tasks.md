@@ -15,7 +15,7 @@
 - [x] 2.3 Detect dependency-bearing files by pattern (including `*.pkr.hcl`, `requirements*.txt`, `package.json`, inline `pip install` and `apt-get install` lines) and report those no adapter covered as unsupported or unparseable; verify a fixture with a Packer template and a malformed lockfile reports both, and the scan still completes
 - [x] 2.4 Run the native NuGet and Go queries (design decision 3) and report disagreements with Renovate; verify on `064aa09` and record the disagreements found
 - [x] 2.5 Add locked entries where a lock file resolves an older version than the repository declares (design decision 3a), with the newer version as a candidate; verify a `064aa09` scan lists the seven drifted entries, including AppHost's `Microsoft.Extensions.Http` at 10.0.11 with candidate 10.0.12 and `EgressProxy.Client`'s Azure.Core at 1.53.0 with candidate 1.62.0, and no other lock-file-only entries
-- [ ] 2.6 Document the supported source types, the custom managers, how locked entries are chosen, and the known gaps in `docs/scan-coverage.md`; verify the document matches the inventory and gaps of a `064aa09` scan
+- [x] 2.6 Document the supported source types, the custom managers, how locked entries are chosen, and the known gaps in `docs/scan-coverage.md`; verify the document matches the inventory and gaps of a `064aa09` scan
 
 ## 3. Update policy
 
