@@ -8,7 +8,17 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from pathlib import Path
 
-from sdlc import consistency, coverage, dependabot, govulncheck, native, osv, policy, renovate
+from sdlc import (
+    consistency,
+    coverage,
+    dependabot,
+    govulncheck,
+    lifecycle,
+    native,
+    osv,
+    policy,
+    renovate,
+)
 from sdlc.subject import Revision, SubjectError, checkout, resolve
 
 
@@ -130,8 +140,12 @@ def scan(repository: str, ref: str, trial_policy: Path | None = None) -> int:
             alerts, vulnerabilities = read_alerts(
                 revision, token, reached.vulnerabilities, inventory.dependencies, gaps
             )
-            declared = consistency.check(baseline, inventory.dependencies, checkout=path)
+            declared = consistency.check(baseline, inventory.dependencies)
             gaps += declared.gaps
+            lifecycles = lifecycle.check(
+                baseline, inventory.dependencies, scanned_at=datetime.fromisoformat(looked_up_at)
+            )
+            gaps += lifecycles.gaps
     except (SubjectError, renovate.RenovateError, policy.PolicyError) as error:
         print(f"error: {error}; no record written", file=sys.stderr)
         return 1
@@ -174,8 +188,9 @@ def scan(repository: str, ref: str, trial_policy: Path | None = None) -> int:
         print_vulnerabilities(vulnerabilities, inventory, found)
     print_alerts(alerts, vulnerabilities, revision.commit)
     print_consistency(declared, inventory.dependencies)
-    # Lifecycle and parity arrive with the rest of slice 1; a record
-    # without them would claim there was nothing to find.
+    print_lifecycle(lifecycles)
+    # Parity arrives with the rest of slice 1; a record without it
+    # would claim there was nothing to find.
     print("error: the scan stops here for now; no record written", file=sys.stderr)
     return 1
 
@@ -261,6 +276,41 @@ def print_consistency(result: consistency.Result, dependencies: list[dict]) -> N
             where = ":".join(str(location[k]) for k in ("file", "line") if k in location)
             dep = entries[d["dependency"]]
             print(f"    {where}: {dep['name']} {dep['current']} declares {d['version']}")
+
+
+def print_lifecycle(result: lifecycle.Result) -> None:
+    states = Counter(e["state"] for e in result.lifecycle)
+    fetched = [t["url"].rsplit("/", 1)[1] for t in result.tools]
+    source = (
+        f"{lifecycle.API}: {', '.join(fetched)}, fetched at {result.tools[0]['fetched_at']}"
+        if result.tools
+        else "nothing read from endoflife.date"
+    )
+    print(
+        f"lifecycle ({source}): {len(result.lifecycle)} lines in use, "
+        + ", ".join(
+            f"{states[s]} {s.replace('_', ' ')}"
+            for s in ("end_of_life", "nearing_end_of_life", "supported", "unknown")
+        )
+    )
+    for state in ("end_of_life", "nearing_end_of_life", "supported", "unknown"):
+        for e in (e for e in result.lifecycle if e["state"] == state):
+            where = ", ".join(
+                ":".join(str(loc[k]) for k in ("file", "line") if k in loc)
+                for loc in e["locations"][:3]
+            )
+            if len(e["locations"]) > 3:
+                where += f" and {len(e['locations']) - 3} more"
+            if state == "unknown":
+                detail = e["reason"]
+            else:
+                ends = e.get("end_of_life")
+                verb = "ended" if state == "end_of_life" else "ends"
+                detail = f"{verb} {ends}" if ends else e.get("reason", "no end date published")
+                lines = e.get("supported_lines")
+                if state != "supported":
+                    detail += f"; supported: {', '.join(lines) if lines else 'none'}"
+            print(f"  {state.replace('_', ' ')}: {e['product']} {e['line']}: {detail} ({where})")
 
 
 def print_alerts(section: dict | None, vulnerabilities: list[dict], commit: str) -> None:

@@ -7,6 +7,7 @@ docs/tooling-spike.md).
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -252,7 +253,10 @@ def normalize(report: dict, *, looked_up_at: str, checkout: Path | None = None) 
     for manager, file, dep, dep_id in _dependencies(report):
         name = _name(dep)
         location: dict[str, Any] = {"file": file}
-        line = lines.find(file, dep.get("replaceString")) or lines.find_unique(file, name)
+        pattern = declaration_line(manager, dep)
+        line = lines.find(file, dep.get("replaceString")) or (
+            lines.find_pattern(file, pattern) if pattern else lines.find_unique(file, name)
+        )
         if line:
             location["line"] = line
 
@@ -271,6 +275,38 @@ def normalize(report: dict, *, looked_up_at: str, checkout: Path | None = None) 
         candidates += dep_candidates
 
     return Inventory(dependencies, candidates)
+
+
+def declaration_line(manager: str, dep: dict) -> str | None:
+    """A pattern for the line declaring an entry Renovate gives no text to find it by.
+
+    These are declarations other parts of the scan point at: go.mod's directives, the
+    versions setup actions install, global.json's SDK and an MSBuild project SDK. The patterns
+    are anchored on the key that declares the value, so a comment or another key with the
+    same value isn't taken for it.
+    """
+    value = dep.get("currentValue")
+    if not value:
+        return None
+    escaped = re.escape(value)
+    dep_type = dep.get("depType")
+    if manager == "gomod" and dep_type in ("golang", "toolchain"):
+        # `go 1.25.14` and `toolchain go1.25.14`; Renovate names both `go`.
+        directive = "go" if dep_type == "golang" else "toolchain"
+        return rf"^\s*{directive}\s+(?:go)?{escaped}(?![\w.])"
+    if dep.get("datasource") == "dotnet-version":
+        # setup-dotnet's `dotnet-version: 10.0.x`, or global.json's `"version": "10.0.100"`.
+        return rf"""^\s*(?:-\s+)?(?:dotnet-version:\s*["']?|"version"\s*:\s*"){escaped}(?![\w.])"""
+    tool = re.fullmatch(r"actions/([\w-]+)-versions", dep.get("packageName") or "")
+    if manager == "github-actions" and tool:
+        # setup-go's `go-version: '1.25'`, setup-python's `python-version`, and so on.
+        key = re.escape(f"{tool[1]}-version")
+        return rf"""^\s*(?:-\s+)?{key}:\s*["']?{escaped}["']?\s*(?:#.*)?$"""
+    if dep_type == "msbuild-sdk":
+        # `<Project Sdk="Aspire.AppHost.Sdk/13.5.4">`, or an <Sdk Name=".." Version=".."> element.
+        name = re.escape(_name(dep))
+        return rf"""{name}(?:/|"\s+Version="){escaped}(?![\w.])"""
+    return None
 
 
 def match_fields(report: dict) -> dict[str, dict[str, Any]]:
@@ -411,6 +447,13 @@ class _LineFinder:
         nth = self.used.get((file, text), 0)
         matches = [i for i, line in enumerate(self._lines(file), 1) if text in line]
         self.used[(file, text)] = nth + 1
+        return matches[nth] if nth < len(matches) else None
+
+    def find_pattern(self, file: str, pattern: str) -> int | None:
+        """The n-th line matching the pattern for the n-th dependency declared by it."""
+        nth = self.used.get((file, pattern), 0)
+        matches = [i for i, line in enumerate(self._lines(file), 1) if re.search(pattern, line)]
+        self.used[(file, pattern)] = nth + 1
         return matches[nth] if nth < len(matches) else None
 
     def find_unique(self, file: str, name: str) -> int | None:

@@ -89,7 +89,7 @@ Some dependencies are declared in several places that Renovate updates separatel
 - **.NET:** the SDK in `setup-dotnet`'s `dotnet-version`, `global.json` and the `sdk` image at `mcr.microsoft.com/dotnet/`; the runtime in the `aspnet`, `runtime` and `runtime-deps` images there, and the .NET line in the devcontainer image's tag (`2.2.3-10.0-noble`). SDK declarations compare with each other by feature band: 10.0.401 is band 4, so it agrees with `10.0.4xx` but not with `10.0.100`. An SDK and a runtime compare at major.minor only, because a runtime's third part is a patch.
 - **Aspire:** the AppHost SDK and the Aspire CLI.
 
-Image tags give their version without the suffix: `golang:1.27-alpine` declares 1.27. Two declarations disagree when they differ as far as both go: `1.25` agrees with `1.25.14`, not with `1.27`. A flagged dependency lists every declaration with its file, line and version. The record lists, per alias, which declarations were compared, so an alias nothing declares shows as such.
+Image tags give their version without the suffix: `golang:1.27-alpine` declares 1.27. Two declarations disagree when they differ as far as both go: `1.25` agrees with `1.25.14`, not with `1.27`. A flagged dependency lists every declaration with its file, line and version. The inventory finds the line of declarations Renovate gives no text for: go.mod's directives, `setup-*` versions, `global.json`'s SDK and MSBuild project SDKs. The record lists, per alias, which declarations were compared, so an alias nothing declares shows as such.
 
 Some declarations aren't compared, and are an `unparseable_source` gap instead, so they never count as agreeing:
 - no version, such as `latest` or a digest alone;
@@ -97,6 +97,30 @@ Some declarations aren't compared, and are an `unparseable_source` gap instead, 
 - a version that floats to the newest release, such as Go `1.x` or `golang:1-alpine`. Go and .NET need at least major.minor.
 
 At `064aa09` everything agrees: Go 1.25 across go.mod (1.25.14), both workflows and the proxy's build image; .NET 10.0 across `setup-dotnet`, six images and the devcontainer; Aspire 13.5.4 in the AppHost SDK and the devcontainer's CLI. Dependabot's #76 builds the proxy with `golang:1.27-alpine` while go.mod and the workflows stay on 1.25, so a scan of its head flags the Go toolchain.
+
+## Lifecycle
+
+Renovate knows versions, not support windows, so the scan reads lifecycle data from the endoflife.date API (`https://endoflife.date/api/v1/products/<product>`, no account, no token sent; design decision 6a). The table in `src/sdlc/lifecycle.py` links inventory entries to its products:
+- **`go`:** the Go toolchain as the consistency check reads it: go.mod's directive that sets the toolchain, `setup-go`, `golang` images.
+- **`dotnet`:** `setup-dotnet`, `global.json`, the `sdk`, `aspnet`, `runtime` and `runtime-deps` images and the devcontainer image's .NET line. Lines from .NET 5 on are named by major: `10.0` is line 10.
+- **`python`:** `python` image tags and `setup-python` (`3.12.x` is 3.12).
+- **`nodejs`:** `node` image tags and `setup-node`, by major.
+- **`alpine-linux`:** `alpine` image tags, and the Alpine suffix of any image's tag: `golang:1.25-alpine3.22` is Alpine 3.22.
+- **`debian`:** `debian` image tags (`12`, `bookworm-slim`), and distroless images: `gcr.io/distroless/static-debian12` is Debian 12.
+- **`ubuntu`:** `ubuntu` image tags (`24.04`, `noble`), until the end of standard support.
+- **Codenames** after the version in any image's tag, past variant words such as `slim` or `chiseled`, resolve against the Debian and Ubuntu codenames in endoflife.date's data, by first word: `python:3.12-slim-bookworm` is Debian 12, `aspnet:10.0-noble-chiseled` and the devcontainer's `2.2.3-10.0-noble` are Ubuntu 24.04. A word that is neither, such as a codename not yet in the data, is `unknown`.
+
+Each product is fetched once per scan; each product read is recorded as a tool with its URL and fetch time. Every line in use gets one result, with the entries and locations using it:
+- **`end_of_life`:** the data marks it ended (even beside a later date: data that contradicts itself must not read as supported), or its end-of-life date is on or before the scan's date. Without the mark, the date decides, because the mark was computed when the data was generated.
+- **`nearing_end_of_life`:** the date is within 90 days after the scan.
+- **`supported`:** otherwise, with the date when one is published.
+- **`unknown`:** never counted as supported. The declaration names no line (`golang:latest`, a variable, a bare `-alpine`, which follows whichever Alpine the image was last built on); the product's data lacks the line or the codename; the API couldn't be read (an `unavailable_source` gap, after which the scan carries on); or the entry has no mapping.
+
+Go lines get no nearing-end-of-life warning: the data only gives a Go line a date once it has ended, when the release two minors later comes out.
+
+Results for supported, nearing and ended lines list the lines still supported on the scan's date, oldest first. An image or runtime declaration (`runs-on` labels, `setup-*` versions) that no row maps is listed under its own name as `unknown`, so it shows rather than passing silently. Packages aren't: endoflife.date doesn't track them. An image built on Alpine or a codename still needs its own row: `redis:7-alpine3.22` reports Alpine 3.22, and redis 7 as unmapped.
+
+At `064aa09` on 2026-10-09, Go 1.25 is end of life since 2026-08-19, with 1.26 the oldest supported line. .NET 10, Python 3.12, Debian 12 (distroless) and Ubuntu 24.04 (the devcontainer's `noble`) are supported. Alpine is unknown, because `golang:1.25-alpine` and `python:3.12-alpine` don't name a release, and the `ubuntu-latest` runners have no mapping.
 
 ## Coverage gaps
 
@@ -106,12 +130,14 @@ The scan reports a gap rather than staying silent when:
 - **a line installs a package without a version**, such as `pip install pkg` or `go install …@latest`.
 - **a package manager query fails**, for example when a locked restore breaks.
 - **a declaration in the alias table has no version to compare**, such as `golang:latest`, `golang:${GO_VERSION}` or Go `1.x`.
+- **endoflife.date can't be read**, or answers with an error or malformed data. The lines of the products concerned are `unknown`.
 
 A file type Renovate does read, such as a project file with only project references, isn't a gap when Renovate finds nothing in it.
 
 ## Known limits
 
 - **The VM scale set's Marketplace image** (`version: 'latest'` in `hub.bicep`) isn't tracked. It's managed by Azure and upgraded automatically.
-- **`gcr.io/distroless/static-debian12:nonroot`** has no version tag. It could only be tracked by digest, so it is skipped. End-of-life detection (task 4.5) covers its Debian base.
+- **`gcr.io/distroless/static-debian12:nonroot`** has no version tag. It could only be tracked by digest, so it is skipped. Its Debian release's lifecycle is reported.
+- **OS releases are read from image tags only for Alpine, Debian and Ubuntu.** Others, such as Azure Linux or Windows Server Core, aren't.
 - **The Marketplace image build** (Packer, platform image, OS packages) isn't covered yet. A Packer template shows up as a coverage gap until it is.
-- **End-of-life lines and the comparison with Dependabot's PRs** are later tasks in `openspec/changes/revision-dependency-scan/tasks.md`.
+- **The comparison with Dependabot's PRs** is a later task in `openspec/changes/revision-dependency-scan/tasks.md`.

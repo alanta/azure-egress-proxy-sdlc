@@ -193,3 +193,61 @@ def test_a_name_on_exactly_one_line_locates_entries_without_replace_text(tmp_pat
     }
     inventory = normalize(report, looked_up_at=AT, checkout=tmp_path)
     assert inventory.dependencies[0]["location"] == {"file": "Directory.Packages.props", "line": 2}
+
+
+def report_with(*entries):
+    """A report with these (manager, file, dependency) entries."""
+    files: dict[str, dict[str, dict]] = {}
+    for manager, file, dep in entries:
+        files.setdefault(manager, {}).setdefault(file, {"packageFile": file, "deps": []})
+        files[manager][file]["deps"].append(dep)
+    package_files = {m: list(by_file.values()) for m, by_file in files.items()}
+    return {"repositories": {"local": {"packageFiles": package_files}}}
+
+
+def test_declarations_without_replace_text_get_the_line_that_declares_them(tmp_path):
+    (tmp_path / "go.mod").write_text("module m\n\ngo 1.25.0\n\ntoolchain go1.25.14\n")
+    (tmp_path / "ci.yml").write_text(
+        "steps:\n"
+        "  - uses: actions/setup-go@v6\n"
+        "    with:\n"
+        "      # go-version: '1.25'\n"
+        "      go-version: '1.25'\n"
+        "  - uses: actions/setup-python@v6\n"
+        "    with:\n"
+        "      python-version: 3.12.x\n"
+        "  - uses: actions/setup-dotnet@v5\n"
+        "    with:\n"
+        "      dotnet-version: 10.0.x\n"
+    )
+    (tmp_path / "global.json").write_text('{\n  "sdk": {\n    "version": "10.0.100"\n  }\n}\n')
+    (tmp_path / "AppHost.csproj").write_text(
+        '<Project Sdk="Microsoft.NET.Sdk">\n\n'
+        '  <Sdk Name="Aspire.AppHost.Sdk" Version="13.5.4" />\n'
+    )
+    go = {"depName": "go", "datasource": "golang-version"}
+    setup = {"datasource": "github-releases", "depType": "uses-with"}
+    dotnet = {"depName": "dotnet-sdk", "datasource": "dotnet-version"}
+    report = report_with(
+        ("gomod", "go.mod", go | {"depType": "golang", "currentValue": "1.25.0"}),
+        ("gomod", "go.mod", go | {"depType": "toolchain", "currentValue": "go1.25.14"}),
+        ("github-actions", "ci.yml", setup | {"depName": "go", "packageName": "actions/go-versions",
+                                              "currentValue": "1.25"}),
+        ("github-actions", "ci.yml", setup | {"depName": "python",
+                                              "packageName": "actions/python-versions",
+                                              "currentValue": "3.12.x"}),
+        ("github-actions", "ci.yml", dotnet | {"depType": "uses-with", "currentValue": "10.0.x"}),
+        ("nuget", "global.json", dotnet | {"depType": "dotnet-sdk", "currentValue": "10.0.100"}),
+        ("nuget", "AppHost.csproj", {"depName": "Aspire.AppHost.Sdk", "datasource": "nuget",
+                                     "depType": "msbuild-sdk", "currentValue": "13.5.4"}),
+    )  # fmt: skip
+    inventory = normalize(report, looked_up_at=AT, checkout=tmp_path)
+    assert {d["id"]: d["location"].get("line") for d in inventory.dependencies} == {
+        "gomod:go.mod:go": 3,
+        "gomod:go.mod:go#2": 5,
+        "github-actions:ci.yml:go": 5,  # not the commented-out line
+        "github-actions:ci.yml:python": 8,
+        "github-actions:ci.yml:dotnet-sdk": 11,
+        "nuget:global.json:dotnet-sdk": 3,
+        "nuget:AppHost.csproj:Aspire.AppHost.Sdk": 3,
+    }

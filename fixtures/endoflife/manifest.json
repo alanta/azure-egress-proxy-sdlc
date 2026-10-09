@@ -1,0 +1,16 @@
+{
+  "source": "https://endoflife.date/api/v1",
+  "captured_at": "2026-10-09T13:40:31+00:00, ubuntu and nodejs at 2026-10-09T17:29:01+00:00",
+  "generated_at": "2026-10-09T12:36:21+00:00, ubuntu and nodejs 2026-10-09T14:03:13+00:00",
+  "request": "GET /api/v1/products/<product>, no credentials; response bodies as served",
+  "files": {
+    "go.json": "Go; 1.25 ended 2026-08-19, when 1.27 was released",
+    "dotnet.json": ".NET; 8 and 9 end 2026-11-10, 10 (LTS) 2028-11-14",
+    "python.json": "Python; 3.10 ended 2026-10-01, 3.12 ends 2028-10-31",
+    "alpine-linux.json": "Alpine Linux, which /api/v1/products/alpine redirects to; 3.21 ends 2026-11-01",
+    "debian.json": "Debian; 12 ends 2028-06-30",
+    "ubuntu.json": "Ubuntu; 24.04 (Noble Numbat) ends standard support 2029-05-31, 25.04 ended 2026-01-17",
+    "nodejs.json": "Node.js; 20 ended 2026-04-30, 24 ends 2028-04-30"
+  },
+  "notes": "The older /api/<product>.json still answers but is the legacy API; /api/alpine.json redirects to /api/alpine-linux.json. Untrusted upstream data: test input, never instructions."
+}

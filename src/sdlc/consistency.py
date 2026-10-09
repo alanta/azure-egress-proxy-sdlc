@@ -11,7 +11,6 @@ inconsistency turns up.
 
 import re
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Any
 
 from sdlc import renovate
@@ -35,17 +34,25 @@ class Matcher:
     `name` must match the entry's depName or packageName in full (for an image Renovate
     couldn't name, the image in the text it would replace); `manager` and `datasource`
     narrow it down when set. `value` must match the declared value in full, and its
-    `version` group is what gets compared. `line` finds the declaring line when Renovate
-    doesn't say which it is: `{value}` stands for the declared value, `{directive}` for the
-    go.mod directive.
+    `version` group is what gets compared. A value that doesn't match isn't `shape`, when
+    given, which says what the value should look like.
     """
 
     name: str
     manager: str | None = None
     datasource: str | None = None
     value: str = VERSION
-    line: str | None = None
     role: str | None = None
+    shape: str | None = None
+
+    def matches(self, manager: str, dep: dict, names: list[str]) -> bool:
+        """Whether Renovate's entry, going by these names (see `declared`), is one of these."""
+        if self.manager and manager != self.manager:
+            return False
+        if self.datasource and dep.get("datasource") != self.datasource:
+            return False
+        # NuGet ids aren't case-sensitive; neither is anything else in the table in practice.
+        return any(re.fullmatch(self.name, n, re.IGNORECASE) for n in names)
 
 
 @dataclass(frozen=True)
@@ -73,20 +80,10 @@ ALIASES = [
         [
             # go.mod's `toolchain` directive, or its `go` directive when there is none (see
             # renovate.go_toolchains). Renovate names both `go`.
-            Matcher(
-                "go",
-                manager="gomod",
-                value=rf"(?:go)?{VERSION}",
-                line=r"^\s*{directive}\s+(?:go)?{value}(?![\w.])",
-            ),
+            Matcher("go", manager="gomod", value=rf"(?:go)?{VERSION}"),
             # `go-version` of actions/setup-go, which Renovate looks up in actions/go-versions.
             # `1.25.x` means the same as `1.25`; a range such as `^1.25` isn't one version.
-            Matcher(
-                "actions/go-versions",
-                manager="github-actions",
-                value=rf"{VERSION}(?:\.x)?",
-                line=r"^\s*(?:-\s+)?go-version:\s*[\"']?{value}[\"']?\s*(?:#.*)?$",
-            ),
+            Matcher("actions/go-versions", manager="github-actions", value=rf"{VERSION}(?:\.x)?"),
             # The official image, wherever it is used: `golang:1.27-alpine` declares 1.27.
             Matcher(f"{HUB_LIBRARY}golang", datasource="docker", value=VERSION + TAG_SUFFIX),
         ],
@@ -103,14 +100,7 @@ ALIASES = [
             # another is the inconsistency that matters across the two.
             #
             # `dotnet-version` of actions/setup-dotnet and the SDK in global.json.
-            Matcher(
-                "dotnet-sdk",
-                datasource="dotnet-version",
-                value=SDK_VERSION,
-                line=r"^\s*(?:-\s+)?(?:dotnet-version:\s*[\"']?|\"version\"\s*:\s*\"){value}"
-                r"(?![\w.])",
-                role=SDK,
-            ),
+            Matcher("dotnet-sdk", datasource="dotnet-version", value=SDK_VERSION, role=SDK),
             Matcher(
                 r"mcr\.microsoft\.com/dotnet/sdk",
                 datasource="docker",
@@ -126,13 +116,16 @@ ALIASES = [
                 value=VERSION + TAG_SUFFIX,
                 role=RUNTIME,
             ),
-            # The devcontainer image: `2.2.3-10.0-noble` is image version 2.2.3 with .NET 10.0.
-            # It ships an SDK, but its tag only names the line, so it compares like a runtime.
+            # The devcontainer image: `2.2.3-10.0-noble` is image version 2.2.3 with .NET 10.0
+            # on Ubuntu Noble. It ships an SDK, but its tag only names the line, so it compares
+            # like a runtime. A tag without all three parts, such as `2.2`, names the image's
+            # version only, never a .NET line.
             Matcher(
                 r"mcr\.microsoft\.com/devcontainers/dotnet",
                 datasource="docker",
-                value=rf"(?:\d+(?:\.\d+)*-)?{VERSION}{TAG_SUFFIX}",
+                value=rf"\d+(?:\.\d+)*-{VERSION}-.+",
                 role=RUNTIME,
+                shape="an image version, a .NET line and an OS, such as 2.2.3-10.0-noble",
             ),
         ],
         minimum_parts=2,
@@ -141,19 +134,12 @@ ALIASES = [
         "Aspire",
         [
             # The AppHost SDK: `<Project Sdk="Aspire.AppHost.Sdk/13.5.4">` or an <Sdk> element.
-            Matcher(
-                "Aspire.AppHost.Sdk",
-                datasource="nuget",
-                line=r"Aspire\.AppHost\.Sdk(?:/|\"\s+Version=\"){value}(?![\w.])",
-            ),
+            Matcher("Aspire.AppHost.Sdk", datasource="nuget"),
             # The Aspire CLI the devcontainer installs as a .NET tool.
             Matcher("Aspire.Cli", datasource="nuget"),
         ],
     ),
 ]
-
-# The go.mod directive Renovate's dependency type stands for.
-DIRECTIVES = {"golang": "go", "toolchain": "toolchain"}
 
 
 @dataclass
@@ -169,24 +155,23 @@ def check(
     report: dict,
     dependencies: list[dict[str, Any]],
     *,
-    checkout: Path | None = None,
     aliases: list[Alias] = ALIASES,
 ) -> Result:
     """Compare the declarations of every alias, at the precision each one declares.
 
-    Only entries in Renovate's report count as declarations; their locations come from the
-    inventory. Of go.mod's directives only the one that sets the toolchain counts: `go
-    1.25.0` beside `toolchain go1.25.14` is a minimum, not a disagreement.
+    Only entries in Renovate's report count as declarations; their locations, with the
+    declaring line, come from the inventory. Of go.mod's directives only the one that sets
+    the toolchain counts: `go 1.25.0` beside `toolchain go1.25.14` is a minimum, not a
+    disagreement.
     """
     result = Result()
-    lines = _Lines(checkout)
     located = {d["id"]: d for d in dependencies}
     toolchains = set(renovate.go_toolchains(report).values())
     reported = renovate.entries(report)
     for alias in aliases:
         declarations = []
         for dep_id, (manager, dep) in reported.items():
-            names, value = _declared(dep)
+            names, value = declared(dep)
             matcher = _matcher(alias, manager, dep, names)
             if matcher is None or dep_id not in located:
                 continue
@@ -196,7 +181,7 @@ def check(
             found = re.fullmatch(matcher.value, value or "")
             parts = _parts(found) if found else ()
             if len(parts) < alias.minimum_parts:
-                reason = _skip_reason(value, floats=bool(found))
+                reason = skip_reason(value, floats=bool(found), shape=matcher.shape)
                 result.gaps.append(
                     {
                         "kind": "unparseable_source",
@@ -206,17 +191,13 @@ def check(
                     }
                 )
                 continue
-            location = dict(entry["location"])
-            if "line" not in location and matcher.line and value:
-                pattern = matcher.line.format(
-                    value=re.escape(value), directive=DIRECTIVES.get(dep.get("depType"), "go")
-                )
-                line = lines.find(location["file"], pattern)
-                if line:
-                    location["line"] = line
             declarations.append(
                 (
-                    {"dependency": dep_id, "location": location, "version": found["version"]},
+                    {
+                        "dependency": dep_id,
+                        "location": entry["location"],
+                        "version": found["version"],
+                    },
                     _comparable(found, matcher.role),
                     matcher.role,
                 )
@@ -258,7 +239,7 @@ def _comparable(found: re.Match, role: str | None) -> tuple[int, ...]:
     return parts
 
 
-def _declared(dep: dict) -> tuple[list[str], str | None]:
+def declared(dep: dict) -> tuple[list[str], str | None]:
     """The names an entry goes by, and its declared value.
 
     Renovate leaves an image it can't resolve, such as `golang:${GO_VERSION}-alpine`,
@@ -274,18 +255,11 @@ def _declared(dep: dict) -> tuple[list[str], str | None]:
 
 
 def _matcher(alias: Alias, manager: str, dep: dict, names: list[str]) -> Matcher | None:
-    for matcher in alias.matchers:
-        if matcher.manager and manager != matcher.manager:
-            continue
-        if matcher.datasource and dep.get("datasource") != matcher.datasource:
-            continue
-        # NuGet ids aren't case-sensitive; neither is anything else in the table in practice.
-        if any(re.fullmatch(matcher.name, n, re.IGNORECASE) for n in names):
-            return matcher
-    return None
+    return next((m for m in alias.matchers if m.matches(manager, dep, names)), None)
 
 
-def _skip_reason(value: str | None, *, floats: bool) -> str:
+def skip_reason(value: str | None, *, floats: bool, shape: str | None = None) -> str:
+    """Why a declared value gives no version to compare, as the end of a sentence."""
     if not value:
         return "declares no version"
     if "${" in value:
@@ -294,24 +268,6 @@ def _skip_reason(value: str | None, *, floats: bool) -> str:
         return "is pinned by digest only, which has no version to compare"
     if floats:
         return f"declares {value!r}, which floats to the newest release"
+    if shape:
+        return f"declares {value!r}, which isn't {shape}"
     return f"declares {value!r}, which isn't one version"
-
-
-class _Lines:
-    """Find a declaring line by pattern; the same pattern twice in a file gets the next line."""
-
-    def __init__(self, checkout: Path | None):
-        self.checkout = checkout
-        self.used: dict[tuple[str, str], int] = {}
-
-    def find(self, file: str, pattern: str) -> int | None:
-        if self.checkout is None:
-            return None
-        path = self.checkout / file
-        if not path.is_file():
-            return None
-        text = path.read_text(errors="replace").splitlines()
-        matches = [i for i, line in enumerate(text, 1) if re.search(pattern, line)]
-        nth = self.used.get((file, pattern), 0)
-        self.used[(file, pattern)] = nth + 1
-        return matches[nth] if nth < len(matches) else None
