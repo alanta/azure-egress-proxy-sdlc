@@ -34,7 +34,7 @@
 ## 5. Dependabot parity
 
 - [x] 5.1 Read open Dependabot PRs and parse their proposed updates from the commit metadata and the from-versions from title or body; verify against the fixtures from 1.1, including grouped PRs #75, #76, #98 and #99 and a deliberately corrupted message reported as `unparseable`
-- [ ] 5.2 Classify each proposed update as `matched`, `held by policy`, `missed` or `stale`, and list scan-only candidates; verify fixture tests for each state, including a removed candidate reported as `missed`
+- [x] 5.2 Classify each proposed update as `matched`, `held by policy`, `missed` or `stale`, and list scan-only candidates; verify fixture tests for each state, including a removed candidate reported as `missed`
 
 ## 6. Reports and end-to-end runs
 

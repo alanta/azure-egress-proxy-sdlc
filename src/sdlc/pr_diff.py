@@ -17,7 +17,9 @@ only in files the scan knows, and only by fixed patterns per file type:
   `exclude` and `retract` blocks, and other blocks, are not requirements. A hunk's block is
   the one it opens or closes, or else the one git names in the hunk header (`@@ … @@
   require (`), which is the last line before it that starts a directive;
-- Dockerfiles: `FROM image:tag`, with a literal tag;
+- Dockerfiles: `FROM image:tag`, with a literal tag. Dependabot names an image without its
+  registry, so `dotnet/sdk` is the path of `mcr.microsoft.com/dotnet/sdk` as much as of a
+  Docker Hub image; only a name with a registry is tied to that registry;
 - workflows: `uses: owner/repo@v1.2.3`, or a commit SHA with the version in its comment.
 A line that matches no pattern, or can't be tied to the dependency, is never guessed at.
 
@@ -202,12 +204,36 @@ def _removed_from_go_mod(lines: list[str]):
 def _same(file_kind: str, found: str, name: str) -> bool:
     if file_kind in ("props", "csproj", "lock"):  # NuGet ids are case-insensitive
         return found.casefold() == name.casefold()
-    if file_kind == "docker":  # Dependabot names official images `library/x` or `x`
-        return _image(found) == _image(name)
+    if file_kind == "docker":
+        return same_image(found, name)
     if file_kind == "workflow":  # `owner/repo/path` is the action `owner/repo`
         return "/".join(found.split("/")[:2]).casefold() == name.casefold()
     return found == name
 
 
-def _image(name: str) -> str:
-    return name.removeprefix("docker.io/").removeprefix("library/")
+_DOCKER_HUB = {"docker.io", "index.docker.io", "registry-1.docker.io"}
+
+
+def image_parts(name: str) -> tuple[str | None, str]:
+    """An image's registry and path: `golang`, `library/golang` and `docker.io/library/golang`
+    are all Docker Hub's `golang`. The registry is None when the name doesn't say one."""
+    first, _, rest = name.partition("/")
+    registry = None
+    if rest and ("." in first or ":" in first or first == "localhost"):
+        registry, name = first, rest
+        if registry in _DOCKER_HUB:
+            registry = "docker.io"
+    if registry in (None, "docker.io"):
+        name = name.removeprefix("library/")
+    return registry, name
+
+
+def same_image(written: str, named: str) -> bool:
+    """Whether a file's image is the one Dependabot names.
+
+    Dependabot leaves the registry out of its names (`dotnet/sdk` for
+    `mcr.microsoft.com/dotnet/sdk`), so a name without one matches the path in any registry.
+    A name with one matches only that registry, where a file without one means Docker Hub.
+    """
+    (registry, path), (wanted, wanted_path) = image_parts(written), image_parts(named)
+    return path == wanted_path and (wanted is None or (registry or "docker.io") == wanted)
