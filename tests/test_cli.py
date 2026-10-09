@@ -269,3 +269,47 @@ def test_a_lookup_failing_in_one_run_makes_it_unknown_and_the_scan_carries_on(
     assert "1 dependencies (1 unknown), 0 update candidates" in captured.out
     assert "the scan stops here for now; no record written" in captured.err
     assert "can't be classified; no record written" not in captured.err
+
+
+def test_scan_prints_an_inconsistent_go_toolchain(offline_scan, monkeypatch, tmp_path, capsys):
+    from sdlc import renovate
+
+    def fake_run(path, *, policy=None, token=None):
+        (path / "go.mod").write_text("module example.com/m\n\ngo 1.25.14\n")
+        files = {
+            "gomod": [
+                {
+                    "packageFile": "go.mod",
+                    "deps": [
+                        {
+                            "depName": "go",
+                            "datasource": "golang-version",
+                            "depType": "golang",
+                            "currentValue": "1.25.14",
+                        }
+                    ],
+                }
+            ],
+            "dockerfile": [
+                {
+                    "packageFile": "Dockerfile",
+                    "deps": [
+                        {
+                            "depName": "golang",
+                            "datasource": "docker",
+                            "currentValue": "1.27-alpine",
+                        }
+                    ],
+                }
+            ],
+        }
+        return {"repositories": {"local": {"packageFiles": files}}}
+
+    monkeypatch.setattr(renovate, "run", fake_run)
+    assert main(["scan", "--repo", "alanta/demo"]) == 1
+    captured = capsys.readouterr()
+    assert "consistency: 1 of 3 logical dependencies declared inconsistently" in captured.out
+    assert "  inconsistent: Go toolchain\n" in captured.out
+    assert "    Dockerfile: golang 1.27-alpine declares 1.27\n" in captured.out
+    assert "    go.mod:3: go 1.25.14 declares 1.25.14\n" in captured.out
+    assert "the scan stops here for now; no record written" in captured.err

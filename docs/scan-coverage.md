@@ -82,6 +82,22 @@ When the alerts can't be read (no token, no permission, alerts disabled, rate li
 
 On 2026-10-09 the token can read them, and `main` has no open alerts, while it requires the same `golang.org/x/crypto` and `golang.org/x/net` versions as `064aa09`. GitHub's advisory database has no entry for the two of their CVEs checked (CVE-2026-78662 and CVE-2026-78659), which would explain why Dependabot is silent. None of the scan's 21 advisories is corroborated.
 
+## Consistency
+
+Some dependencies are declared in several places that Renovate updates separately. The alias table in `src/sdlc/consistency.py` lists which declarations belong together (design decision 6):
+- **Go toolchain:** go.mod's `toolchain` directive, or its `go` directive when there is none; `setup-go`'s `go-version`; `golang` image tags, from Docker Hub or a mirror such as `mirror.gcr.io`.
+- **.NET:** the SDK in `setup-dotnet`'s `dotnet-version`, `global.json` and the `sdk` image at `mcr.microsoft.com/dotnet/`; the runtime in the `aspnet`, `runtime` and `runtime-deps` images there, and the .NET line in the devcontainer image's tag (`2.2.3-10.0-noble`). SDK declarations compare with each other by feature band: 10.0.401 is band 4, so it agrees with `10.0.4xx` but not with `10.0.100`. An SDK and a runtime compare at major.minor only, because a runtime's third part is a patch.
+- **Aspire:** the AppHost SDK and the Aspire CLI.
+
+Image tags give their version without the suffix: `golang:1.27-alpine` declares 1.27. Two declarations disagree when they differ as far as both go: `1.25` agrees with `1.25.14`, not with `1.27`. A flagged dependency lists every declaration with its file, line and version. The record lists, per alias, which declarations were compared, so an alias nothing declares shows as such.
+
+Some declarations aren't compared, and are an `unparseable_source` gap instead, so they never count as agreeing:
+- no version, such as `latest` or a digest alone;
+- a variable, such as `golang:${GO_VERSION}-alpine`;
+- a version that floats to the newest release, such as Go `1.x` or `golang:1-alpine`. Go and .NET need at least major.minor.
+
+At `064aa09` everything agrees: Go 1.25 across go.mod (1.25.14), both workflows and the proxy's build image; .NET 10.0 across `setup-dotnet`, six images and the devcontainer; Aspire 13.5.4 in the AppHost SDK and the devcontainer's CLI. Dependabot's #76 builds the proxy with `golang:1.27-alpine` while go.mod and the workflows stay on 1.25, so a scan of its head flags the Go toolchain.
+
 ## Coverage gaps
 
 The scan reports a gap rather than staying silent when:
@@ -89,6 +105,7 @@ The scan reports a gap rather than staying silent when:
 - **a lock file can't be parsed.** Renovate doesn't parse lock files in lookup mode, so the scan checks them itself.
 - **a line installs a package without a version**, such as `pip install pkg` or `go install …@latest`.
 - **a package manager query fails**, for example when a locked restore breaks.
+- **a declaration in the alias table has no version to compare**, such as `golang:latest`, `golang:${GO_VERSION}` or Go `1.x`.
 
 A file type Renovate does read, such as a project file with only project references, isn't a gap when Renovate finds nothing in it.
 
@@ -97,4 +114,4 @@ A file type Renovate does read, such as a project file with only project referen
 - **The VM scale set's Marketplace image** (`version: 'latest'` in `hub.bicep`) isn't tracked. It's managed by Azure and upgraded automatically.
 - **`gcr.io/distroless/static-debian12:nonroot`** has no version tag. It could only be tracked by digest, so it is skipped. End-of-life detection (task 4.5) covers its Debian base.
 - **The Marketplace image build** (Packer, platform image, OS packages) isn't covered yet. A Packer template shows up as a coverage gap until it is.
-- **End-of-life lines, cross-file consistency and the comparison with Dependabot's PRs** are later tasks in `openspec/changes/revision-dependency-scan/tasks.md`.
+- **End-of-life lines and the comparison with Dependabot's PRs** are later tasks in `openspec/changes/revision-dependency-scan/tasks.md`.

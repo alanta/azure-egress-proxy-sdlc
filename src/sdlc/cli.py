@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from pathlib import Path
 
-from sdlc import coverage, dependabot, govulncheck, native, osv, policy, renovate
+from sdlc import consistency, coverage, dependabot, govulncheck, native, osv, policy, renovate
 from sdlc.subject import Revision, SubjectError, checkout, resolve
 
 
@@ -130,6 +130,8 @@ def scan(repository: str, ref: str, trial_policy: Path | None = None) -> int:
             alerts, vulnerabilities = read_alerts(
                 revision, token, reached.vulnerabilities, inventory.dependencies, gaps
             )
+            declared = consistency.check(baseline, inventory.dependencies, checkout=path)
+            gaps += declared.gaps
     except (SubjectError, renovate.RenovateError, policy.PolicyError) as error:
         print(f"error: {error}; no record written", file=sys.stderr)
         return 1
@@ -171,8 +173,9 @@ def scan(repository: str, ref: str, trial_policy: Path | None = None) -> int:
     else:
         print_vulnerabilities(vulnerabilities, inventory, found)
     print_alerts(alerts, vulnerabilities, revision.commit)
-    # Lifecycle, consistency and parity arrive with the rest of slice 1; a
-    # record without them would claim there was nothing to find.
+    print_consistency(declared, inventory.dependencies)
+    # Lifecycle and parity arrive with the rest of slice 1; a record
+    # without them would claim there was nothing to find.
     print("error: the scan stops here for now; no record written", file=sys.stderr)
     return 1
 
@@ -235,6 +238,29 @@ def read_alerts(
         )
         return None, vulnerabilities
     return dependabot.compare(alerts, vulnerabilities, dependencies, revision.commit)
+
+
+def print_consistency(result: consistency.Result, dependencies: list[dict]) -> None:
+    entries = {d["id"]: d for d in dependencies}
+    flagged = {i["dependency"] for i in result.inconsistencies}
+    summary = []
+    for name, compared in result.compared.items():
+        if len(compared) < 2:
+            summary.append(f"{name} compared {'once' if compared else 'nowhere'}")
+        else:
+            state = "inconsistent" if name in flagged else "consistent"
+            summary.append(f"{name} {state} across {len(compared)} declarations")
+    print(
+        f"consistency: {len(flagged)} of {len(result.compared)} logical dependencies "
+        f"declared inconsistently ({', '.join(summary)})"
+    )
+    for inconsistency in result.inconsistencies:
+        print(f"  inconsistent: {inconsistency['dependency']}")
+        for d in inconsistency["declarations"]:
+            location = d["location"]
+            where = ":".join(str(location[k]) for k in ("file", "line") if k in location)
+            dep = entries[d["dependency"]]
+            print(f"    {where}: {dep['name']} {dep['current']} declares {d['version']}")
 
 
 def print_alerts(section: dict | None, vulnerabilities: list[dict], commit: str) -> None:

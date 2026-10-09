@@ -15,6 +15,7 @@
     "candidates",
     "vulnerabilities",
     "lifecycle",
+    "consistency",
     "inconsistencies",
     "cross_checks",
     "parity",
@@ -138,6 +139,33 @@
       "type": "array",
       "items": {
         "$ref": "#/$defs/lifecycle"
+      }
+    },
+    "consistency": {
+      "type": "array",
+      "description": "Every logical dependency in the alias table, with the declarations the consistency check compared, so an alias nothing declares shows as such.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "dependency",
+          "compared"
+        ],
+        "properties": {
+          "dependency": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The logical dependency, such as the Go toolchain."
+          },
+          "compared": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "The inventory entries whose declared versions were compared."
+          }
+        }
       }
     },
     "inconsistencies": {
@@ -664,16 +692,23 @@
             "type": "object",
             "additionalProperties": false,
             "required": [
+              "dependency",
               "location",
               "version"
             ],
             "properties": {
+              "dependency": {
+                "type": "string",
+                "minLength": 1,
+                "description": "The inventory entry that makes this declaration, with the value as declared."
+              },
               "location": {
                 "$ref": "#/$defs/location"
               },
               "version": {
                 "type": "string",
-                "minLength": 1
+                "minLength": 1,
+                "description": "The version read from the declared value, such as 1.27 from golang:1.27-alpine."
               }
             }
           }
