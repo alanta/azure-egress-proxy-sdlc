@@ -61,12 +61,15 @@ def scan(repository: str, ref: str, trial_policy: Path | None = None) -> int:
             # The inventory comes from the run without the policy's holds, so a dependency
             # the policy disables still shows what its lookup found.
             inventory = renovate.normalize(baseline, looked_up_at=looked_up_at, checkout=path)
-            candidates = policy.classify(
-                inventory.candidates,
+            fields = renovate.match_fields(baseline)
+            # A lookup that failed in only one of the runs makes that dependency unknown.
+            inventory, with_policy = policy.reconcile(
+                inventory,
                 renovate.normalize(report, looked_up_at=looked_up_at),
-                renovate.match_fields(baseline),
+                fields,
                 subject_policy,
             )
+            candidates = policy.classify(inventory.candidates, with_policy, fields, subject_policy)
             gaps = coverage.gaps(path, baseline)
             native_updates = []
             for query, label in (

@@ -237,3 +237,35 @@ def test_scan_compares_the_alerts_and_says_which_commit_they_describe(
         "no fixed version"
     ) in out
     assert "gap: dependabot-alerts" not in out
+
+
+def test_a_lookup_failing_in_one_run_makes_it_unknown_and_the_scan_carries_on(
+    offline_scan, monkeypatch, tmp_path, capsys
+):
+    from sdlc import renovate
+
+    def fake_run(path, *, policy=None, token=None):
+        dep = {
+            "depName": "Microsoft.Extensions.Http",
+            "packageName": "Microsoft.Extensions.Http",
+            "datasource": "nuget",
+            "currentValue": "10.0.12",
+            "updates": [{"updateType": "patch", "newValue": "10.0.13"}],
+        }
+        if "Runtime majors wait" in (policy or ""):  # the run with the policy's holds
+            dep |= {"updates": [], "warnings": [{"message": "Failed to look up: no-result"}]}
+        files = {"nuget": [{"packageFile": "Directory.Packages.props", "deps": [dep]}]}
+        return {"repositories": {"local": {"packageFiles": files}}}
+
+    monkeypatch.setattr(renovate, "run", fake_run)
+    trial = tmp_path / "trial.renovate.json5"
+    trial.write_text(
+        '{packageRules: [{description: "Runtime majors wait", '
+        'matchPackageNames: ["Microsoft.Extensions.*"], matchUpdateTypes: ["major"], '
+        "enabled: false}]}"
+    )
+    assert main(["scan", "--repo", "alanta/demo", "--trial-policy", str(trial)]) == 1
+    captured = capsys.readouterr()
+    assert "1 dependencies (1 unknown), 0 update candidates" in captured.out
+    assert "the scan stops here for now; no record written" in captured.err
+    assert "can't be classified; no record written" not in captured.err
