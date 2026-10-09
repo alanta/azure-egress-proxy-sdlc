@@ -13,7 +13,7 @@
 - [x] 2.1 Resolve the ref to a commit and clone the subject into a temporary directory; verify `main` is recorded as its commit, an unknown ref fails with no record, and the clone is discarded after the run
 - [x] 2.2 Normalise Renovate's report into inventory entries and per-update-type candidates with datasource and lookup time, with failed lookups as `unknown`; verify unit tests on the report captured in 1.3, including a rate-limited lookup
 - [x] 2.3 Detect dependency-bearing files by pattern (including `*.pkr.hcl`, `requirements*.txt`, `package.json`, inline `pip install` and `apt-get install` lines) and report those no adapter covered as unsupported or unparseable; verify a fixture with a Packer template and a malformed lockfile reports both, and the scan still completes
-- [ ] 2.4 Run the native NuGet and Go queries (design decision 3) and report disagreements with Renovate; verify on `064aa09` and record the disagreements found
+- [x] 2.4 Run the native NuGet and Go queries (design decision 3) and report disagreements with Renovate; verify on `064aa09` and record the disagreements found
 - [ ] 2.5 Document the supported source types, the custom managers and the known gaps in `docs/scan-coverage.md`; verify the document matches the inventory and gaps of a `064aa09` scan
 
 ## 3. Update policy
