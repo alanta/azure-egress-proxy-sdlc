@@ -4,7 +4,8 @@ OSV-Scanner runs in a pinned container on the scan's throwaway checkout and read
 files: every `packages.lock.json`, and `go.mod`, which lists every module a Go build resolves
 (OSV-Scanner has no extractor for `go.sum`). It matches the resolved versions against
 osv.dev. It doesn't decide reachability: its own call analysis is turned off, because
-govulncheck supplies reachability for Go (task 4.2). Until then every finding is `unknown`.
+govulncheck supplies reachability for Go (see `sdlc.govulncheck`). Every finding starts as
+`unknown`.
 
 An advisory on a dependency the inventory doesn't list, such as a transitive NuGet package or
 an indirect Go module, adds a locked entry for it, with the fixed version as its candidate
@@ -58,7 +59,7 @@ class Findings:
 
 
 @dataclass(frozen=True)
-class _Advisory:
+class Advisory:
     id: str
     aliases: list[str]
     records: list[dict[str, Any]]  # the OSV entries of one group: the same issue
@@ -150,7 +151,7 @@ def findings(
     added: list[dict[str, Any]] = []
     updated: dict[str, dict[str, Any]] = {}  # skipped indirect entries, taken over
     looked_up: dict[str, dict[str, Any]] = {}  # indirect entries Renovate looked up
-    found: list[tuple[dict[str, Any], str, str, str, _Advisory]] = []
+    found: list[tuple[dict[str, Any], str, str, str, Advisory]] = []
     gaps: list[dict[str, Any]] = []
     seen: set[tuple[str, str]] = set()
 
@@ -261,30 +262,47 @@ def findings(
     by_entry: dict[str, list[dict[str, Any]]] = {}
     for candidate in candidates + new_candidates:
         by_entry.setdefault(candidate["dependency"], []).append(candidate)
-    vulnerabilities = []
-    for entry, ecosystem, name, version, advisory in found:
-        vulnerability: dict[str, Any] = {"advisory": advisory.id}
-        if advisory.aliases:
-            vulnerability["aliases"] = advisory.aliases
-        fixed, last_affected = fix(version, advisory.records, ecosystem, name)
-        vulnerability |= {
-            "dependency": entry["id"],
-            "affected_version": _display(entry["ecosystem"], version),
-            "fixed_version": _display(entry["ecosystem"], fixed) if fixed else None,
-        }
-        if last_affected and not fixed:
-            vulnerability["last_affected"] = _display(entry["ecosystem"], last_affected)
-        if fixed or last_affected:
-            reached, held_by = _reached(
-                entry, by_entry.get(entry["id"], []), advisory, ecosystem, name
-            )
-            vulnerability["fix_reached_by_candidate"] = reached
-            if held_by:
-                vulnerability["fix_held_by"] = held_by
-        vulnerability |= {"source": SOURCE, "reachability": "unknown"}
-        vulnerabilities.append(vulnerability)
-
+    vulnerabilities = [
+        vulnerability(entry, by_entry.get(entry["id"], []), advisory, ecosystem, name, version)
+        for entry, ecosystem, name, version, advisory in found
+    ]
     return Findings(added, list(updated.values()), new_candidates, vulnerabilities, gaps)
+
+
+def vulnerability(
+    entry: dict[str, Any],
+    candidates: list[dict[str, Any]],
+    advisory: Advisory,
+    ecosystem: str,
+    name: str,
+    version: str,
+    *,
+    source: str = SOURCE,
+    reachability: str = "unknown",
+) -> dict[str, Any]:
+    """The record's vulnerability for an advisory on the entry's version, given its candidates.
+
+    Reachability is `unknown` unless the caller knows better: OSV-Scanner's matches say nothing
+    about it.
+    """
+    found: dict[str, Any] = {"advisory": advisory.id}
+    if advisory.aliases:
+        found["aliases"] = advisory.aliases
+    fixed, last_affected = fix(version, advisory.records, ecosystem, name)
+    found |= {
+        "dependency": entry["id"],
+        "affected_version": _display(entry["ecosystem"], version),
+        "fixed_version": _display(entry["ecosystem"], fixed) if fixed else None,
+    }
+    if last_affected and not fixed:
+        found["last_affected"] = _display(entry["ecosystem"], last_affected)
+    if fixed or last_affected:
+        reached, held_by = _reached(entry, candidates, advisory, ecosystem, name)
+        found["fix_reached_by_candidate"] = reached
+        if held_by:
+            found["fix_held_by"] = held_by
+    found |= {"source": source, "reachability": reachability}
+    return found
 
 
 def match_fields(entries: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
@@ -301,7 +319,7 @@ def match_fields(entries: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     }
 
 
-def _advisories(package: dict[str, Any]) -> list[_Advisory]:
+def _advisories(package: dict[str, Any]) -> list[Advisory]:
     """One advisory per group: OSV-Scanner groups entries that describe the same issue."""
     records = {v["id"]: v for v in package.get("vulnerabilities") or [] if v.get("id")}
     groups = [[i for i in g.get("ids") or [] if i in records] for g in package.get("groups") or []]
@@ -314,7 +332,7 @@ def _advisories(package: dict[str, Any]) -> list[_Advisory]:
         aliases = set(ids)
         for i in ids:
             aliases |= set(records[i].get("aliases") or [])
-        advisories.append(_Advisory(ids[0], sorted(aliases - {ids[0]}), [records[i] for i in ids]))
+        advisories.append(Advisory(ids[0], sorted(aliases - {ids[0]}), [records[i] for i in ids]))
     return advisories
 
 
@@ -490,7 +508,7 @@ def fix(
 def _reached(
     entry: dict[str, Any],
     candidates: list[dict[str, Any]],
-    advisory: _Advisory,
+    advisory: Advisory,
     ecosystem: str,
     name: str,
 ) -> tuple[bool | str, str | None]:

@@ -49,7 +49,15 @@ def tool_entries() -> list[dict[str, str]]:
     ]
 
 
-def _container(image: str, workdir: str, checkout: Path, env: dict[str, str], *command: str) -> str:
+def container(
+    image: str,
+    workdir: str,
+    checkout: Path,
+    env: dict[str, str],
+    *command: str,
+    read_only: bool = False,
+) -> str:
+    """Run a command in the image on the checkout and return its output; NativeError if it fails."""
     runtime = os.environ.get("SDLC_CONTAINER_RUNTIME", "docker")
     version = subprocess.run(  # noqa: S603 - the configured container runtime
         [runtime, "--version"], capture_output=True, text=True, check=False
@@ -63,7 +71,8 @@ def _container(image: str, workdir: str, checkout: Path, env: dict[str, str], *c
     args = [runtime, "run", "--rm", *user, "--env", f"HOME={CONTAINER_TMP}"]
     for key, value in env.items():
         args += ["--env", f"{key}={value}"]
-    args += ["--volume", f"{checkout}:/src:Z", "--workdir", workdir, image, *command]
+    mount = f"{checkout}:/src:ro,Z" if read_only else f"{checkout}:/src:Z"
+    args += ["--volume", mount, "--workdir", workdir, image, *command]
     result = subprocess.run(  # noqa: S603 - fixed command; values are data
         args, capture_output=True, text=True, check=False
     )
@@ -77,7 +86,7 @@ def dotnet_updates(checkout: Path) -> list[NativeUpdate]:
     if not solutions:
         return []
     solution = solutions[0].name
-    output = _container(
+    output = container(
         DOTNET_IMAGE,
         "/src",
         checkout,
@@ -120,11 +129,26 @@ def parse_dotnet(listing: dict[str, Any], checkout: Path) -> list[NativeUpdate]:
     return updates
 
 
+def go_mods(checkout: Path) -> list[str]:
+    """The go.mod files of the checkout, relative to it, that the go command treats as modules.
+
+    Like `./...`, it ignores `testdata` and `vendor` directories, and those whose names start
+    with `_` or `.`.
+    """
+    found = []
+    for go_mod in checkout.glob("**/go.mod"):
+        parts = go_mod.parent.relative_to(checkout).parts
+        if any(p in ("testdata", "vendor") or p.startswith(("_", ".")) for p in parts):
+            continue
+        found.append(str(go_mod.relative_to(checkout)))
+    return sorted(found)
+
+
 def go_updates(checkout: Path) -> list[NativeUpdate]:
     updates = []
-    for go_mod in sorted(checkout.glob("**/go.mod")):
-        module_dir = go_mod.parent.relative_to(checkout)
-        output = _container(
+    for go_mod in go_mods(checkout):
+        module_dir = Path(go_mod).parent
+        output = container(
             GO_IMAGE,
             f"/src/{module_dir}",
             checkout,

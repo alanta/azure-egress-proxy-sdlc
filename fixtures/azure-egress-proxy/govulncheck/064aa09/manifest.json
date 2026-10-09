@@ -1,0 +1,20 @@
+{
+  "subject": "alanta/azure-egress-proxy",
+  "commit": "064aa099ecf7ffea9664b89df29f7d89d6859358",
+  "captured_at": "2026-10-09",
+  "govulncheck": {
+    "version": "v1.8.0",
+    "image": "docker.io/library/golang:1.27-alpine@sha256:8a5910f31396cd4d89662f56c68b3ae31d374308270a1c3bd96672ee5ed43414",
+    "toolchain": "go1.25.14",
+    "db": "https://vuln.go.dev",
+    "db_last_modified": "2026-10-08T22:31:09Z",
+    "platforms": [
+      "linux/amd64",
+      "linux/arm64"
+    ]
+  },
+  "mode": "govulncheck -format json ./... in proxy/, with GOTOOLCHAIN=go1.25.14 from go.mod's go directive, GOOS=linux, CGO_ENABLED=0, GOWORK=off, -mod=readonly, once per GOARCH (amd64, arm64)",
+  "files": {
+    "govulncheck.json.gz": "govulncheck.run() on a clean checkout of the commit, unchanged but gzipped: one JSON stream per platform, each after a {\"sdlc_platform\": ...} marker; 6 MB, most of it call traces"
+  }
+}
