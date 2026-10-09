@@ -130,6 +130,7 @@ Open PRs by `dependabot[bot]` are read with the read-only credential:
 
 - **Names, target versions and groups** come from the `updated-dependencies` YAML block Dependabot writes in its commit messages. The block doesn't always carry an update type (the grouped Docker PR #76 has none), so the update type is derived from the from- and to-versions.
 - **From-versions** come from the `Updates <name> from A to B` lines in the PR body, or the title for a single update, matched with fixed patterns only. PR text is never interpreted beyond that.
+- **The PR's diff is always read**: its removed version lines give each file's from-version. Some NuGet PRs, like #98, state only the to-version, because the dependency has a central version and older locked ones. Dependabot writes the diff's version lines mechanically, so fixed patterns per file type read them reliably, and the diff is matched like the text, never interpreted. A from-version the text states must be among the diff's, so text alone can't set one.
 - **Unparseable PRs** are reported as such.
 
 A PR is current for the revision when its from-versions equal the versions declared in the scanned revision or resolved in its lock files; otherwise it is stale. Lock files count because Dependabot also updates transitive versions: #77 moves AppHost's locked `Microsoft.Extensions.Http` from 10.0.11 to the 10.0.12 already declared centrally.

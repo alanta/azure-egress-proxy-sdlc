@@ -12,6 +12,7 @@ from sdlc import (
     consistency,
     coverage,
     dependabot,
+    dependabot_prs,
     govulncheck,
     lifecycle,
     native,
@@ -140,6 +141,9 @@ def scan(repository: str, ref: str, trial_policy: Path | None = None) -> int:
             alerts, vulnerabilities = read_alerts(
                 revision, token, reached.vulnerabilities, inventory.dependencies, gaps
             )
+            # Read in the same run as the lookups: parity holds only at a point in time.
+            # Task 5.2 classifies them against the candidates; until then they stay here.
+            pulls = read_pull_requests(revision, token, gaps)
             declared = consistency.check(baseline, inventory.dependencies)
             gaps += declared.gaps
             lifecycles = lifecycle.check(
@@ -189,7 +193,8 @@ def scan(repository: str, ref: str, trial_policy: Path | None = None) -> int:
     print_alerts(alerts, vulnerabilities, revision.commit)
     print_consistency(declared, inventory.dependencies)
     print_lifecycle(lifecycles)
-    # Parity arrives with the rest of slice 1; a record without it
+    print_pull_requests(pulls)
+    # Parity's classification arrives with task 5.2; a record without it
     # would claim there was nothing to find.
     print("error: the scan stops here for now; no record written", file=sys.stderr)
     return 1
@@ -253,6 +258,51 @@ def read_alerts(
         )
         return None, vulnerabilities
     return dependabot.compare(alerts, vulnerabilities, dependencies, revision.commit)
+
+
+def read_pull_requests(
+    revision: Revision, token: str | None, gaps: list[dict]
+) -> dependabot_prs.PullRequests | None:
+    """Dependabot's open PRs with their proposed updates, or None and a gap saying why not.
+
+    None never means there are no open PRs: it means nothing is known about them.
+    """
+    try:
+        return dependabot_prs.read(revision.repository, token)
+    except dependabot.Unavailable as error:
+        gaps.append(
+            {"kind": "unavailable_source", "subject": dependabot_prs.SUBJECT, "reason": str(error)}
+        )
+        return None
+
+
+def print_pull_requests(pulls: dependabot_prs.PullRequests | None) -> None:
+    if pulls is None:
+        print("Dependabot PRs: unavailable (see its gap), so nothing is known about them")
+        return
+    parsed = [p for p in pulls.pull_requests if p.state == "parsed"]
+    unparseable = [p for p in pulls.pull_requests if p.state == "unparseable"]
+    print(
+        f"Dependabot PRs: {len(pulls.pull_requests)} open (read at {pulls.read_at}); "
+        f"{len(parsed)} parsed, proposing {sum(len(p.updates) for p in parsed)} updates; "
+        f"{len(unparseable)} unparseable"
+        + (", so the comparison with them is incomplete" if unparseable else "")
+    )
+    for pull in parsed:
+        print(f"  #{pull.number} at {pull.head[:7]} on {pull.base}: {pull.title}")
+        for u in pull.updates:
+            kind = u.update_type or "unknown type"
+            if u.update_type_derived:
+                kind += ", derived"
+            where = " ".join(
+                part for part in (u.ecosystem, u.directory, u.group and f"group {u.group}") if part
+            )
+            old = u.from_version or " or ".join(sorted({f.version for f in u.from_versions}))
+            if u.from_source == "diff":
+                old += f" (from the diff of {len(u.from_versions)} files)"
+            print(f"    {u.name} {old} -> {u.to_version} ({kind}) {where}")
+    for pull in unparseable:
+        print(f"  unparseable #{pull.number} at {pull.head[:7]}: {pull.reason}")
 
 
 def print_consistency(result: consistency.Result, dependencies: list[dict]) -> None:

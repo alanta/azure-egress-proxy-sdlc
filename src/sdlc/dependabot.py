@@ -33,6 +33,7 @@ from typing import Any
 
 API = "https://api.github.com"
 SUBJECT = "dependabot-alerts"  # the gap's subject when the alerts can't be read
+PERMISSION = "Dependabot alerts: read"
 TIMEOUT = 30
 
 _NEXT = re.compile(r'<([^>]+)>;\s*rel="next"')
@@ -40,7 +41,7 @@ _COMMIT = re.compile(r"^[0-9a-f]{40}$")
 
 
 class Unavailable(Exception):
-    """The alerts can't be read; the message says why."""
+    """A source on GitHub can't be read; the message says why."""
 
 
 @dataclass(frozen=True)
@@ -103,12 +104,12 @@ def read(
             "No token in SDLC_GITHUB_TOKEN; reading Dependabot alerts needs one with "
             "Dependabot alerts: read."
         )
-    repo = _json(_fetch(get, f"{API}/repos/{repository}", token))
+    repo = decode(fetch(get, f"{API}/repos/{repository}", token))
     ref = repo.get("default_branch") if isinstance(repo, dict) else None
     if not isinstance(ref, str) or not ref:
         raise Unavailable("GitHub's answer names no default branch for the alerts to describe.")
-    branch = _json(
-        _fetch(get, f"{API}/repos/{repository}/branches/{urllib.parse.quote(ref, safe='')}", token)
+    branch = decode(
+        fetch(get, f"{API}/repos/{repository}/branches/{urllib.parse.quote(ref, safe='')}", token)
     )
     commit = branch.get("commit") if isinstance(branch, dict) else None
     sha = commit.get("sha") if isinstance(commit, dict) else None
@@ -123,14 +124,14 @@ def read(
         if url in fetched:
             raise Unavailable(f"GitHub's pagination links back to a page already read: {url}")
         fetched.add(url)
-        response = _fetch(get, url, token)
-        page = _json(response)
+        response = fetch(get, url, token)
+        page = decode(response)
         if not isinstance(page, list) or not all(_is_alert(a) for a in page):
             raise Unavailable("GitHub's answer isn't a list of Dependabot alerts.")
         # An alert can move to the next page while the pages are read; it counts once.
         for alert in page:
             alerts.setdefault(alert["number"], alert)
-        url = _next(response.headers.get("link"))
+        url = next_page(response.headers.get("link"))
     return Alerts(ref, sha, read_at, list(alerts.values()))
 
 
@@ -210,7 +211,19 @@ def compare(
     }, result
 
 
-def _fetch(get: Callable[[str, str], Response], url: str, token: str) -> Response:
+def fetch(
+    get: Callable[[str, str], Response],
+    url: str,
+    token: str,
+    *,
+    what: str = "Dependabot alerts",
+    permission: str = PERMISSION,
+) -> Response:
+    """A 200 answer from GitHub's API, or Unavailable saying why there is none.
+
+    `what` and `permission` name what is being read and the token permission it needs, so a
+    refusal can say which is missing.
+    """
     # The token goes to GitHub's API only, wherever a pagination link points.
     if not _in_api(url):
         raise Unavailable(f"GitHub's answer links to {url}, outside its API.")
@@ -222,11 +235,11 @@ def _fetch(get: Callable[[str, str], Response], url: str, token: str) -> Respons
     except http.client.HTTPException as error:  # a cut-off or garbled answer
         raise Unavailable(f"GitHub's answer broke off: {error!r}.") from error
     if response.status != 200:
-        raise Unavailable(_explain(response))
+        raise Unavailable(_explain(response, what, permission))
     return response
 
 
-def _explain(response: Response) -> str:
+def _explain(response: Response, what: str, permission: str) -> str:
     """Why GitHub refused, as far as its answer tells."""
     message = _message(response.body)
     said = f"GitHub answered {response.status}" + (f": {message}" if message else "")
@@ -245,15 +258,15 @@ def _explain(response: Response) -> str:
             when = f", for {headers['retry-after']} seconds"
         return f"GitHub's rate limit was reached{when} ({said})."
     if "disabled" in message.casefold():
-        return f"Dependabot alerts are disabled for the repository ({said})."
+        return f"{what[:1].upper()}{what[1:]} are disabled for the repository ({said})."
     if response.status == 401:
         return f"GitHub rejected the token ({said})."
     if response.status == 403 and "not accessible" in message.casefold():
-        return f"The token lacks the Dependabot alerts: read permission ({said})."
+        return f"The token lacks the {permission} permission ({said})."
     if response.status == 404:
         return (
-            "The repository or its Dependabot alerts aren't visible to the token: it may lack "
-            f"Dependabot alerts: read ({said})."
+            f"The repository or its {what} aren't visible to the token: it may lack "
+            f"{permission} ({said})."
         )
     return f"{said}."
 
@@ -266,14 +279,14 @@ def _message(body: bytes) -> str:
     return message.strip() if isinstance(message, str) else ""
 
 
-def _json(response: Response) -> Any:
+def decode(response: Response) -> Any:
     try:
         return json.loads(response.body)
     except ValueError as error:
         raise Unavailable(f"GitHub's answer isn't JSON: {error}") from error
 
 
-def _next(link: str | None) -> str | None:
+def next_page(link: str | None) -> str | None:
     match = _NEXT.search(link or "")
     return match.group(1) if match else None
 

@@ -374,3 +374,53 @@ def test_scan_with_endoflife_date_unreachable_reports_unknown(offline_scan, monk
     assert f"gap: endoflife.date: {reason}" in out
     assert f"unknown: go 1.25: {reason} (go.mod)" in out
     assert "lifecycle (nothing read from endoflife.date)" in out
+
+
+def test_scan_without_a_token_says_nothing_is_known_about_dependabot_s_prs(offline_scan, capsys):
+    assert main(["scan", "--repo", "alanta/demo"]) == 1
+    out = capsys.readouterr().out
+    assert "gap: dependabot-prs: No token in SDLC_GITHUB_TOKEN" in out
+    assert "Dependabot PRs: unavailable (see its gap), so nothing is known about them" in out
+
+
+def test_scan_lists_dependabot_s_proposed_updates_and_unparseable_prs(
+    offline_scan, monkeypatch, capsys
+):
+    import json
+    from pathlib import Path
+
+    from sdlc import dependabot_prs
+
+    prs = Path(__file__).parents[1] / "fixtures" / "azure-egress-proxy" / "prs"
+
+    def parsed(n, with_diff=True):
+        files = json.loads((prs / str(n) / "files.json").read_text())
+        return dependabot_prs.parse(
+            json.loads((prs / str(n) / "pr.json").read_text()),
+            json.loads((prs / str(n) / "commits.json").read_text()),
+            (lambda: files) if with_diff else None,
+        )
+
+    found = [parsed(76), parsed(98), parsed(99, with_diff=False)]
+    monkeypatch.setattr(
+        dependabot_prs,
+        "read",
+        lambda repository, token: dependabot_prs.PullRequests("2026-10-09T09:00:00+00:00", found),
+    )
+    assert main(["scan", "--repo", "alanta/demo"]) == 1
+    captured = capsys.readouterr()
+    assert (
+        "Dependabot PRs: 3 open (read at 2026-10-09T09:00:00+00:00); 2 parsed, proposing 5 "
+        "updates; 1 unparseable, so the comparison with them is incomplete"
+    ) in captured.out
+    assert "  #76 at deddfe4 on main: docker: bump the docker-minor-patch group" in captured.out
+    assert (
+        "    library/golang 1.25-alpine -> 1.27-alpine (minor, derived) docker /proxy "
+        "group docker-minor-patch\n"
+    ) in captured.out
+    assert (
+        "    Azure.Core 1.53.0 or 1.55.0 or 1.62.0 (from the diff of 11 files) -> 1.63.0 (minor) "
+        "nuget group nuget-minor-patch\n"
+    ) in captured.out
+    assert "  unparseable #99 at 7aea495: its diff wasn't read\n" in captured.out
+    assert "no record written" in captured.err

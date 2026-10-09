@@ -122,6 +122,19 @@ Results for supported, nearing and ended lines list the lines still supported on
 
 At `064aa09` on 2026-10-09, Go 1.25 is end of life since 2026-08-19, with 1.26 the oldest supported line. .NET 10, Python 3.12, Debian 12 (distroless) and Ubuntu 24.04 (the devcontainer's `noble`) are supported. Alpine is unknown, because `golang:1.25-alpine` and `python:3.12-alpine` don't name a release, and the `ubuntu-latest` runners have no mapping.
 
+## Dependabot PRs
+
+Dependabot's open PRs are the baseline the scan has to match (design decision 7). The scan lists the open PRs by `dependabot[bot]` and each one's commits with the token, which needs `Pull requests: read`, and records when it read them. Each PR becomes one update per dependency: name, from- and to-version, update type, package ecosystem, directory and group.
+- **Names, to-versions, update types and groups** come from the `updated-dependencies` block at the end of Dependabot's commit message. Only that block is parsed as YAML, by a loader that builds nothing but strings, lists and maps, so `3.10` stays `3.10`. A dependency the block lists more than once, as #98 does for Azure.Core, counts once.
+- **From-versions** come from fixed `… from A to B` lines in the title, the commit message and the body: `Updates `x` from` for most ecosystems, `Updated [x](…) from` in NuGet bodies, `Bumps x from` in NuGet commits, and the title of a single update. The body is read only above its first `<details>` or `<blockquote>`, where upstream release notes start, so they can't set a version. A grouped PR's later lines sit below an earlier one's notes, but its commit message has them all.
+- **The PR's changed files are always read**, and their removed lines give each file's version, by a fixed pattern per file type: `PackageVersion` and `PackageReference` versions, `"resolved"` inside the package's block of a `packages.lock.json`, go.mod requirements (not `exclude` or `retract` lines), Dockerfile `FROM` tags and workflow `uses:` refs (a SHA's version comment). Each update lists them; versions drop a leading `v`, and keep the file's own text beside it. A from-version the text states must be among them when there are any; other files at other versions are fine. When the text states none, the diff's versions are the from-versions, and there is one from-version only when they agree. A patch GitHub leaves out or cuts short, or a file list it doesn't give in full, makes the PR unparseable.
+- **An update type the block lacks**, as in Docker's #76, is derived from the versions by the first number that differs: `3.12-alpine` to `3.14-alpine` is minor.
+- **The ecosystem** comes from Dependabot's branch name. **The directory** comes from the `Bumps the … group … /dir` line or the title's `in /dir`. NuGet PRs name none.
+
+Nothing else in a PR's text is read (decision 9). A PR is `unparseable`, with the reason and no updates, when its block is missing, malformed, over 64 KiB or nested too deeply, a dependency has no from-version or two, its text disagrees with its block or its diff, a commit isn't Dependabot's (authored by `dependabot[bot]`, committed and signed by GitHub), its head moves while it is read, or its commits or diff can't be read. So a partial reading never passes for a complete one. When the PRs can't be listed at all, the record has an `unavailable_source` gap for `dependabot-prs`, and says nothing about them.
+
+Every PR captured on 2026-10-07 parses. #98 needs its diff: Dependabot writes only "Bumps Azure.Core to 1.63.0" and "Pinned … at 1.63.0", because the central version is 1.62.0 while `EgressProxy.Client` and its tests lock 1.53.0 and `AllowlistSeeder` locks 1.55.0. Its diff gives all three, per file. On 2026-10-09 three PRs are open, #75, #76 and #99, and all of them parse into 7 updates. Comparing the updates with the scan's candidates is task 5.2.
+
 ## Coverage gaps
 
 The scan reports a gap rather than staying silent when:
@@ -131,6 +144,7 @@ The scan reports a gap rather than staying silent when:
 - **a package manager query fails**, for example when a locked restore breaks.
 - **a declaration in the alias table has no version to compare**, such as `golang:latest`, `golang:${GO_VERSION}` or Go `1.x`.
 - **endoflife.date can't be read**, or answers with an error or malformed data. The lines of the products concerned are `unknown`.
+- **Dependabot's alerts or open PRs can't be read.** Nothing is then said about them.
 
 A file type Renovate does read, such as a project file with only project references, isn't a gap when Renovate finds nothing in it.
 
@@ -140,4 +154,4 @@ A file type Renovate does read, such as a project file with only project referen
 - **`gcr.io/distroless/static-debian12:nonroot`** has no version tag. It could only be tracked by digest, so it is skipped. Its Debian release's lifecycle is reported.
 - **OS releases are read from image tags only for Alpine, Debian and Ubuntu.** Others, such as Azure Linux or Windows Server Core, aren't.
 - **The Marketplace image build** (Packer, platform image, OS packages) isn't covered yet. A Packer template shows up as a coverage gap until it is.
-- **The comparison with Dependabot's PRs** is a later task in `openspec/changes/revision-dependency-scan/tasks.md`.
+- **The comparison with Dependabot's PRs** (matched, held, missed, stale) is task 5.2 in `openspec/changes/revision-dependency-scan/tasks.md`. The PRs are read and parsed, but not yet compared.
