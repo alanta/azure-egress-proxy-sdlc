@@ -19,8 +19,8 @@
 
 ## 3. Update policy
 
-- [ ] 3.1 Load the policy from `.github/renovate.json5` at the revision, or from an explicitly supplied trial file; classify candidates as `in scope` or `held by policy` with the rule; fail on an invalid policy; verify tests for a held platform-coupled major, no policy found, a trial policy recorded in the output, and an invalid policy failing with no record
-- [ ] 3.2 Write the trial policy for `azure-egress-proxy` in `policies/azure-egress-proxy.renovate.json5`, carrying over `dependabot.yml`'s intent (the `Microsoft.OpenApi` 3.x hold, weekly grouping of minor and patch updates) and holding NuGet majors coupled to the .NET runtime, with a reason comment per rule; verify a scan of `064aa09` with it holds `Microsoft.OpenApi` 3.x and every runtime-coupled `11.x` candidate
+- [x] 3.1 Load the policy from `.github/renovate.json5` at the revision, or from an explicitly supplied trial file; classify candidates as `in scope` or `held by policy` with the rule; fail on an invalid policy; verify tests for a held platform-coupled major, no policy found, a trial policy recorded in the output, and an invalid policy failing with no record
+- [x] 3.2 Write the trial policy for `azure-egress-proxy` in `policies/azure-egress-proxy.renovate.json5`, carrying over `dependabot.yml`'s intent (the `Microsoft.OpenApi` 3.x hold, weekly grouping of minor and patch updates) and holding NuGet majors coupled to the .NET runtime, with a reason comment per rule; verify a scan of `064aa09` with it holds `Microsoft.OpenApi` 3.x and every runtime-coupled `11.x` candidate
 
 ## 4. Vulnerabilities and consistency
 

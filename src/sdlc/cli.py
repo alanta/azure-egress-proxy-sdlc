@@ -4,10 +4,11 @@ import argparse
 import os
 import sys
 from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from pathlib import Path
 
-from sdlc import coverage, native, renovate
+from sdlc import coverage, native, policy, renovate
 from sdlc.subject import SubjectError, checkout, resolve
 
 
@@ -52,12 +53,21 @@ def scan(repository: str, ref: str, trial_policy: Path | None = None) -> int:
         revision = resolve(repository, ref)
         print(f"{repository}@{ref} is {revision.commit}")
         looked_up_at = datetime.now(UTC).isoformat(timespec="seconds")
+        token = os.environ.get("SDLC_GITHUB_TOKEN")
         with checkout(revision) as path:
-            report = renovate.run(
-                path, trial_policy=trial_policy, token=os.environ.get("SDLC_GITHUB_TOKEN")
+            subject_policy = policy.load(path, trial_policy, validate=renovate.validate)
+            print(f"policy: {describe(subject_policy)}")
+            report, baseline = run_renovate(path, subject_policy, token)
+            # The inventory comes from the run without the policy's holds, so a dependency
+            # the policy disables still shows what its lookup found.
+            inventory = renovate.normalize(baseline, looked_up_at=looked_up_at, checkout=path)
+            candidates = policy.classify(
+                inventory.candidates,
+                renovate.normalize(report, looked_up_at=looked_up_at),
+                renovate.match_fields(baseline),
+                subject_policy,
             )
-            inventory = renovate.normalize(report, looked_up_at=looked_up_at, checkout=path)
-            gaps = coverage.gaps(path, report)
+            gaps = coverage.gaps(path, baseline)
             native_updates = []
             for query, label in (
                 (native.dotnet_updates, "dotnet list package"),
@@ -69,16 +79,29 @@ def scan(repository: str, ref: str, trial_policy: Path | None = None) -> int:
                     gaps.append(
                         {"kind": "unavailable_source", "subject": label, "reason": str(error)}
                     )
-            disagreements = native.cross_check(
-                native_updates, inventory.dependencies, inventory.candidates
-            )
+            disagreements = native.cross_check(native_updates, inventory.dependencies, candidates)
             drifted, drift_candidates = native.lock_drift(
                 native_updates, inventory.dependencies, looked_up_at=looked_up_at, checkout=path
             )
-            inventory = renovate.Inventory(
-                inventory.dependencies + drifted, inventory.candidates + drift_candidates
+            # Renovate never sees lock-file drift, so only the policy's rules classify it.
+            drift_candidates = policy.classify(
+                drift_candidates,
+                None,
+                {
+                    d["id"]: {
+                        "depName": d["name"],
+                        "packageName": d["name"],
+                        "datasource": "nuget",
+                        "manager": "nuget",
+                    }
+                    for d in drifted
+                },
+                subject_policy,
             )
-    except (SubjectError, renovate.RenovateError) as error:
+            inventory = renovate.Inventory(
+                inventory.dependencies + drifted, candidates + drift_candidates
+            )
+    except (SubjectError, renovate.RenovateError, policy.PolicyError) as error:
         print(f"error: {error}; no record written", file=sys.stderr)
         return 1
 
@@ -92,13 +115,40 @@ def scan(repository: str, ref: str, trial_policy: Path | None = None) -> int:
         print(f"  gap: {gap['subject']}: {gap['reason']}")
     for dep in drifted:
         print(f"  lock drift: {dep['location']['file']}: {dep['name']} {dep['current']}")
+    held = [c for c in inventory.candidates if c["classification"] == "held_by_policy"]
+    print(
+        f"{len(inventory.candidates) - len(held)} candidates in scope, {len(held)} held by policy"
+    )
+    for c in held:
+        print(f"  held: {c['dependency']} {c['update_type']} {c['version']}: {c['held_by']}")
     print(f"{len(disagreements)} disagreements with the package managers")
     for d in disagreements:
         print(
             f"  {d['source']}: {d['name']} {d['current']} -> {d['native_latest']}, "
             f"scan has {d['scan_candidates'] or 'nothing'}"
         )
-    # Policy, vulnerabilities, lifecycle, consistency and parity arrive with the rest of
-    # slice 1; a record without them would claim there was nothing to find.
+    # Vulnerabilities, lifecycle, consistency and parity arrive with the rest of slice 1; a
+    # record without them would claim there was nothing to find.
     print("error: the scan stops here for now; no record written", file=sys.stderr)
     return 1
+
+
+def describe(subject_policy: policy.Policy) -> str:
+    source = subject_policy.source
+    if source["source"] == "none":
+        return "none found, so every candidate is in scope"
+    where = "trial file" if source["source"] == "trial" else "the subject's"
+    return f"{where} {source['path']}"
+
+
+def run_renovate(path: Path, subject_policy: policy.Policy, token: str | None) -> tuple[dict, dict]:
+    """Renovate's reports with the whole policy and without its holds, run side by side."""
+    if subject_policy.baseline == subject_policy.content:
+        report = renovate.run(path, policy=subject_policy.content, token=token)
+        return report, report
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        main, baseline = (
+            pool.submit(renovate.run, path, policy=text, token=token)
+            for text in (subject_policy.content, subject_policy.baseline)
+        )
+        return main.result(), baseline.result()

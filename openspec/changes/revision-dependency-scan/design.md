@@ -78,7 +78,7 @@ Go has no drift of this kind: `go.mod` holds one version per module.
 
 ### 4. The update policy lives in the subject repository, in Renovate's format
 
-There is no cross-tool standard for update policy. `dependabot.yml` and Renovate's config are tool-specific formats, and Renovate's is the more expressive one. It can hold a .NET-runtime-coupled NuGet major (`packageRules` with `matchUpdateTypes: ["major"]` and `allowedVersions`), ignore a dependency, and group updates.
+There is no cross-tool standard for update policy. `dependabot.yml` and Renovate's config are tool-specific formats, and Renovate's is the more expressive one. It can hold a .NET-runtime-coupled NuGet major (`packageRules` with `matchUpdateTypes: ["major"]` and `enabled: false`, or `allowedVersions`), ignore a dependency, and group updates.
 
 So the policy is `.github/renovate.json5` in the subject repository: JSON5 allows a comment with the reason next to each rule. The scan reads it at the scanned revision, so a policy change is reviewed in the same PR as the code it affects.
 
@@ -87,6 +87,8 @@ Until the maintainer merges a policy into the subject, a trial policy kept in th
 The file is inert while no Renovate app is installed on the subject repository. When Dependabot is retired, the same file can drive Renovate directly, if that is the route taken.
 
 An invalid policy fails the scan: falling back to "everything in scope" would widen the policy silently.
+
+Renovate can't say which rule held a candidate. Its report names no rules, a major turned off by `matchUpdateTypes` and `enabled: false` still appears in it, and `allowedVersions` drops versions without a trace, sometimes leaving an older candidate in their place. So the scan runs Renovate twice: once with the policy, and once without its hold rules (`enabled: false` or `allowedVersions`) and `ignoreDeps`. The inventory comes from the second run. A candidate the second run has and the first lacks was dropped by `allowedVersions`. The scan names the rule by matching hold rules itself, which is why every hold rule needs a `description` and may only use the matchers it evaluates the way Renovate does: package and dependency names, datasources, managers and update types. Renovate's own validator checks the rest of the file. When Renovate drops a candidate that no hold rule matches, the scan's matching disagrees with Renovate's, and the scan fails rather than guess.
 
 The autonomy and merge policy of slice 3 is a separate concern, and gets its own file when that slice is designed.
 

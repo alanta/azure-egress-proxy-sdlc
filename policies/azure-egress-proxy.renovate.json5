@@ -1,8 +1,89 @@
 // Trial update policy for alanta/azure-egress-proxy, in Renovate's format. It stands in
 // for .github/renovate.json5 in the subject until the maintainer adopts one there (see
-// openspec/changes/revision-dependency-scan, design decision 4). The update rules are
-// task 3.2; this file starts with the subject's own dependency sources.
+// openspec/changes/revision-dependency-scan, design decision 4). It carries over the
+// intent of the subject's .github/dependabot.yml and adds the .NET runtime hold.
 {
+  // dependabot.yml checks every ecosystem weekly on Monday, so that minor and patch
+  // bumps arrive as one batch a week instead of one PR per package. Security updates
+  // ignore this schedule and the groups below: Renovate's vulnerabilityAlerts defaults
+  // clear both, as dependabot.yml intends.
+  schedule: ["on monday"],
+
+  packageRules: [
+    // Weekly groups, as in dependabot.yml: one PR per ecosystem for minor and patch
+    // bumps. Majors stay out of every group, so each one still arrives on its own PR
+    // for a human to read the changelog. Digest-only bumps of SHA-pinned actions and
+    // images join the weekly group too, so they don't bring back one PR per pin.
+    {
+      description: "GitHub Actions minor and patch bumps, weekly",
+      matchManagers: ["github-actions"],
+      matchUpdateTypes: ["minor", "patch", "digest"],
+      groupName: "actions-minor-patch",
+    },
+    {
+      description: "Go module minor and patch bumps, weekly",
+      matchManagers: ["gomod"],
+      matchUpdateTypes: ["minor", "patch"],
+      groupName: "gomod-minor-patch",
+    },
+    {
+      description: "NuGet minor and patch bumps, weekly",
+      matchDatasources: ["nuget"],
+      matchUpdateTypes: ["minor", "patch"],
+      groupName: "nuget-minor-patch",
+    },
+    {
+      // The Aspire, Extensions and AspNetCore packages version in lockstep, so they get
+      // a group of their own; this rule comes after the one above to take precedence.
+      description: "Microsoft and Aspire NuGet minor and patch bumps, weekly",
+      matchDatasources: ["nuget"],
+      matchPackageNames: ["Microsoft.*", "Aspire.*"],
+      matchUpdateTypes: ["minor", "patch"],
+      groupName: "microsoft",
+    },
+    {
+      description: "Container image minor and patch bumps, weekly",
+      matchDatasources: ["docker"],
+      matchUpdateTypes: ["minor", "patch", "digest"],
+      groupName: "docker-minor-patch",
+    },
+
+    // Holds.
+    {
+      // The OpenAPI stack stays on 2.x for now: 3.x requires explicit migration work.
+      // dependabot.yml ignores Microsoft.OpenApi 3.*, and Directory.Packages.props
+      // carries the same note.
+      description: "Microsoft.OpenApi stays on 2.x",
+      matchDatasources: ["nuget"],
+      matchPackageNames: ["Microsoft.OpenApi"],
+      allowedVersions: "<3",
+    },
+    {
+      // Moving to the next .NET runtime (10 -> 11) is a platform migration, which is out
+      // of scope for dependency updates. The ASP.NET Core and Microsoft.Extensions
+      // packages ship with the runtime and take its major version (10.0.x, or 10.x for
+      // the dotnet/extensions packages), so their majors are runtime majors. Aspire,
+      // Microsoft.OpenApi, the test SDK and the Azure and IdentityModel packages version
+      // on their own and are not held here.
+      description: "NuGet packages stay on the .NET runtime's major",
+      matchDatasources: ["nuget"],
+      matchPackageNames: ["Microsoft.AspNetCore.*", "Microsoft.Extensions.*"],
+      matchUpdateTypes: ["major"],
+      enabled: false,
+    },
+    {
+      // The SDK and ASP.NET Core images carry the runtime major in their tag (10.0), and
+      // CI's actions/setup-dotnet installs the SDK of that major (dotnet-version 10.0.x),
+      // so their majors are the same platform migration as above. The devcontainer image
+      // is not held: its version is the image's own, the runtime is only in the suffix.
+      description: ".NET SDK and images stay on the .NET runtime's major",
+      matchDatasources: ["docker", "dotnet-version"],
+      matchPackageNames: ["mcr.microsoft.com/dotnet/*", "dotnet-sdk"],
+      matchUpdateTypes: ["major"],
+      enabled: false,
+    },
+  ],
+
   customManagers: [
     {
       // The devcontainer installs the Aspire CLI as a dotnet tool, pinned by an ARG.

@@ -16,6 +16,7 @@ name = "azure-egress-proxy-sdlc"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "json5" },
     { name = "jsonschema" },
     { name = "packaging" },
 ]
@@ -28,6 +29,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "json5", specifier = ">=0.12" },
     { name = "jsonschema", specifier = ">=4.23" },
     { name = "packaging", specifier = ">=24" },
 ]
@@ -54,6 +56,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/01/e1/2069291243c926a2ff1cd706c7f3eeb9b62144bf60f77c9fb9ff2fb26bd3/iniconfig-2.3.1.tar.gz", hash = "sha256:67f4b9c50da0dedf52af349e7749a80a9057a5031199791b906c3bb3ae878960", size = 21209, upload-time = "2026-10-06T22:48:38.076Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/56/43/4ca9e49d27a1fcf6bece6f6aec0ea46bb9112489b93d4b688fb415457bdb/iniconfig-2.3.1-py3-none-any.whl", hash = "sha256:9121e2c1fdb355232495be3194c8dfe87ccc2d5dee45947b78e68f499790d7a7", size = 7552, upload-time = "2026-10-06T22:48:36.959Z" },
+]
+
+[[package]]
+name = "json5"
+version = "0.16.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/80/63/503651a3946bfacb6d6098985f2af6b3bf880d8eedc53035761c628d13bc/json5-0.16.0.tar.gz", hash = "sha256:8b135a77b231f22e3656c601fec7621c5354c64c4fb2773715ee0814e4dc6bf7", size = 55924, upload-time = "2026-10-08T03:08:26.732Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/22/ea/6983226ffa91ff470b685e1673b7bd863e526eb208af1e7458fd71f02e31/json5-0.16.0-py3-none-any.whl", hash = "sha256:ab703e0d2e565ecff92b4d3525159108911db47e1becc3903a9433d4d504505a", size = 37394, upload-time = "2026-10-08T03:08:25.715Z" },
 ]
 
 [[package]]
