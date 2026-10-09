@@ -12,6 +12,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from packaging.version import InvalidVersion, Version
+
 DOTNET_IMAGE = (
     "mcr.microsoft.com/dotnet/sdk:10.0"
     "@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317"
@@ -203,3 +205,89 @@ def cross_check(
             }
         )
     return disagreements
+
+
+def lock_drift(
+    native: list[NativeUpdate],
+    dependencies: list[dict[str, Any]],
+    *,
+    looked_up_at: str,
+    checkout: Path | None = None,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Locked entries older than the version the repository declares (design decision 3a).
+
+    Returns inventory entries and their candidates. The candidate is the declared version:
+    the drift is fixed by resolving what the repository already declares.
+    """
+    declared: dict[str, Version] = {}
+    for dep in dependencies:
+        if dep["ecosystem"] != "nuget" or dep["origin"] != "declared" or not dep["current"]:
+            continue
+        try:
+            version = Version(dep["current"])
+        except InvalidVersion:
+            continue
+        declared[dep["name"]] = max(version, declared.get(dep["name"], version))
+
+    entries: list[dict[str, Any]] = []
+    candidates: list[dict[str, Any]] = []
+    seen = set()
+    for update in native:
+        if update.source != "dotnet" or update.direct or update.name not in declared:
+            continue
+        try:
+            locked = Version(update.current)
+        except InvalidVersion:
+            continue
+        target = declared[update.name]
+        lock_file = str(Path(update.location).parent / "packages.lock.json")
+        if locked >= target or (lock_file, update.name) in seen:
+            continue
+        seen.add((lock_file, update.name))
+
+        dep_id = f"locked:{lock_file}:{update.name}"
+        location: dict[str, Any] = {"file": lock_file}
+        line = _line_naming(checkout, lock_file, update.name)
+        if line:
+            location["line"] = line
+        entries.append(
+            {
+                "id": dep_id,
+                "ecosystem": "nuget",
+                "name": update.name,
+                "current": update.current,
+                "origin": "locked",
+                "location": location,
+                "lookup": {
+                    "state": "outdated",
+                    "datasource": "nuget",
+                    "looked_up_at": looked_up_at,
+                },
+            }
+        )
+        candidates.append(
+            {
+                "dependency": dep_id,
+                "update_type": update_type(locked, target),
+                "version": str(target),
+                "classification": "in_scope",
+            }
+        )
+    return entries, candidates
+
+
+def update_type(current: Version, target: Version) -> str:
+    if target.major != current.major:
+        return "major"
+    if target.minor != current.minor:
+        return "minor"
+    return "patch"
+
+
+def _line_naming(checkout: Path | None, file: str, name: str) -> int | None:
+    if checkout is None or not (checkout / file).exists():
+        return None
+    for number, line in enumerate((checkout / file).read_text().splitlines(), 1):
+        if f'"{name}": {{' in line:
+            return number
+    return None

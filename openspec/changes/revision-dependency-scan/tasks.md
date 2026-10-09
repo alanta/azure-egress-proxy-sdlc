@@ -14,7 +14,8 @@
 - [x] 2.2 Normalise Renovate's report into inventory entries and per-update-type candidates with datasource and lookup time, with failed lookups as `unknown`; verify unit tests on the report captured in 1.3, including a rate-limited lookup
 - [x] 2.3 Detect dependency-bearing files by pattern (including `*.pkr.hcl`, `requirements*.txt`, `package.json`, inline `pip install` and `apt-get install` lines) and report those no adapter covered as unsupported or unparseable; verify a fixture with a Packer template and a malformed lockfile reports both, and the scan still completes
 - [x] 2.4 Run the native NuGet and Go queries (design decision 3) and report disagreements with Renovate; verify on `064aa09` and record the disagreements found
-- [ ] 2.5 Document the supported source types, the custom managers and the known gaps in `docs/scan-coverage.md`; verify the document matches the inventory and gaps of a `064aa09` scan
+- [x] 2.5 Add locked entries where a lock file resolves an older version than the repository declares (design decision 3a), with the newer version as a candidate; verify a `064aa09` scan lists the seven drifted entries, including AppHost's `Microsoft.Extensions.Http` at 10.0.11 with candidate 10.0.12 and `EgressProxy.Client`'s Azure.Core at 1.53.0 with candidate 1.62.0, and no other lock-file-only entries
+- [ ] 2.6 Document the supported source types, the custom managers, how locked entries are chosen, and the known gaps in `docs/scan-coverage.md`; verify the document matches the inventory and gaps of a `064aa09` scan
 
 ## 3. Update policy
 
@@ -23,7 +24,7 @@
 
 ## 4. Vulnerabilities and consistency
 
-- [ ] 4.1 Run pinned OSV-Scanner on the lockfiles and map its results to inventory entries with fixed versions and whether a candidate reaches them; verify on `064aa09` (the spike found three `golang.org/x/crypto` advisories), with unresolved packages reported as unknown
+- [ ] 4.1 Run pinned OSV-Scanner on the lockfiles and map its results to inventory entries with fixed versions and whether a candidate reaches them, adding a locked entry for an affected dependency that only appears in a lock file or as an indirect module; verify on `064aa09` (the spike found three `golang.org/x/crypto` advisories), with unresolved packages reported as unknown
 - [ ] 4.2 Run govulncheck with the `go.mod` toolchain and record reachability separately from version matches; verify on `064aa09`, and that non-Go advisories report reachability `unknown`
 - [ ] 4.3 Read Dependabot alerts when the credential allows it, otherwise record the source as unavailable; verify both paths, with and without the permission
 - [ ] 4.4 Implement the alias table and the consistency check (design decision 6); verify `064aa09` has no Go toolchain inconsistency, and the head of PR #76 (captured in 1.1) flags `golang:1.27-alpine` against `go 1.25.14` and `setup-go 1.25`

@@ -60,6 +60,22 @@ Task 1.3 verifies the report-file output, and task 1.4 the custom managers. If t
 
 `dotnet list package --outdated --include-transitive` after a locked restore, and `go list -m -u -json all`, run on the same copy. Where they disagree with Renovate, the record says so. This catches a Renovate blind spot before it becomes a missed update, and costs one container run each. It can be dropped later if it never finds anything.
 
+### 3a. Locked entries only where they carry a signal
+
+The package managers see every transitive and indirect dependency: on azure-egress-proxy that's 220 outdated .NET packages and 55 Go modules. Most of them move only when the packages that pull them in move. Listing them all would bury the few that matter.
+
+So a dependency that only appears in a lock file is listed in two cases:
+- **Drift:** its locked version is older than the version the repository declares for it elsewhere. The .NET query finds these by comparing each project's transitive packages with the central versions. That's PR #77: AppHost locks `Microsoft.Extensions.Http` at 10.0.11 while 10.0.12 is declared.
+- **Vulnerability:** an advisory concerns it (task 4.1), such as `golang.org/x/crypto` v0.55.0 as an indirect Go module.
+
+On `064aa09` there are seven such entries, in four projects. For example, `EgressProxy.Client` resolves Azure.Core 1.53.0 while 1.62.0 is declared. They all have one cause: central versions don't apply to transitive packages unless `CentralPackageTransitivePinningEnabled` is on, and it isn't. The lock files still record each central version as the requested range, which is why Dependabot's NuGet PRs fail with NU1004 when they change it.
+
+The candidate is the declared version, not the newest one: the drift is fixed by resolving what the repository already declares.
+
+Go has no drift of this kind: `go.mod` holds one version per module.
+
+**Alternatives:** listing every locked entry is complete but adds about 275 entries per scan. Listing none leaves #77-style updates as permanent misses in the Dependabot comparison.
+
 ### 4. The update policy lives in the subject repository, in Renovate's format
 
 There is no cross-tool standard for update policy. `dependabot.yml` and Renovate's config are tool-specific formats, and Renovate's is the more expressive one. It can hold a .NET-runtime-coupled NuGet major (`packageRules` with `matchUpdateTypes: ["major"]` and `allowedVersions`), ignore a dependency, and group updates.
