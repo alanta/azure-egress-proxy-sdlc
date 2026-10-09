@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from pathlib import Path
 
-from sdlc import coverage, native, policy, renovate
+from sdlc import coverage, native, osv, policy, renovate
 from sdlc.subject import SubjectError, checkout, resolve
 
 
@@ -101,6 +101,9 @@ def scan(repository: str, ref: str, trial_policy: Path | None = None) -> int:
             inventory = renovate.Inventory(
                 inventory.dependencies + drifted, candidates + drift_candidates
             )
+            found, inventory = find_vulnerabilities(
+                path, inventory, renovate.indirect(baseline), subject_policy, gaps
+            )
     except (SubjectError, renovate.RenovateError, policy.PolicyError) as error:
         print(f"error: {error}; no record written", file=sys.stderr)
         return 1
@@ -127,10 +130,86 @@ def scan(repository: str, ref: str, trial_policy: Path | None = None) -> int:
             f"  {d['source']}: {d['name']} {d['current']} -> {d['native_latest']}, "
             f"scan has {d['scan_candidates'] or 'nothing'}"
         )
-    # Vulnerabilities, lifecycle, consistency and parity arrive with the rest of slice 1; a
+    if found is None:
+        print("vulnerabilities: unknown, OSV-Scanner didn't run (see its gap)")
+    else:
+        print_vulnerabilities(found, inventory)
+    # Lifecycle, consistency and parity arrive with the rest of slice 1; a
     # record without them would claim there was nothing to find.
     print("error: the scan stops here for now; no record written", file=sys.stderr)
     return 1
+
+
+def find_vulnerabilities(
+    path: Path,
+    inventory: renovate.Inventory,
+    indirect: set[str],
+    subject_policy: policy.Policy,
+    gaps: list[dict],
+) -> tuple[osv.Findings | None, renovate.Inventory]:
+    """OSV-Scanner's findings, and the inventory with the locked entries they add.
+
+    No findings when OSV-Scanner fails: the failure is a gap, and the scan carries on
+    without claiming anything about vulnerabilities.
+    """
+    scanned_at = datetime.now(UTC).isoformat(timespec="seconds")
+    files = osv.lock_files(path)
+    try:
+        output = osv.run(path, files)
+    except osv.OsvError as error:
+        gaps.append({"kind": "unavailable_source", "subject": "osv-scanner", "reason": str(error)})
+        return None, inventory
+    found = osv.findings(
+        output,
+        inventory.dependencies,
+        inventory.candidates,
+        indirect=indirect,
+        looked_up_at=scanned_at,
+        scanned=files,
+        classify=lambda candidates, fields: policy.classify(
+            candidates, None, fields, subject_policy
+        ),
+        checkout=path,
+    )
+    gaps += found.gaps
+    updated = {d["id"]: d for d in found.updated}
+    return found, renovate.Inventory(
+        [updated.get(d["id"], d) for d in inventory.dependencies] + found.dependencies,
+        inventory.candidates + found.candidates,
+    )
+
+
+def print_vulnerabilities(found: osv.Findings, inventory: renovate.Inventory) -> None:
+    by_dependency: dict[str, list[dict]] = {}
+    for v in found.vulnerabilities:
+        by_dependency.setdefault(v["dependency"], []).append(v)
+    print(
+        f"{len(found.vulnerabilities)} advisories on {len(by_dependency)} dependencies "
+        f"from OSV-Scanner, {len(found.gaps)} packages it couldn't check; reachability unknown"
+    )
+    entries = {d["id"]: d for d in inventory.dependencies}
+    for dep_id, advisories in by_dependency.items():
+        dep = entries[dep_id]
+        candidates = [
+            c["version"] + (" (held)" if c["classification"] == "held_by_policy" else "")
+            for c in inventory.candidates
+            if c["dependency"] == dep_id
+        ]
+        print(
+            f"  vulnerable: {dep['name']} {dep['current']} ({dep['origin']}, "
+            f"{dep['location']['file']}), candidates {', '.join(candidates) or 'none'}"
+        )
+        for v in advisories:
+            if v["fixed_version"]:
+                fix = f"fixed in {v['fixed_version']}"
+            elif "last_affected" in v:
+                fix = f"fixed after {v['last_affected']}"
+            else:
+                print(f"    {v['advisory']}: no fixed version")
+                continue
+            reached = {True: "yes", False: "no"}.get(v["fix_reached_by_candidate"], "unknown")
+            held = f", only held candidates do ({v['fix_held_by']})" if "fix_held_by" in v else ""
+            print(f"    {v['advisory']}: {fix}, an in-scope candidate reaches it: {reached}{held}")
 
 
 def describe(subject_policy: policy.Policy) -> str:

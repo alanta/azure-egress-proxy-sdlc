@@ -1,0 +1,13 @@
+{
+  "subject": "alanta/azure-egress-proxy",
+  "commit": "064aa099ecf7ffea9664b89df29f7d89d6859358",
+  "captured_at": "2026-10-09",
+  "osv-scanner": {
+    "version": "2.6.0",
+    "image": "ghcr.io/google/osv-scanner:v2.6.0@sha256:afd838850ac1a0fcc15ff4a041dc9ba11123c3f0d2666217a5f0fcf9222b55fa"
+  },
+  "mode": "scan source --format=json --all-packages --no-call-analysis=all, with --lockfile for proxy/go.mod and each packages.lock.json",
+  "files": {
+    "osv-scanner.json": "osv.run() on a clean checkout of the commit; paths are as mounted at /src"
+  }
+}

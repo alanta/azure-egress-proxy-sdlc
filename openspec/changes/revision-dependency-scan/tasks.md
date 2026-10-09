@@ -24,7 +24,7 @@
 
 ## 4. Vulnerabilities and consistency
 
-- [ ] 4.1 Run pinned OSV-Scanner on the lockfiles and map its results to inventory entries with fixed versions and whether a candidate reaches them, adding a locked entry for an affected dependency that only appears in a lock file or as an indirect module; verify on `064aa09` (the spike found three `golang.org/x/crypto` advisories), with unresolved packages reported as unknown
+- [x] 4.1 Run pinned OSV-Scanner on the lockfiles and map its results to inventory entries with fixed versions and whether a candidate reaches them, adding a locked entry for an affected dependency that only appears in a lock file or as an indirect module; verify on `064aa09` (the spike found three `golang.org/x/crypto` advisories), with unresolved packages reported as unknown
 - [ ] 4.2 Run govulncheck with the `go.mod` toolchain and record reachability separately from version matches; verify on `064aa09`, and that non-Go advisories report reachability `unknown`
 - [ ] 4.3 Read Dependabot alerts when the credential allows it, otherwise record the source as unavailable; verify both paths, with and without the permission
 - [ ] 4.4 Implement the alias table and the consistency check (design decision 6); verify `064aa09` has no Go toolchain inconsistency, and the head of PR #76 (captured in 1.1) flags `golang:1.27-alpine` against `go 1.25.14` and `setup-go 1.25`
