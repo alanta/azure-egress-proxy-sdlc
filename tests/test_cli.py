@@ -313,3 +313,64 @@ def test_scan_prints_an_inconsistent_go_toolchain(offline_scan, monkeypatch, tmp
     assert "    Dockerfile: golang 1.27-alpine declares 1.27\n" in captured.out
     assert "    go.mod:3: go 1.25.14 declares 1.25.14\n" in captured.out
     assert "the scan stops here for now; no record written" in captured.err
+
+
+def lifecycle_scan(monkeypatch, answer):
+    """A scan of a go.mod on Go 1.25.14, with endoflife.date answered by `answer`."""
+    from sdlc import lifecycle, renovate
+
+    dep = {
+        "depName": "go",
+        "datasource": "golang-version",
+        "depType": "golang",
+        "currentValue": "1.25.14",
+    }
+    report = {
+        "repositories": {
+            "local": {"packageFiles": {"gomod": [{"packageFile": "go.mod", "deps": [dep]}]}}
+        }
+    }
+    monkeypatch.setattr(renovate, "run", lambda path, *, policy=None, token=None: report)
+    monkeypatch.setattr(lifecycle._OPENER, "open", answer)
+    return main(["scan", "--repo", "alanta/demo"])
+
+
+def test_scan_prints_the_lines_past_their_end_of_life(offline_scan, monkeypatch, capsys):
+    from pathlib import Path
+
+    go = Path(__file__).parents[1] / "fixtures" / "endoflife" / "go.json"
+
+    class Answer:
+        status = 200
+
+        def read(self):
+            return go.read_bytes()
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+    assert lifecycle_scan(monkeypatch, lambda request, timeout: Answer()) == 1
+    captured = capsys.readouterr()
+    assert "lifecycle (https://endoflife.date/api/v1: go, fetched at " in captured.out
+    assert "1 end of life, 0 nearing end of life" in captured.out
+    assert "end of life: go 1.25: ended 2026-08-19; supported: 1.26, 1.27 (go.mod)" in (
+        captured.out
+    )
+    assert "no record written" in captured.err
+
+
+def test_scan_with_endoflife_date_unreachable_reports_unknown(offline_scan, monkeypatch, capsys):
+    import urllib.error
+
+    def unreachable(request, timeout):
+        raise urllib.error.URLError("Name or service not known")
+
+    assert lifecycle_scan(monkeypatch, unreachable) == 1
+    out = capsys.readouterr().out
+    reason = "endoflife.date couldn't be reached: Name or service not known."
+    assert f"gap: endoflife.date: {reason}" in out
+    assert f"unknown: go 1.25: {reason} (go.mod)" in out
+    assert "lifecycle (nothing read from endoflife.date)" in out

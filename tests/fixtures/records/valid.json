@@ -11,6 +11,12 @@
       "name": "renovate",
       "version": "44.145.1",
       "image": "docker.io/renovate/renovate:44.145.1@sha256:6f1f3e2d9d0c3f99aa1f61f7509d302185de7deb173ac8c5ff88a5ce283ec435"
+    },
+    {
+      "name": "endoflife.date",
+      "version": "v1",
+      "url": "https://endoflife.date/api/v1",
+      "fetched_at": "2026-10-08T09:00:20+00:00"
     }
   ],
   "policy": {
@@ -78,6 +84,22 @@
         "state": "skipped",
         "reason": "Tag 'nonroot' has no version; only a digest pin could be tracked."
       }
+    },
+    {
+      "id": "gomod:proxy/go.mod:go",
+      "ecosystem": "golang-version",
+      "name": "go",
+      "current": "1.25.14",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod",
+        "line": 3
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "golang-version",
+        "looked_up_at": "2026-10-08T09:00:10+00:00"
+      }
     }
   ],
   "candidates": [
@@ -115,7 +137,10 @@
         "1.26",
         "1.27"
       ],
-      "source": "endoflife.date",
+      "source": "https://endoflife.date/api/v1/products/go",
+      "dependencies": [
+        "gomod:proxy/go.mod:go"
+      ],
       "locations": [
         {
           "file": "proxy/go.mod",

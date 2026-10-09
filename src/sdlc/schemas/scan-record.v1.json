@@ -73,6 +73,15 @@
           "image": {
             "type": "string",
             "description": "Container image, pinned by digest."
+          },
+          "url": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The API base of a data source, such as endoflife.date."
+          },
+          "fetched_at": {
+            "$ref": "#/$defs/timestamp",
+            "description": "When the data source was read."
           }
         }
       }
@@ -587,22 +596,24 @@
     "lifecycle": {
       "type": "object",
       "additionalProperties": false,
+      "description": "One version line in use, with every inventory entry that uses it. An image or runtime declaration without a mapping to lifecycle data is listed under its own name, as unknown.",
       "required": [
         "product",
         "line",
         "state",
+        "dependencies",
         "locations"
       ],
       "properties": {
         "product": {
           "type": "string",
           "minLength": 1,
-          "description": "Platform, toolchain or image, such as go, dotnet, python, debian."
+          "description": "The endoflife.date product, such as go, dotnet, python, alpine-linux, debian; for an entry without a mapping, its own name."
         },
         "line": {
           "type": "string",
           "minLength": 1,
-          "description": "The version line in use, such as 1.25."
+          "description": "The version line in use as the product names it, such as 1.25 or 10; the declared value when it names no line."
         },
         "state": {
           "enum": [
@@ -614,16 +625,28 @@
         },
         "end_of_life": {
           "type": "string",
-          "format": "date"
+          "format": "date",
+          "description": "The date support ends or ended, when one is published."
         },
         "supported_lines": {
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "description": "The lines still supported on the scan's date, oldest first."
         },
         "source": {
-          "type": "string"
+          "type": "string",
+          "description": "Where the lifecycle data came from."
+        },
+        "dependencies": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "The inventory entries that use the line, with locations in the same order."
         },
         "reason": {
           "type": "string",
@@ -651,9 +674,42 @@
           },
           "then": {
             "required": [
-              "end_of_life",
               "source"
             ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "nearing_end_of_life"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "end_of_life"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "end_of_life"
+              }
+            },
+            "not": {
+              "required": [
+                "end_of_life"
+              ]
+            }
+          },
+          "then": {
+            "required": [
+              "reason"
+            ],
+            "description": "Ended without a published date: the reason says so."
           }
         },
         {

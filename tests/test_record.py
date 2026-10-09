@@ -69,9 +69,22 @@ def test_valid_record_passes(record):
             "'reason' is a required property",
         ),
         (
-            "end of life without a date",
-            lambda r: r["lifecycle"][0].pop("end_of_life"),
+            "nearing end of life without a date",
+            lambda r: (
+                r["lifecycle"][0].update(state="nearing_end_of_life"),
+                r["lifecycle"][0].pop("end_of_life"),
+            ),
             "'end_of_life' is a required property",
+        ),
+        (
+            "end of life without a date or a reason",
+            lambda r: r["lifecycle"][0].pop("end_of_life"),
+            "'reason' is a required property",
+        ),
+        (
+            "lifecycle line without its dependencies",
+            lambda r: r["lifecycle"][0].pop("dependencies"),
+            "'dependencies' is a required property",
         ),
         (
             "wrong schema version",
@@ -179,6 +192,28 @@ def test_schema_rejects(record, description, change, expected):
             "a compared declaration that isn't in the inventory",
             lambda r: r["consistency"][0]["compared"].append("nuget:nowhere:Nothing"),
             "$.consistency[0].compared[1]: unknown dependency id 'nuget:nowhere:Nothing'",
+        ),
+        (
+            "a lifecycle line used by an unknown dependency",
+            lambda r: r["lifecycle"][0].update(
+                dependencies=["gomod:nowhere:go"], locations=[{"file": "nowhere"}]
+            ),
+            "$.lifecycle[0].dependencies[0]: unknown dependency id 'gomod:nowhere:go'",
+        ),
+        (
+            "a lifecycle line located elsewhere than its dependency",
+            lambda r: r["lifecycle"][0].update(locations=[{"file": "go.mod", "line": 3}]),
+            "$.lifecycle[0].locations[0]: not the location of 'gomod:proxy/go.mod:go'",
+        ),
+        (
+            "a lifecycle line with more dependencies than locations",
+            lambda r: r["lifecycle"][0]["dependencies"].append(r["inventory"][0]["id"]),
+            "its dependencies and locations don't pair up",
+        ),
+        (
+            "a data source fetched at a time without a time zone",
+            lambda r: r["tools"][1].update(fetched_at="2026-10-08T09:00:00"),
+            "$.tools[1].fetched_at: '2026-10-08T09:00:00' has no time zone",
         ),
         (
             "complete parity with an unparseable PR",

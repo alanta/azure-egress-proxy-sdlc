@@ -41,6 +41,11 @@ def _consistency_problems(record: dict[str, Any]) -> list[str]:
     ]
     if "captured_at" in record["parity"]:
         timestamps.append(("$.parity.captured_at", record["parity"]["captured_at"]))
+    timestamps += [
+        (f"$.tools[{i}].fetched_at", t["fetched_at"])
+        for i, t in enumerate(record["tools"])
+        if "fetched_at" in t
+    ]
     if "dependabot_alerts" in record:
         timestamps.append(("$.dependabot_alerts.read_at", record["dependabot_alerts"]["read_at"]))
     for path, value in timestamps:
@@ -96,6 +101,7 @@ def _consistency_problems(record: dict[str, Any]) -> list[str]:
 
     problems += _alert_problems(record)
     problems += _inconsistency_problems(record)
+    problems += _lifecycle_problems(record)
 
     pull_requests = record["parity"]["pull_requests"]
     if any(pr["state"] == "unparseable" for pr in pull_requests) and record["parity"]["complete"]:
@@ -120,6 +126,24 @@ def _inconsistency_problems(record: dict[str, Any]) -> list[str]:
                 problems.append(f"{path}.declarations[{j}]: unknown dependency id {dep_id!r}")
             elif d["location"]["file"] != files[dep_id]:
                 problems.append(f"{path}.declarations[{j}].location: not the file of {dep_id!r}")
+    return problems
+
+
+def _lifecycle_problems(record: dict[str, Any]) -> list[str]:
+    """Each line lists its inventory entries with their locations, in the same order."""
+    problems = []
+    entries = {d["id"]: d for d in record["inventory"]}
+    for i, line in enumerate(record["lifecycle"]):
+        path = f"$.lifecycle[{i}]"
+        if len(line["dependencies"]) != len(line["locations"]):
+            problems.append(f"{path}: its dependencies and locations don't pair up")
+        for j, (dep_id, location) in enumerate(
+            zip(line["dependencies"], line["locations"], strict=False)
+        ):
+            if dep_id not in entries:
+                problems.append(f"{path}.dependencies[{j}]: unknown dependency id {dep_id!r}")
+            elif location != entries[dep_id]["location"]:
+                problems.append(f"{path}.locations[{j}]: not the location of {dep_id!r}")
     return problems
 
 

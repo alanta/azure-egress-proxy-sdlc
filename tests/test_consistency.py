@@ -22,7 +22,7 @@ def report_064aa09():
 
 def check(report, checkout=None):
     inventory = normalize(report, looked_up_at=AT, checkout=checkout)
-    result = consistency.check(report, inventory.dependencies, checkout=checkout)
+    result = consistency.check(report, inventory.dependencies)
     return inventory, result
 
 
@@ -370,6 +370,20 @@ def test_the_devcontainer_image_declares_its_dotnet_line():
         )
     )
     assert versions(result, ".NET") == ["10.0", "11.0"]
+
+
+@pytest.mark.parametrize("tag", ["2.2", "2", "10.0", "2.2.3-10.0"])
+def test_a_devcontainer_tag_without_a_dotnet_line_is_a_gap(tag):
+    _, result = check(
+        report_of(setup_dotnet("10.0.x"), image("mcr.microsoft.com/devcontainers/dotnet", tag))
+    )
+    assert len(result.compared[".NET"]) == 1  # setup-dotnet only
+    [gap] = result.gaps
+    assert gap["reason"] == (
+        f".NET: mcr.microsoft.com/devcontainers/dotnet declares {tag!r}, which isn't an image "
+        "version, a .NET line and an OS, such as 2.2.3-10.0-noble, so the consistency check "
+        "skips it."
+    )
 
 
 def test_an_image_tag_with_a_variable_is_a_gap():
