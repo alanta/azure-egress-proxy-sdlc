@@ -7,6 +7,17 @@ import pytest
 from sdlc.record import validate_record
 
 FIXTURE = Path(__file__).parent / "fixtures" / "records" / "valid.json"
+AT = "2026-10-09T09:00:00+00:00"
+
+
+def section(record, *alerts):
+    return {
+        "ref": "main",
+        "commit": record["subject"]["commit"],
+        "is_scanned_commit": True,
+        "read_at": AT,
+        "alerts": list(alerts),
+    }
 
 
 @pytest.fixture
@@ -108,6 +119,21 @@ def test_schema_rejects(record, description, change, expected):
             "has no time zone",
         ),
         (
+            "alerts neither read nor listed as unavailable",
+            lambda r: r.update(gaps=[]),
+            "no gap says why the alerts weren't read",
+        ),
+        (
+            "alerts read and listed as unavailable",
+            lambda r: r.update(dependabot_alerts=section(r)),
+            "present, but a gap says the alerts weren't read",
+        ),
+        (
+            "a vulnerability citing an alert the record doesn't have",
+            lambda r: r["vulnerabilities"][0].update(dependabot_alerts=[3]),
+            "alert 3 isn't matched",
+        ),
+        (
             "complete parity with an unparseable PR",
             lambda r: r["parity"]["pull_requests"][0].update(state="unparseable"),
             "true although a pull request is unparseable",
@@ -116,4 +142,76 @@ def test_schema_rejects(record, description, change, expected):
 )
 def test_consistency_rejects(record, description, change, expected):
     problems = broken(record, change)
+    assert any(expected in p for p in problems), (description, problems)
+
+
+def with_alerts(record, *alerts):
+    record = copy.deepcopy(record)
+    record["gaps"] = [g for g in record["gaps"] if g["subject"] != "dependabot-alerts"]
+    record["dependabot_alerts"] = section(record, *alerts)
+    return record
+
+
+def alert(number, result, **fields):
+    return {
+        "number": number,
+        "advisory": "GHSA-xxxx-yyyy-zzzz",
+        "ecosystem": "go",
+        "package": "golang.org/x/crypto",
+        "manifest": "proxy/go.mod",
+        "fixed_version": None,
+        "result": result,
+    } | fields
+
+
+def test_read_alerts_replace_the_gap(record):
+    matched = with_alerts(
+        record, alert(3, "matched", dependency="gomod:proxy/go.mod:golang.org/x/crypto")
+    )
+    matched["vulnerabilities"][0]["dependabot_alerts"] = [3]
+    assert validate_record(matched) == []
+    assert validate_record(with_alerts(record, alert(4, "unmatched"))) == []
+
+
+@pytest.mark.parametrize(
+    ("description", "alerts", "cited", "expected"),
+    [
+        (
+            "a matched alert no vulnerability lists",
+            [alert(3, "matched")],
+            None,
+            "no vulnerability lists it",
+        ),
+        (
+            "a vulnerability citing an unmatched alert",
+            [alert(3, "unmatched")],
+            [3],
+            "isn't matched",
+        ),
+        (
+            "an alert on an unknown dependency",
+            [alert(3, "unmatched", dependency="gomod:nowhere:x")],
+            None,
+            "unknown dependency id 'gomod:nowhere:x'",
+        ),
+        ("an unknown alert result", [alert(3, "maybe")], None, "is not one of"),
+        (
+            "the same alert twice",
+            [alert(3, "unmatched"), alert(3, "unmatched")],
+            None,
+            "duplicate alert 3",
+        ),
+        (
+            "a match elsewhere no vulnerability lists",
+            [alert(3, "matched_elsewhere")],
+            None,
+            "no vulnerability lists it",
+        ),
+    ],
+)
+def test_alerts_are_checked(record, description, alerts, cited, expected):
+    changed = with_alerts(record, *alerts)
+    if cited:
+        changed["vulnerabilities"][0]["dependabot_alerts"] = cited
+    problems = validate_record(changed)
     assert any(expected in p for p in problems), (description, problems)

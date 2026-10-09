@@ -8,8 +8,8 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from pathlib import Path
 
-from sdlc import coverage, govulncheck, native, osv, policy, renovate
-from sdlc.subject import SubjectError, checkout, resolve
+from sdlc import coverage, dependabot, govulncheck, native, osv, policy, renovate
+from sdlc.subject import Revision, SubjectError, checkout, resolve
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -124,6 +124,9 @@ def scan(repository: str, ref: str, trial_policy: Path | None = None) -> int:
                 [updated.get(d["id"], d) for d in inventory.dependencies] + reached.dependencies,
                 inventory.candidates + reached.candidates,
             )
+            alerts, vulnerabilities = read_alerts(
+                revision, token, reached.vulnerabilities, inventory.dependencies, gaps
+            )
     except (SubjectError, renovate.RenovateError, policy.PolicyError) as error:
         print(f"error: {error}; no record written", file=sys.stderr)
         return 1
@@ -160,10 +163,11 @@ def scan(repository: str, ref: str, trial_policy: Path | None = None) -> int:
     if found is None:
         # govulncheck's own findings still count, but no total may suggest that's all.
         print("vulnerabilities: unknown, OSV-Scanner didn't run (see its gap)")
-        if reached.vulnerabilities:
-            print_vulnerabilities(reached.vulnerabilities, inventory, found)
+        if vulnerabilities:
+            print_vulnerabilities(vulnerabilities, inventory, found)
     else:
-        print_vulnerabilities(reached.vulnerabilities, inventory, found)
+        print_vulnerabilities(vulnerabilities, inventory, found)
+    print_alerts(alerts, vulnerabilities, revision.commit)
     # Lifecycle, consistency and parity arrive with the rest of slice 1; a
     # record without them would claim there was nothing to find.
     print("error: the scan stops here for now; no record written", file=sys.stderr)
@@ -209,6 +213,59 @@ def find_vulnerabilities(
     )
 
 
+def read_alerts(
+    revision: Revision,
+    token: str | None,
+    vulnerabilities: list[dict],
+    dependencies: list[dict],
+    gaps: list[dict],
+) -> tuple[dict | None, list[dict]]:
+    """The Dependabot alerts section, and the vulnerabilities with the alerts that match them.
+
+    No section when the alerts can't be read: a gap says why, and nothing is claimed about them.
+    """
+    try:
+        alerts = dependabot.read(revision.repository, token)
+    except dependabot.Unavailable as error:
+        gaps.append(
+            {"kind": "unavailable_source", "subject": dependabot.SUBJECT, "reason": str(error)}
+        )
+        return None, vulnerabilities
+    return dependabot.compare(alerts, vulnerabilities, dependencies, revision.commit)
+
+
+def print_alerts(section: dict | None, vulnerabilities: list[dict], commit: str) -> None:
+    if section is None:
+        print("Dependabot alerts: unavailable (see its gap), so nothing is known from them")
+        return
+    alerts = section["alerts"]
+    results = Counter(a["result"] for a in alerts)
+    unmatched = [a for a in alerts if a["result"] == "unmatched"]
+    head = f"{section['ref']} at {section['commit'][:7]}"
+    if section["is_scanned_commit"]:
+        about = f"{head}, the scanned commit"
+    else:
+        # Later parity work must not count the branch's differences as misses of the scan.
+        about = (
+            f"{head}, NOT the scanned commit {commit[:7]}: a difference may be the branch's, "
+            "not the scan's"
+        )
+    print(
+        f"Dependabot alerts: {len(alerts)} open on {about} (read at {section['read_at']}); "
+        f"{results['matched']} match the scan's advisories in the same file, "
+        f"{results['matched_elsewhere']} only in another file, {results['unmatched']} don't; "
+        f"{sum('dependabot_alerts' not in v for v in vulnerabilities)} of the scan's "
+        f"{len(vulnerabilities)} advisories have no open alert"
+    )
+    for a in unmatched:
+        fix = f"fixed in {a['fixed_version']}" if a["fixed_version"] else "no fixed version"
+        listed = "" if "dependency" in a else ", not in the inventory there"
+        print(
+            f"  unmatched alert #{a['number']}: {a['advisory']} on {a['package']} "
+            f"({a['manifest']}{listed}), {fix}"
+        )
+
+
 def print_vulnerabilities(
     vulnerabilities: list[dict], inventory: renovate.Inventory, found: osv.Findings | None
 ) -> None:
@@ -241,6 +298,9 @@ def print_vulnerabilities(
         )
         for v in advisories:
             reach = v["reachability"].replace("_", " ")
+            if "dependabot_alerts" in v:
+                numbers = ", ".join(f"#{n}" for n in v["dependabot_alerts"])
+                reach += f", Dependabot alert {numbers}"
             if v["fixed_version"]:
                 fix = f"fixed in {v['fixed_version']}"
             elif "last_affected" in v:

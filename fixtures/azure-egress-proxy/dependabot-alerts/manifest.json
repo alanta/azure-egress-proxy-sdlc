@@ -1,0 +1,13 @@
+{
+  "subject": "alanta/azure-egress-proxy",
+  "default_branch": "main",
+  "default_branch_commit": "e93d7062b075352f151f8e6b5a15f60913e7bd98",
+  "captured_at": "2026-10-09",
+  "credential": "the scan's read-only fine-grained token, which has Dependabot alerts: read",
+  "files": {
+    "open.json": "GET /repos/alanta/azure-egress-proxy/dependabot/alerts?state=open&per_page=100: 200, one page, no open alerts",
+    "all-states.json": "The same without state=open: 200, one page, 16 alerts, all fixed; the shapes the tests reuse as open alerts",
+    "unauthenticated.json": "The same request without a token: 401"
+  },
+  "notes": "Response bodies only, reformatted; no request or response headers are stored."
+}

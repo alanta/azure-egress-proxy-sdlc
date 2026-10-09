@@ -128,7 +128,7 @@ def test_findings_make_a_valid_record(scanned, inventory, report, record_from):
     found = find(scanned, inventory, report)
     record = record_from(merged(inventory, found))
     record["vulnerabilities"] = found.vulnerabilities
-    record["gaps"] = found.gaps
+    record["gaps"] += found.gaps
     assert validate_record(record) == []
 
 
