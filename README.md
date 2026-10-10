@@ -1,6 +1,6 @@
 # Agentic SDLC automation for azure-egress-proxy
 
-**Status:** Slice 1 (revision dependency scan) is specified in [`openspec/changes/revision-dependency-scan`](openspec/changes/revision-dependency-scan/). Nothing is implemented yet.
+**Status:** Slice 1, the revision dependency scan, is built. Its spec is [`openspec/specs/dependency-scan`](openspec/specs/dependency-scan/spec.md), and the change that built it is archived under [`openspec/changes/archive/2026-10-10-revision-dependency-scan`](openspec/changes/archive/2026-10-10-revision-dependency-scan/). To run a scan, see [`docs/running-a-scan.md`](docs/running-a-scan.md).
 
 ## Purpose
 
