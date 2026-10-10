@@ -1,0 +1,1176 @@
+{
+  "taken_at": "2026-10-10T08:54:33Z",
+  "repository": "alanta/azure-egress-proxy",
+  "branches": {
+    "chore/nuget-updates": "50f82aad1c2f1b8f9917db676131db003a3531ad",
+    "dependabot/docker/mock-idp/docker-minor-patch-40bcfecaf4": "bdf6a9d2e88e4bef3b4eca254962c7b94165c648",
+    "dependabot/github_actions/actions-minor-patch-c358d8fd12": "dd10dde1a2b8d937414aba270e670a67762ddbaf",
+    "dependabot/go_modules/proxy/gomod-minor-patch-66f8ae7338": "5dde1e0ff3aa3b5ced29f9bfb3cae55b2a4686ba",
+    "docs/production-hardening-accuracy": "facf842860155047a5c3f5882deda33ab6d7948e",
+    "feat/config-rejected-event": "2fbf9a301d96a68636ad385bc703ff219255fb7f",
+    "fix/startup-config-validation": "eba01f31478ca4eded955d7fccb448058c34bee4",
+    "fix/transitive-pinning": "39dc2698b887228e6ba346cc4567a35a11545150",
+    "main": "e93d7062b075352f151f8e6b5a15f60913e7bd98"
+  },
+  "prs": [
+    {
+      "number": 77,
+      "state": "closed",
+      "head": "dcd6de884238b990d6ae4440a2d3aedd7e15f334",
+      "updated_at": "2026-10-09T11:12:12Z",
+      "comments": 3,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 102,
+      "state": "closed",
+      "head": "39dc2698b887228e6ba346cc4567a35a11545150",
+      "updated_at": "2026-10-09T11:07:11Z",
+      "comments": 0,
+      "labels": []
+    },
+    {
+      "number": 98,
+      "state": "closed",
+      "head": "bc9839dd824d26f2326c9417ebd8b24777e8f29b",
+      "updated_at": "2026-10-07T20:39:45Z",
+      "comments": 3,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 99,
+      "state": "open",
+      "head": "5dde1e0ff3aa3b5ced29f9bfb3cae55b2a4686ba",
+      "updated_at": "2026-10-07T20:37:09Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        "go"
+      ]
+    },
+    {
+      "number": 76,
+      "state": "open",
+      "head": "bdf6a9d2e88e4bef3b4eca254962c7b94165c648",
+      "updated_at": "2026-10-07T20:35:20Z",
+      "comments": 2,
+      "labels": [
+        "dependencies",
+        "docker"
+      ]
+    },
+    {
+      "number": 75,
+      "state": "open",
+      "head": "dd10dde1a2b8d937414aba270e670a67762ddbaf",
+      "updated_at": "2026-10-07T20:25:54Z",
+      "comments": 2,
+      "labels": [
+        "dependencies",
+        "github_actions"
+      ]
+    },
+    {
+      "number": 100,
+      "state": "closed",
+      "head": "3a0aad681b99227a4efe19d0ae70670a9311f61f",
+      "updated_at": "2026-10-07T20:22:09Z",
+      "comments": 0,
+      "labels": []
+    },
+    {
+      "number": 89,
+      "state": "closed",
+      "head": "d5b50e5f8094fc1d322f0cfa40ed2f6e079d059e",
+      "updated_at": "2026-10-05T20:28:52Z",
+      "comments": 2,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 88,
+      "state": "closed",
+      "head": "8a489a6b4e11849377e9277945437e7c5017fc50",
+      "updated_at": "2026-10-01T19:04:27Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        "go"
+      ]
+    },
+    {
+      "number": 97,
+      "state": "closed",
+      "head": "8561b5c3103a1179116bcf674ce3c4f662a8ce57",
+      "updated_at": "2026-10-01T19:03:44Z",
+      "comments": 0,
+      "labels": []
+    },
+    {
+      "number": 95,
+      "state": "closed",
+      "head": "d9547610aaa371bc6107ac1484dd788f7ab0eee3",
+      "updated_at": "2026-09-29T14:52:23Z",
+      "comments": 0,
+      "labels": []
+    },
+    {
+      "number": 93,
+      "state": "closed",
+      "head": "f7d01fa1a20f39da783d5021932d0c0948d64880",
+      "updated_at": "2026-09-29T13:08:57Z",
+      "comments": 0,
+      "labels": []
+    },
+    {
+      "number": 92,
+      "state": "closed",
+      "head": "2fbf9a301d96a68636ad385bc703ff219255fb7f",
+      "updated_at": "2026-09-29T12:59:54Z",
+      "comments": 0,
+      "labels": []
+    },
+    {
+      "number": 78,
+      "state": "closed",
+      "head": "45c576d39acf19daca095ee503d57e84cb849737",
+      "updated_at": "2026-09-29T07:22:18Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 58,
+      "state": "closed",
+      "head": "a7b5fd48e04308d03d03227ac810e02c912cb450",
+      "updated_at": "2026-09-29T07:21:22Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 49,
+      "state": "closed",
+      "head": "f56c9c32823d16dff58952f93263ea881f46bfbe",
+      "updated_at": "2026-09-29T07:20:24Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        "github_actions"
+      ]
+    },
+    {
+      "number": 56,
+      "state": "closed",
+      "head": "f6b24a698da530271a019e4da1e41807d0a5d383",
+      "updated_at": "2026-09-28T20:28:49Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 87,
+      "state": "closed",
+      "head": "facf842860155047a5c3f5882deda33ab6d7948e",
+      "updated_at": "2026-09-27T11:33:16Z",
+      "comments": 0,
+      "labels": [
+        "documentation"
+      ]
+    },
+    {
+      "number": 86,
+      "state": "closed",
+      "head": "eba01f31478ca4eded955d7fccb448058c34bee4",
+      "updated_at": "2026-09-27T11:32:41Z",
+      "comments": 0,
+      "labels": []
+    },
+    {
+      "number": 84,
+      "state": "closed",
+      "head": "3f44db83b977180f0f97fca7cf4d70a48401c956",
+      "updated_at": "2026-09-26T21:04:04Z",
+      "comments": 0,
+      "labels": [
+        "documentation"
+      ]
+    },
+    {
+      "number": 83,
+      "state": "closed",
+      "head": "40dee9626d1dec412e9aa7ca07fe36c48ee95458",
+      "updated_at": "2026-09-26T15:12:51Z",
+      "comments": 0,
+      "labels": []
+    },
+    {
+      "number": 82,
+      "state": "closed",
+      "head": "74a48553decfe76bcce78586803bef8deb7995e5",
+      "updated_at": "2026-09-26T14:37:46Z",
+      "comments": 0,
+      "labels": []
+    },
+    {
+      "number": 71,
+      "state": "closed",
+      "head": "96840c5663b3103fcb6f8834d76b2bb3780ccf16",
+      "updated_at": "2026-09-25T08:46:54Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 72,
+      "state": "closed",
+      "head": "c7a9b9dc25cd80fe4590204fad1cb94fe904f21e",
+      "updated_at": "2026-09-25T08:46:51Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 69,
+      "state": "closed",
+      "head": "df572a4e32a7d5e7ca0a8985f6a562608b3cd8f7",
+      "updated_at": "2026-09-25T08:45:35Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        "go"
+      ]
+    },
+    {
+      "number": 64,
+      "state": "closed",
+      "head": "2e3578b4aa7a870f465ad6ca96beb91cba8d5633",
+      "updated_at": "2026-09-25T08:45:32Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        "go"
+      ]
+    },
+    {
+      "number": 66,
+      "state": "closed",
+      "head": "900360cc65c4c856ad547a86ae7f01bf18939f86",
+      "updated_at": "2026-09-25T08:45:27Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        "go"
+      ]
+    },
+    {
+      "number": 65,
+      "state": "closed",
+      "head": "14c9e75f416c2661db1bf1f598b04a4042a7b565",
+      "updated_at": "2026-09-25T08:45:27Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        "github_actions"
+      ]
+    },
+    {
+      "number": 61,
+      "state": "closed",
+      "head": "165efda90da32168879a81a3257521985ee2da24",
+      "updated_at": "2026-09-25T08:45:27Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        "go"
+      ]
+    },
+    {
+      "number": 63,
+      "state": "closed",
+      "head": "840a19756d026840c272bbddabf6367429bd568a",
+      "updated_at": "2026-09-25T08:45:22Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        "go"
+      ]
+    },
+    {
+      "number": 67,
+      "state": "closed",
+      "head": "50081a2dbd585d820b6d15bfafb6154a6e7d5762",
+      "updated_at": "2026-09-25T08:44:51Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        "github_actions"
+      ]
+    },
+    {
+      "number": 62,
+      "state": "closed",
+      "head": "a21739ef1ea16c7a17a4a111aa966bc2c249a98a",
+      "updated_at": "2026-09-25T08:44:47Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        "github_actions"
+      ]
+    },
+    {
+      "number": 54,
+      "state": "closed",
+      "head": "8fb69bdec042727bdba0edf54ea443c103ab2059",
+      "updated_at": "2026-09-25T08:44:44Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        "github_actions"
+      ]
+    },
+    {
+      "number": 74,
+      "state": "closed",
+      "head": "7ae7f36a870a914ec29aaf8c5cebad02e2e6931d",
+      "updated_at": "2026-09-25T08:44:31Z",
+      "comments": 0,
+      "labels": []
+    },
+    {
+      "number": 73,
+      "state": "closed",
+      "head": "a1473bb079becd50c451b55b95696e3c3cfefdd5",
+      "updated_at": "2026-09-25T08:43:30Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 70,
+      "state": "closed",
+      "head": "3a26780cdce1437818f1b08e26b11c961a173e27",
+      "updated_at": "2026-09-24T20:31:01Z",
+      "comments": 2,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 57,
+      "state": "closed",
+      "head": "c8aab1be88d0b78eed52d43fe85d97a79f934dd4",
+      "updated_at": "2026-09-17T20:31:00Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 68,
+      "state": "closed",
+      "head": "c9c41f57dc4affe01d48e6cdffe7084ba7fca845",
+      "updated_at": "2026-09-17T20:27:43Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 59,
+      "state": "closed",
+      "head": "3fa1df4bda90fc629e0cc02e677f70474322690b",
+      "updated_at": "2026-09-10T20:30:56Z",
+      "comments": 2,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 55,
+      "state": "closed",
+      "head": "54d6819ee51d3d23cb7fe62243aae6e9e85a3272",
+      "updated_at": "2026-09-10T20:30:52Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 53,
+      "state": "closed",
+      "head": "97ee1de41a585fb44b321fc76f3ad0117db90677",
+      "updated_at": "2026-09-03T20:24:41Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        "go"
+      ]
+    },
+    {
+      "number": 48,
+      "state": "closed",
+      "head": "a15c646ee5da8e79d5af7e41382a0702effd3f5d",
+      "updated_at": "2026-09-03T20:24:25Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        "github_actions"
+      ]
+    },
+    {
+      "number": 60,
+      "state": "closed",
+      "head": "6b6e8d9ba42ff01175e4efcb14d58d2e9908b594",
+      "updated_at": "2026-09-03T20:24:19Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        "go"
+      ]
+    },
+    {
+      "number": 52,
+      "state": "closed",
+      "head": "e4c2dc1f488410ffd8c09fd244dc01806fc5522d",
+      "updated_at": "2026-08-27T20:25:08Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        "go"
+      ]
+    },
+    {
+      "number": 51,
+      "state": "closed",
+      "head": "d01f3ed416a37d0043456f18a52419f1f76ac2f8",
+      "updated_at": "2026-08-20T20:30:12Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 50,
+      "state": "closed",
+      "head": "e725a94385c2240469835b668e42ab78e94c2b09",
+      "updated_at": "2026-08-20T20:28:36Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 47,
+      "state": "closed",
+      "head": "ba36e9dd0715a0dd50c6ad8bcfbfc59de298f52b",
+      "updated_at": "2026-08-10T12:17:06Z",
+      "comments": 0,
+      "labels": []
+    },
+    {
+      "number": 32,
+      "state": "closed",
+      "head": "be18ba44afb52c77eb57e3bd13c59213b280ebc9",
+      "updated_at": "2026-08-10T09:14:23Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 46,
+      "state": "closed",
+      "head": "50f82aad1c2f1b8f9917db676131db003a3531ad",
+      "updated_at": "2026-08-10T09:10:26Z",
+      "comments": 0,
+      "labels": []
+    },
+    {
+      "number": 39,
+      "state": "closed",
+      "head": "a2f2e12d3d24606df57cdc8ad5dc6ba525815b06",
+      "updated_at": "2026-08-10T08:57:58Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 45,
+      "state": "closed",
+      "head": "1b22b5e641ab73b16321ac00fc12cc4517dae13d",
+      "updated_at": "2026-08-10T08:53:12Z",
+      "comments": 0,
+      "labels": []
+    },
+    {
+      "number": 44,
+      "state": "closed",
+      "head": "ef46a5ab1bd543b9ce474c324fbcd1239480d1cb",
+      "updated_at": "2026-08-06T14:03:53Z",
+      "comments": 0,
+      "labels": []
+    },
+    {
+      "number": 43,
+      "state": "closed",
+      "head": "5eae301c4e06bdfa9c4c756ca35ce7fed4801de4",
+      "updated_at": "2026-08-06T14:01:56Z",
+      "comments": 0,
+      "labels": []
+    },
+    {
+      "number": 42,
+      "state": "closed",
+      "head": "04f360b3e2837ad1c141265416a545f63963f150",
+      "updated_at": "2026-08-05T13:54:13Z",
+      "comments": 0,
+      "labels": []
+    },
+    {
+      "number": 37,
+      "state": "closed",
+      "head": "04c72d88be29c40d7e366daa1fb6b2fd20454c1d",
+      "updated_at": "2026-08-05T13:53:25Z",
+      "comments": 0,
+      "labels": [
+        "dependencies",
+        "github_actions"
+      ]
+    },
+    {
+      "number": 38,
+      "state": "closed",
+      "head": "b09d966c4adb54122a8d6218648dd1850d4d3ddb",
+      "updated_at": "2026-08-04T08:45:11Z",
+      "comments": 4,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 36,
+      "state": "closed",
+      "head": "de5e7b63e02a9c66a2ffc5864663c16755281e01",
+      "updated_at": "2026-08-04T07:58:07Z",
+      "comments": 0,
+      "labels": []
+    },
+    {
+      "number": 31,
+      "state": "closed",
+      "head": "084f07934e3c016b179fc2149d4675fbcd020640",
+      "updated_at": "2026-08-04T07:58:07Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 35,
+      "state": "closed",
+      "head": "6dac56fdb0b6be50f76f7c1159f361200e4e8bcb",
+      "updated_at": "2026-08-03T13:43:33Z",
+      "comments": 0,
+      "labels": []
+    },
+    {
+      "number": 21,
+      "state": "closed",
+      "head": "9301479022f91b92fe2987644c1be7fe3bc8d162",
+      "updated_at": "2026-08-03T13:24:00Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 28,
+      "state": "closed",
+      "head": "1d0acbd7cca5cf9b8e1207c01e921805e8db4ea9",
+      "updated_at": "2026-08-03T13:23:43Z",
+      "comments": 2,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 30,
+      "state": "closed",
+      "head": "3fe3a9b63165b3fc8318dd9cffd11712037032f2",
+      "updated_at": "2026-07-29T10:26:51Z",
+      "comments": 0,
+      "labels": []
+    },
+    {
+      "number": 29,
+      "state": "closed",
+      "head": "edf9d5588ee0767d691ac222a7554c73c2de77e8",
+      "updated_at": "2026-07-28T20:48:54Z",
+      "comments": 0,
+      "labels": []
+    },
+    {
+      "number": 24,
+      "state": "closed",
+      "head": "01d08ac9ba35fb4874d8567cd182035fa7d32612",
+      "updated_at": "2026-07-28T15:37:43Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 25,
+      "state": "closed",
+      "head": "6c0eb68a4e6805ee561ddddb181c1e6af685dabb",
+      "updated_at": "2026-07-28T15:37:18Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 23,
+      "state": "closed",
+      "head": "5183500265da310dd363889db446ea36fc33010e",
+      "updated_at": "2026-07-28T15:37:18Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 26,
+      "state": "closed",
+      "head": "47910c1a870f7cdcd88227ec38d728be67321c3c",
+      "updated_at": "2026-07-28T15:36:43Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 20,
+      "state": "closed",
+      "head": "92e55176c40f4cdfae3e9d79120d5d18136a7622",
+      "updated_at": "2026-07-28T15:35:08Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        "go"
+      ]
+    },
+    {
+      "number": 18,
+      "state": "closed",
+      "head": "8e02c25b64c3a5ba95ec6946ec1bcfe93cf65469",
+      "updated_at": "2026-07-28T15:35:07Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        "go"
+      ]
+    },
+    {
+      "number": 19,
+      "state": "closed",
+      "head": "f7f342321ced973c4db77b7cb3e859e62e508ef8",
+      "updated_at": "2026-07-28T15:35:06Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        "go"
+      ]
+    },
+    {
+      "number": 27,
+      "state": "closed",
+      "head": "fa1247d2d48ad77dfb16f76a980f5093752aaf17",
+      "updated_at": "2026-07-28T15:34:23Z",
+      "comments": 0,
+      "labels": []
+    },
+    {
+      "number": 22,
+      "state": "closed",
+      "head": "d4a906708597380d4edd5f76fc3126a45b33c2b2",
+      "updated_at": "2026-07-28T09:57:02Z",
+      "comments": 1,
+      "labels": [
+        "dependencies",
+        ".NET"
+      ]
+    },
+    {
+      "number": 17,
+      "state": "closed",
+      "head": "a019a05d2a3b874e336d687d7eb6274d61043065",
+      "updated_at": "2026-07-28T09:52:18Z",
+      "comments": 0,
+      "labels": []
+    },
+    {
+      "number": 16,
+      "state": "closed",
+      "head": "f3966278f7c561f22967dc44a3ee1b2e6d535c7b",
+      "updated_at": "2026-07-28T08:35:30Z",
+      "comments": 0,
+      "labels": []
+    },
+    {
+      "number": 14,
+      "state": "closed",
+      "head": "a8e2cbaedf253d0d037e2f13fb71db074bc1e1ea",
+      "updated_at": "2026-07-27T19:30:47Z",
+      "comments": 0,
+      "labels": [
+        "dependencies",
+        "go"
+      ]
+    },
+    {
+      "number": 12,
+      "state": "closed",
+      "head": "d7f0b04e9f330fcc48929ddf087073c6403b5a7e",
+      "updated_at": "2026-07-09T13:36:03Z",
+      "comments": 0,
+      "labels": []
+    },
+    {
+      "number": 9,
+      "state": "closed",
+      "head": "d5deeb35601c0dc4d8d5fd8f6c16ae938cd1293f",
+      "updated_at": "2026-07-06T11:25:03Z",
+      "comments": 0,
+      "labels": []
+    }
+  ],
+  "workflow_runs": [
+    {
+      "id": 37922103762,
+      "name": "nuget in /src/AppHost for Microsoft.Extensions.Http - Update #1619210886",
+      "event": "dynamic",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "e93d7062b075352f151f8e6b5a15f60913e7bd98",
+      "created_at": "2026-10-09T11:10:30Z",
+      "actor": "dependabot[bot]"
+    },
+    {
+      "id": 37921771611,
+      "name": "CI",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "e93d7062b075352f151f8e6b5a15f60913e7bd98",
+      "created_at": "2026-10-09T11:07:14Z",
+      "actor": "alanta"
+    },
+    {
+      "id": 37917112266,
+      "name": "CI",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "39dc2698b887228e6ba346cc4567a35a11545150",
+      "created_at": "2026-10-09T10:21:39Z",
+      "actor": "alanta"
+    },
+    {
+      "id": 37683430755,
+      "name": "CI",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "dcd6de884238b990d6ae4440a2d3aedd7e15f334",
+      "created_at": "2026-10-07T20:37:32Z",
+      "actor": "dependabot[bot]"
+    },
+    {
+      "id": 37683394854,
+      "name": "CI",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "5dde1e0ff3aa3b5ced29f9bfb3cae55b2a4686ba",
+      "created_at": "2026-10-07T20:37:15Z",
+      "actor": "dependabot[bot]"
+    },
+    {
+      "id": 37683247643,
+      "name": "go_modules in /proxy for github.com/Azure/azure-sdk-for-go/sdk/azcore, github.com/Azure/azure-sdk-for-go/sdk/storage/azblob - Update #1615951017",
+      "event": "dynamic",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "a63cf87544538fff9572ca6fcf59c62e829fa96f",
+      "created_at": "2026-10-07T20:36:07Z",
+      "actor": "dependabot[bot]"
+    },
+    {
+      "id": 37683201047,
+      "name": "nuget in /, /src/AppHost/AllowlistSeeder, /src/ControlPlane, /src/ControlPlane.Tests, /src/EgressProxy.Client, /src/EgressProxy.Client.Tests, /src/Portal, /src/Portal.Tests, /src/SampleApp, /src/ServiceDefaults, /src/ServiceDefaults.Tests for Azure.Core, Azure.Core, Azure.Core, coverlet.collector, Scalar.AspNetCore - Update #1615950685",
+      "event": "dynamic",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "a63cf87544538fff9572ca6fcf59c62e829fa96f",
+      "created_at": "2026-10-07T20:35:45Z",
+      "actor": "dependabot[bot]"
+    },
+    {
+      "id": 37683155287,
+      "name": "CI",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "failure",
+      "head_sha": "bdf6a9d2e88e4bef3b4eca254962c7b94165c648",
+      "created_at": "2026-10-07T20:35:24Z",
+      "actor": "dependabot[bot]"
+    },
+    {
+      "id": 37683137098,
+      "name": "nuget in /src/AppHost for Microsoft.Extensions.Http - Update #1615950309",
+      "event": "dynamic",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "a63cf87544538fff9572ca6fcf59c62e829fa96f",
+      "created_at": "2026-10-07T20:35:16Z",
+      "actor": "dependabot[bot]"
+    },
+    {
+      "id": 37683036678,
+      "name": "docker in /mock-idp, /proxy for python, library/golang - Update #1615949802",
+      "event": "dynamic",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "a63cf87544538fff9572ca6fcf59c62e829fa96f",
+      "created_at": "2026-10-07T20:34:30Z",
+      "actor": "dependabot[bot]"
+    },
+    {
+      "id": 37681945862,
+      "name": "CI",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "dd10dde1a2b8d937414aba270e670a67762ddbaf",
+      "created_at": "2026-10-07T20:25:58Z",
+      "actor": "dependabot[bot]"
+    },
+    {
+      "id": 37681619637,
+      "name": "github_actions in / for azure/login, docker/setup-qemu-action, docker/setup-buildx-action - Update #1615932818",
+      "event": "dynamic",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "a63cf87544538fff9572ca6fcf59c62e829fa96f",
+      "created_at": "2026-10-07T20:23:24Z",
+      "actor": "dependabot[bot]"
+    },
+    {
+      "id": 37681449900,
+      "name": "CI",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "a63cf87544538fff9572ca6fcf59c62e829fa96f",
+      "created_at": "2026-10-07T20:22:04Z",
+      "actor": "alanta"
+    },
+    {
+      "id": 37678893626,
+      "name": "CI",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "3a0aad681b99227a4efe19d0ae70670a9311f61f",
+      "created_at": "2026-10-07T20:01:28Z",
+      "actor": "alanta"
+    },
+    {
+      "id": 37675482108,
+      "name": "CI",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "63cc9ad2eeb447eb2fcd199d3dc8eaaedf32d64b",
+      "created_at": "2026-10-07T19:34:17Z",
+      "actor": "alanta"
+    },
+    {
+      "id": 37675009859,
+      "name": "CI",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "2bc2b1a22bddd66cc24ba10e5a6e1666a1da74ea",
+      "created_at": "2026-10-07T19:30:33Z",
+      "actor": "alanta"
+    },
+    {
+      "id": 37669665266,
+      "name": "CI",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "f9ab9ddf49081f5c550d7ba42dd4b79440cb1de2",
+      "created_at": "2026-10-07T18:48:37Z",
+      "actor": "alanta"
+    },
+    {
+      "id": 37669641646,
+      "name": "CI",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "8fe7d87181c33ddda00702c50480a69885a7825a",
+      "created_at": "2026-10-07T18:48:25Z",
+      "actor": "alanta"
+    },
+    {
+      "id": 37370164964,
+      "name": "CI",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "failure",
+      "head_sha": "7aea49513678ed1c3b0aa0f183f45f23e7d65a81",
+      "created_at": "2026-10-05T20:30:29Z",
+      "actor": "dependabot[bot]"
+    },
+    {
+      "id": 37369994457,
+      "name": "CI",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "failure",
+      "head_sha": "bc9839dd824d26f2326c9417ebd8b24777e8f29b",
+      "created_at": "2026-10-05T20:28:53Z",
+      "actor": "dependabot[bot]"
+    },
+    {
+      "id": 37369584776,
+      "name": "docker in /mock-idp, /proxy for python, library/golang - Update #1611284474",
+      "event": "dynamic",
+      "status": "completed",
+      "conclusion": "failure",
+      "head_sha": "064aa099ecf7ffea9664b89df29f7d89d6859358",
+      "created_at": "2026-10-05T20:24:56Z",
+      "actor": "dependabot[bot]"
+    },
+    {
+      "id": 37369576447,
+      "name": "docker in /.devcontainer, /mock-idp, /proxy, /src/ControlPlane, /src/Portal, /src/SampleApp - Update #1611284057",
+      "event": "dynamic",
+      "status": "completed",
+      "conclusion": "failure",
+      "head_sha": "064aa099ecf7ffea9664b89df29f7d89d6859358",
+      "created_at": "2026-10-05T20:24:51Z",
+      "actor": "dependabot[bot]"
+    },
+    {
+      "id": 37369530111,
+      "name": "nuget in /, /src/ControlPlane, /src/ControlPlane.Tests, /src/EgressProxy.Client, /src/EgressProxy.Client.Tests, /src/Portal, /src/Portal.Tests, /src/ServiceDefaults, /src/ServiceDefaults.Tests for Azure.Core, coverlet.collector, Scalar.AspNetCore - Update #1611281187",
+      "event": "dynamic",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "064aa099ecf7ffea9664b89df29f7d89d6859358",
+      "created_at": "2026-10-05T20:24:25Z",
+      "actor": "dependabot[bot]"
+    },
+    {
+      "id": 37369521814,
+      "name": "nuget in /src/AppHost for Microsoft.Extensions.Http - Update #1611281041",
+      "event": "dynamic",
+      "status": "completed",
+      "conclusion": "failure",
+      "head_sha": "064aa099ecf7ffea9664b89df29f7d89d6859358",
+      "created_at": "2026-10-05T20:24:20Z",
+      "actor": "dependabot[bot]"
+    },
+    {
+      "id": 37369517183,
+      "name": "github_actions in / for azure/login, docker/setup-qemu-action, docker/setup-buildx-action - Update #1611280785",
+      "event": "dynamic",
+      "status": "completed",
+      "conclusion": "failure",
+      "head_sha": "064aa099ecf7ffea9664b89df29f7d89d6859358",
+      "created_at": "2026-10-05T20:24:18Z",
+      "actor": "dependabot[bot]"
+    },
+    {
+      "id": 37369516971,
+      "name": "nuget in /. - Update #1611280644",
+      "event": "dynamic",
+      "status": "completed",
+      "conclusion": "failure",
+      "head_sha": "064aa099ecf7ffea9664b89df29f7d89d6859358",
+      "created_at": "2026-10-05T20:24:17Z",
+      "actor": "dependabot[bot]"
+    },
+    {
+      "id": 37369513518,
+      "name": "github_actions in /. - Update #1611280584",
+      "event": "dynamic",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "064aa099ecf7ffea9664b89df29f7d89d6859358",
+      "created_at": "2026-10-05T20:24:16Z",
+      "actor": "dependabot[bot]"
+    },
+    {
+      "id": 37369513348,
+      "name": "go_modules in /proxy - Update #1611280492",
+      "event": "dynamic",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "064aa099ecf7ffea9664b89df29f7d89d6859358",
+      "created_at": "2026-10-05T20:24:15Z",
+      "actor": "dependabot[bot]"
+    },
+    {
+      "id": 37312367095,
+      "name": "CI",
+      "event": "schedule",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "064aa099ecf7ffea9664b89df29f7d89d6859358",
+      "created_at": "2026-10-05T12:50:47Z",
+      "actor": "alanta"
+    },
+    {
+      "id": 36911493182,
+      "name": "Configured Graph Update: go_modules in /proxy #1603483926",
+      "event": "dynamic",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "064aa099ecf7ffea9664b89df29f7d89d6859358",
+      "created_at": "2026-10-01T19:03:43Z",
+      "actor": "dependabot[bot]"
+    }
+  ],
+  "main_head": "e93d7062b075352f151f8e6b5a15f60913e7bd98",
+  "main_check_runs": [
+    {
+      "id": 113792232902,
+      "name": "Dependabot",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 113791461587,
+      "name": "CI result",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 113791182046,
+      "name": "Scan proxy module for reachable vulnerabilities",
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 113791181984,
+      "name": "Check Go toolchain consistency",
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 113791181866,
+      "name": "Lint workflows",
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 113791181513,
+      "name": "Validate Bicep files",
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 113791181170,
+      "name": "Build and smoke-test mock IdP image",
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 113791181042,
+      "name": "Shell script lint",
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 113791180936,
+      "name": "Proxy image",
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 113791179923,
+      "name": "App images / Build portal image",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 113791179904,
+      "name": "App images / Build sample-app image",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 113791179884,
+      "name": "App images / Build control-plane image",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 113791179704,
+      "name": "Build and test .NET solution",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 113791138572,
+      "name": "changes",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ]
+}

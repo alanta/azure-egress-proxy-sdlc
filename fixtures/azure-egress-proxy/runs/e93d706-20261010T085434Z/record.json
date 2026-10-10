@@ -1,0 +1,4730 @@
+{
+  "schema_version": "1",
+  "subject": {
+    "repository": "alanta/azure-egress-proxy",
+    "ref": "main",
+    "commit": "e93d7062b075352f151f8e6b5a15f60913e7bd98"
+  },
+  "scanned_at": "2026-10-10T08:54:34+00:00",
+  "tools": [
+    {
+      "name": "renovate",
+      "version": "44.145.1",
+      "image": "docker.io/renovate/renovate:44.145.1@sha256:6f1f3e2d9d0c3f99aa1f61f7509d302185de7deb173ac8c5ff88a5ce283ec435"
+    },
+    {
+      "name": "dotnet",
+      "version": "10.0",
+      "image": "mcr.microsoft.com/dotnet/sdk:10.0@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317"
+    },
+    {
+      "name": "go",
+      "version": "1.27",
+      "image": "docker.io/library/golang:1.27-alpine@sha256:8a5910f31396cd4d89662f56c68b3ae31d374308270a1c3bd96672ee5ed43414"
+    },
+    {
+      "name": "osv-scanner",
+      "version": "2.6.0",
+      "image": "ghcr.io/google/osv-scanner:v2.6.0@sha256:afd838850ac1a0fcc15ff4a041dc9ba11123c3f0d2666217a5f0fcf9222b55fa"
+    },
+    {
+      "name": "govulncheck",
+      "version": "v1.8.0",
+      "image": "docker.io/library/golang:1.27-alpine@sha256:8a5910f31396cd4d89662f56c68b3ae31d374308270a1c3bd96672ee5ed43414"
+    },
+    {
+      "name": "go toolchain for govulncheck (proxy/go.mod, linux/amd64, linux/arm64)",
+      "version": "go1.25.14"
+    },
+    {
+      "name": "govulncheck database https://vuln.go.dev",
+      "version": "2026-10-08T22:31:09Z"
+    },
+    {
+      "name": "endoflife.date",
+      "version": "v1",
+      "url": "https://endoflife.date/api/v1/products/dotnet",
+      "fetched_at": "2026-10-10T08:56:45+00:00"
+    },
+    {
+      "name": "endoflife.date",
+      "version": "v1",
+      "url": "https://endoflife.date/api/v1/products/python",
+      "fetched_at": "2026-10-10T08:56:45+00:00"
+    },
+    {
+      "name": "endoflife.date",
+      "version": "v1",
+      "url": "https://endoflife.date/api/v1/products/go",
+      "fetched_at": "2026-10-10T08:56:45+00:00"
+    },
+    {
+      "name": "endoflife.date",
+      "version": "v1",
+      "url": "https://endoflife.date/api/v1/products/debian",
+      "fetched_at": "2026-10-10T08:56:45+00:00"
+    },
+    {
+      "name": "endoflife.date",
+      "version": "v1",
+      "url": "https://endoflife.date/api/v1/products/ubuntu",
+      "fetched_at": "2026-10-10T08:56:46+00:00"
+    }
+  ],
+  "policy": {
+    "source": "trial",
+    "path": "policies/azure-egress-proxy.renovate.json5"
+  },
+  "inventory": [
+    {
+      "id": "bicep:infra/main.bicep:Microsoft.Resources/resourceGroups",
+      "ecosystem": "azure-bicep-resource",
+      "name": "Microsoft.Resources/resourceGroups",
+      "current": "2024-03-01",
+      "origin": "declared",
+      "location": {
+        "file": "infra/main.bicep",
+        "line": 147
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "azure-bicep-resource",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "bicep:infra/modules/hub.bicep:Microsoft.ContainerRegistry/registries",
+      "ecosystem": "azure-bicep-resource",
+      "name": "Microsoft.ContainerRegistry/registries",
+      "current": "2023-07-01",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/hub.bicep",
+        "line": 122
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "azure-bicep-resource",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "bicep:infra/modules/hub.bicep:Microsoft.Storage/storageAccounts",
+      "ecosystem": "azure-bicep-resource",
+      "name": "Microsoft.Storage/storageAccounts",
+      "current": "2023-05-01",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/hub.bicep",
+        "line": 129
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "azure-bicep-resource",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "bicep:infra/modules/hub.bicep:Microsoft.Authorization/roleAssignments",
+      "ecosystem": "azure-bicep-resource",
+      "name": "Microsoft.Authorization/roleAssignments",
+      "current": "2022-04-01",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/hub.bicep",
+        "line": 253
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "azure-bicep-resource",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "bicep:infra/modules/hub.bicep:Microsoft.Authorization/roleAssignments#2",
+      "ecosystem": "azure-bicep-resource",
+      "name": "Microsoft.Authorization/roleAssignments",
+      "current": "2022-04-01",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/hub.bicep",
+        "line": 265
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "azure-bicep-resource",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "bicep:infra/modules/hub.bicep:Microsoft.Network/loadBalancers",
+      "ecosystem": "azure-bicep-resource",
+      "name": "Microsoft.Network/loadBalancers",
+      "current": "2024-05-01",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/hub.bicep",
+        "line": 327
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "azure-bicep-resource",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "bicep:infra/modules/mgmt.bicep:Microsoft.App/managedEnvironments",
+      "ecosystem": "azure-bicep-resource",
+      "name": "Microsoft.App/managedEnvironments",
+      "current": "2024-03-01",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/mgmt.bicep",
+        "line": 434
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "azure-bicep-resource",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "bicep:infra/modules/mgmt.bicep:Microsoft.Insights/diagnosticSettings",
+      "ecosystem": "azure-bicep-resource",
+      "name": "Microsoft.Insights/diagnosticSettings",
+      "current": "2021-05-01-preview",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/mgmt.bicep",
+        "line": 441
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "azure-bicep-resource",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "bicep:infra/modules/mgmt.bicep:Microsoft.App/containerApps/authConfigs",
+      "ecosystem": "azure-bicep-resource",
+      "name": "Microsoft.App/containerApps/authConfigs",
+      "current": "2024-03-01",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/mgmt.bicep",
+        "line": 717
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "azure-bicep-resource",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "bicep:infra/modules/observability.bicep:Microsoft.OperationalInsights/workspaces/tables",
+      "ecosystem": "azure-bicep-resource",
+      "name": "Microsoft.OperationalInsights/workspaces/tables",
+      "current": "2023-09-01",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/observability.bicep",
+        "line": 75
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "azure-bicep-resource",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "bicep:infra/modules/observability.bicep:Microsoft.Compute/virtualMachineScaleSets",
+      "ecosystem": "azure-bicep-resource",
+      "name": "Microsoft.Compute/virtualMachineScaleSets",
+      "current": "2024-11-01",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/observability.bicep",
+        "line": 175
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "azure-bicep-resource",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "bicep:infra/modules/observability.bicep:Microsoft.Compute/virtualMachineScaleSets/extensions",
+      "ecosystem": "azure-bicep-resource",
+      "name": "Microsoft.Compute/virtualMachineScaleSets/extensions",
+      "current": "2024-11-01",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/observability.bicep",
+        "line": 179
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "azure-bicep-resource",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "bicep:infra/modules/observability.bicep:Microsoft.Insights/dataCollectionRuleAssociations",
+      "ecosystem": "azure-bicep-resource",
+      "name": "Microsoft.Insights/dataCollectionRuleAssociations",
+      "current": "2022-06-01",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/observability.bicep",
+        "line": 200
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "azure-bicep-resource",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "bicep:infra/modules/peering.bicep:Microsoft.Network/virtualNetworks",
+      "ecosystem": "azure-bicep-resource",
+      "name": "Microsoft.Network/virtualNetworks",
+      "current": "2025-01-01",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/peering.bicep",
+        "line": 10
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "azure-bicep-resource",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "bicep:infra/modules/peering.bicep:Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+      "ecosystem": "azure-bicep-resource",
+      "name": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+      "current": "2025-01-01",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/peering.bicep",
+        "line": 14
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "azure-bicep-resource",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "bicep:infra/modules/spoke.bicep:Microsoft.App/managedEnvironments",
+      "ecosystem": "azure-bicep-resource",
+      "name": "Microsoft.App/managedEnvironments",
+      "current": "2024-03-01",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/spoke.bicep",
+        "line": 318
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "azure-bicep-resource",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "bicep:infra/modules/spoke.bicep:Microsoft.Insights/diagnosticSettings",
+      "ecosystem": "azure-bicep-resource",
+      "name": "Microsoft.Insights/diagnosticSettings",
+      "current": "2021-05-01-preview",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/spoke.bicep",
+        "line": 325
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "azure-bicep-resource",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "devcontainer:.devcontainer/devcontainer.json:ghcr.io/devcontainers/features/docker-in-docker",
+      "ecosystem": "docker",
+      "name": "ghcr.io/devcontainers/features/docker-in-docker",
+      "current": "2",
+      "origin": "declared",
+      "location": {
+        "file": ".devcontainer/devcontainer.json",
+        "line": 13
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "devcontainer:.devcontainer/worktree/devcontainer.json:ghcr.io/devcontainers/features/docker-in-docker",
+      "ecosystem": "docker",
+      "name": "ghcr.io/devcontainers/features/docker-in-docker",
+      "current": "2",
+      "origin": "declared",
+      "location": {
+        "file": ".devcontainer/worktree/devcontainer.json",
+        "line": 17
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "dockerfile:.devcontainer/Dockerfile:mcr.microsoft.com/devcontainers/dotnet",
+      "ecosystem": "docker",
+      "name": "mcr.microsoft.com/devcontainers/dotnet",
+      "current": "2.2.3-10.0-noble",
+      "origin": "declared",
+      "location": {
+        "file": ".devcontainer/Dockerfile",
+        "line": 1
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "dockerfile:.devcontainer/Dockerfile:apt-transport-https",
+      "ecosystem": "deb",
+      "name": "apt-transport-https",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": ".devcontainer/Dockerfile"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "No version is pinned, so there is nothing to compare.",
+        "datasource": "deb"
+      }
+    },
+    {
+      "id": "dockerfile:.devcontainer/Dockerfile:ca-certificates",
+      "ecosystem": "deb",
+      "name": "ca-certificates",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": ".devcontainer/Dockerfile"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "No version is pinned, so there is nothing to compare.",
+        "datasource": "deb"
+      }
+    },
+    {
+      "id": "dockerfile:.devcontainer/Dockerfile:curl",
+      "ecosystem": "deb",
+      "name": "curl",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": ".devcontainer/Dockerfile"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "No version is pinned, so there is nothing to compare.",
+        "datasource": "deb"
+      }
+    },
+    {
+      "id": "dockerfile:.devcontainer/Dockerfile:git",
+      "ecosystem": "deb",
+      "name": "git",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": ".devcontainer/Dockerfile"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "No version is pinned, so there is nothing to compare.",
+        "datasource": "deb"
+      }
+    },
+    {
+      "id": "dockerfile:.devcontainer/Dockerfile:gnupg",
+      "ecosystem": "deb",
+      "name": "gnupg",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": ".devcontainer/Dockerfile"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "No version is pinned, so there is nothing to compare.",
+        "datasource": "deb"
+      }
+    },
+    {
+      "id": "dockerfile:.devcontainer/Dockerfile:jq",
+      "ecosystem": "deb",
+      "name": "jq",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": ".devcontainer/Dockerfile"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "No version is pinned, so there is nothing to compare.",
+        "datasource": "deb"
+      }
+    },
+    {
+      "id": "dockerfile:.devcontainer/Dockerfile:lsb-release",
+      "ecosystem": "deb",
+      "name": "lsb-release",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": ".devcontainer/Dockerfile"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "No version is pinned, so there is nothing to compare.",
+        "datasource": "deb"
+      }
+    },
+    {
+      "id": "dockerfile:.devcontainer/Dockerfile:shellcheck",
+      "ecosystem": "deb",
+      "name": "shellcheck",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": ".devcontainer/Dockerfile"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "No version is pinned, so there is nothing to compare.",
+        "datasource": "deb"
+      }
+    },
+    {
+      "id": "dockerfile:.devcontainer/Dockerfile:unzip",
+      "ecosystem": "deb",
+      "name": "unzip",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": ".devcontainer/Dockerfile"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "No version is pinned, so there is nothing to compare.",
+        "datasource": "deb"
+      }
+    },
+    {
+      "id": "dockerfile:.devcontainer/Dockerfile:azure-cli",
+      "ecosystem": "deb",
+      "name": "azure-cli",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": ".devcontainer/Dockerfile"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "No version is pinned, so there is nothing to compare.",
+        "datasource": "deb"
+      }
+    },
+    {
+      "id": "dockerfile:mock-idp/Dockerfile:python",
+      "ecosystem": "docker",
+      "name": "python",
+      "current": "3.12-alpine",
+      "origin": "declared",
+      "location": {
+        "file": "mock-idp/Dockerfile",
+        "line": 1
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "dockerfile:proxy/Dockerfile:docker.io/library/golang",
+      "ecosystem": "docker",
+      "name": "docker.io/library/golang",
+      "current": "1.25-alpine",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/Dockerfile",
+        "line": 5
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "dockerfile:proxy/Dockerfile:git",
+      "ecosystem": "apk",
+      "name": "git",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "proxy/Dockerfile"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "No version is pinned, so there is nothing to compare.",
+        "datasource": "apk"
+      }
+    },
+    {
+      "id": "dockerfile:proxy/Dockerfile:gcr.io/distroless/static-debian12",
+      "ecosystem": "docker",
+      "name": "gcr.io/distroless/static-debian12",
+      "current": "nonroot",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/Dockerfile",
+        "line": 26
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "docker"
+      }
+    },
+    {
+      "id": "dockerfile:src/ControlPlane/Dockerfile:mcr.microsoft.com/dotnet/sdk",
+      "ecosystem": "docker",
+      "name": "mcr.microsoft.com/dotnet/sdk",
+      "current": "10.0",
+      "origin": "declared",
+      "location": {
+        "file": "src/ControlPlane/Dockerfile",
+        "line": 1
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "dockerfile:src/ControlPlane/Dockerfile:mcr.microsoft.com/dotnet/aspnet",
+      "ecosystem": "docker",
+      "name": "mcr.microsoft.com/dotnet/aspnet",
+      "current": "10.0",
+      "origin": "declared",
+      "location": {
+        "file": "src/ControlPlane/Dockerfile",
+        "line": 16
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "dockerfile:src/Portal/Dockerfile:mcr.microsoft.com/dotnet/sdk",
+      "ecosystem": "docker",
+      "name": "mcr.microsoft.com/dotnet/sdk",
+      "current": "10.0",
+      "origin": "declared",
+      "location": {
+        "file": "src/Portal/Dockerfile",
+        "line": 1
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "dockerfile:src/Portal/Dockerfile:mcr.microsoft.com/dotnet/aspnet",
+      "ecosystem": "docker",
+      "name": "mcr.microsoft.com/dotnet/aspnet",
+      "current": "10.0",
+      "origin": "declared",
+      "location": {
+        "file": "src/Portal/Dockerfile",
+        "line": 16
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "dockerfile:src/SampleApp/Dockerfile:mcr.microsoft.com/dotnet/sdk",
+      "ecosystem": "docker",
+      "name": "mcr.microsoft.com/dotnet/sdk",
+      "current": "10.0",
+      "origin": "declared",
+      "location": {
+        "file": "src/SampleApp/Dockerfile",
+        "line": 1
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "dockerfile:src/SampleApp/Dockerfile:mcr.microsoft.com/dotnet/aspnet",
+      "ecosystem": "docker",
+      "name": "mcr.microsoft.com/dotnet/aspnet",
+      "current": "10.0",
+      "origin": "declared",
+      "location": {
+        "file": "src/SampleApp/Dockerfile",
+        "line": 17
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/allowlist.yml:actions/checkout",
+      "ecosystem": "github-tags",
+      "name": "actions/checkout",
+      "current": "v7",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/allowlist.yml",
+        "line": 21
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "github-tags",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/allowlist.yml:azure/login",
+      "ecosystem": "github-tags",
+      "name": "azure/login",
+      "current": "v3.0.2",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/allowlist.yml",
+        "line": 56
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "github-tags",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/allowlist.yml:ubuntu",
+      "ecosystem": "github-runners",
+      "name": "ubuntu",
+      "current": "latest",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/allowlist.yml",
+        "line": 19
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "github-runners"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/ci.yml:actions/checkout",
+      "ecosystem": "github-tags",
+      "name": "actions/checkout",
+      "current": "v7",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 35
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "github-tags",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/ci.yml:dorny/paths-filter",
+      "ecosystem": "github-tags",
+      "name": "dorny/paths-filter",
+      "current": "v4.0.3",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 39
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "github-tags",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/ci.yml:actions/checkout#2",
+      "ecosystem": "github-tags",
+      "name": "actions/checkout",
+      "current": "v7",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 99
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "github-tags",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/ci.yml:actions/checkout#3",
+      "ecosystem": "github-tags",
+      "name": "actions/checkout",
+      "current": "v7",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 112
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "github-tags",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/ci.yml:actions/checkout#4",
+      "ecosystem": "github-tags",
+      "name": "actions/checkout",
+      "current": "v7",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 128
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "github-tags",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/ci.yml:actions/setup-go",
+      "ecosystem": "github-tags",
+      "name": "actions/setup-go",
+      "current": "v7",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 132
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "github-tags",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/ci.yml:actions/checkout#5",
+      "ecosystem": "github-tags",
+      "name": "actions/checkout",
+      "current": "v7",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 152
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "github-tags",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/ci.yml:actions/setup-go#2",
+      "ecosystem": "github-tags",
+      "name": "actions/setup-go",
+      "current": "v7",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 156
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "github-tags",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/ci.yml:actions/checkout#6",
+      "ecosystem": "github-tags",
+      "name": "actions/checkout",
+      "current": "v7",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 178
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "github-tags",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/ci.yml:actions/setup-dotnet",
+      "ecosystem": "github-tags",
+      "name": "actions/setup-dotnet",
+      "current": "v6",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 181
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "github-tags",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/ci.yml:actions/checkout#7",
+      "ecosystem": "github-tags",
+      "name": "actions/checkout",
+      "current": "v7",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 202
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "github-tags",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/ci.yml:actions/checkout#8",
+      "ecosystem": "github-tags",
+      "name": "actions/checkout",
+      "current": "v7",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 219
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "github-tags",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/ci.yml:ubuntu",
+      "ecosystem": "github-runners",
+      "name": "ubuntu",
+      "current": "latest",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 20
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "github-runners"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/ci.yml:ubuntu#2",
+      "ecosystem": "github-runners",
+      "name": "ubuntu",
+      "current": "latest",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 93
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "github-runners"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/ci.yml:ubuntu#3",
+      "ecosystem": "github-runners",
+      "name": "ubuntu",
+      "current": "latest",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 107
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "github-runners"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/ci.yml:ubuntu#4",
+      "ecosystem": "github-runners",
+      "name": "ubuntu",
+      "current": "latest",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 120
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "github-runners"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/ci.yml:go",
+      "ecosystem": "github-releases",
+      "name": "go",
+      "current": "1.25",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 134
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "github-releases",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/ci.yml:ubuntu#5",
+      "ecosystem": "github-runners",
+      "name": "ubuntu",
+      "current": "latest",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 143
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "github-runners"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/ci.yml:go#2",
+      "ecosystem": "github-releases",
+      "name": "go",
+      "current": "1.25",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 160
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "github-releases",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/ci.yml:ubuntu#6",
+      "ecosystem": "github-runners",
+      "name": "ubuntu",
+      "current": "latest",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 148
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "github-runners"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/ci.yml:dotnet-sdk",
+      "ecosystem": "dotnet-version",
+      "name": "dotnet-sdk",
+      "current": "10.0.x",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 183
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "dotnet-version",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/ci.yml:ubuntu#7",
+      "ecosystem": "github-runners",
+      "name": "ubuntu",
+      "current": "latest",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 174
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "github-runners"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/ci.yml:ubuntu#8",
+      "ecosystem": "github-runners",
+      "name": "ubuntu",
+      "current": "latest",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 198
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "github-runners"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/ci.yml:ubuntu#9",
+      "ecosystem": "github-runners",
+      "name": "ubuntu",
+      "current": "latest",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 215
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "github-runners"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/deploy.yml:actions/checkout",
+      "ecosystem": "github-tags",
+      "name": "actions/checkout",
+      "current": "v7",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/deploy.yml",
+        "line": 25
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "github-tags",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/deploy.yml:azure/login",
+      "ecosystem": "github-tags",
+      "name": "azure/login",
+      "current": "v3.0.2",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/deploy.yml",
+        "line": 69
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "github-tags",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/deploy.yml:ubuntu",
+      "ecosystem": "github-runners",
+      "name": "ubuntu",
+      "current": "latest",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/deploy.yml",
+        "line": 23
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "github-runners"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/images.yml:actions/checkout",
+      "ecosystem": "github-tags",
+      "name": "actions/checkout",
+      "current": "v7",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/images.yml",
+        "line": 56
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "github-tags",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/images.yml:docker/setup-qemu-action",
+      "ecosystem": "github-tags",
+      "name": "docker/setup-qemu-action",
+      "current": "v4.3.0",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/images.yml",
+        "line": 60
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "github-tags",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/images.yml:docker/setup-buildx-action",
+      "ecosystem": "github-tags",
+      "name": "docker/setup-buildx-action",
+      "current": "v4.3.0",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/images.yml",
+        "line": 61
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "github-tags",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/images.yml:docker/login-action",
+      "ecosystem": "github-tags",
+      "name": "docker/login-action",
+      "current": "v4",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/images.yml",
+        "line": 65
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "github-tags",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/images.yml:docker/build-push-action",
+      "ecosystem": "github-tags",
+      "name": "docker/build-push-action",
+      "current": "v7.4.0",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/images.yml",
+        "line": 72
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "github-tags",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/images.yml:ubuntu",
+      "ecosystem": "github-runners",
+      "name": "ubuntu",
+      "current": "latest",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/images.yml",
+        "line": 35
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "github-runners"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/release.yml:actions/checkout",
+      "ecosystem": "github-tags",
+      "name": "actions/checkout",
+      "current": "v7",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/release.yml",
+        "line": 32
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "github-tags",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/release.yml:actions/setup-go",
+      "ecosystem": "github-tags",
+      "name": "actions/setup-go",
+      "current": "v7",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/release.yml",
+        "line": 80
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "github-tags",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/release.yml:actions/upload-artifact",
+      "ecosystem": "github-tags",
+      "name": "actions/upload-artifact",
+      "current": "v7",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/release.yml",
+        "line": 106
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "github-tags",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/release.yml:softprops/action-gh-release",
+      "ecosystem": "github-tags",
+      "name": "softprops/action-gh-release",
+      "current": "v3.0.3",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/release.yml",
+        "line": 114
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "github-tags",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/release.yml:ubuntu",
+      "ecosystem": "github-runners",
+      "name": "ubuntu",
+      "current": "latest",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/release.yml",
+        "line": 25
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "github-runners"
+      }
+    },
+    {
+      "id": "github-actions:.github/workflows/release.yml:go",
+      "ecosystem": "github-releases",
+      "name": "go",
+      "current": "1.25",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/release.yml",
+        "line": 86
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "github-releases",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:go",
+      "ecosystem": "golang-version",
+      "name": "go",
+      "current": "1.25.14",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod",
+        "line": 3
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "golang-version",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/Azure/azure-sdk-for-go/sdk/azcore",
+      "ecosystem": "go",
+      "name": "github.com/Azure/azure-sdk-for-go/sdk/azcore",
+      "current": "v1.23.1",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "go",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/Azure/azure-sdk-for-go/sdk/azidentity",
+      "ecosystem": "go",
+      "name": "github.com/Azure/azure-sdk-for-go/sdk/azidentity",
+      "current": "v1.14.1",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "go",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/Azure/azure-sdk-for-go/sdk/storage/azblob",
+      "ecosystem": "go",
+      "name": "github.com/Azure/azure-sdk-for-go/sdk/storage/azblob",
+      "current": "v1.8.1",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "go",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/MicahParks/keyfunc/v3",
+      "ecosystem": "go",
+      "name": "github.com/MicahParks/keyfunc/v3",
+      "current": "v3.8.2",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "go",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/golang-jwt/jwt/v5",
+      "ecosystem": "go",
+      "name": "github.com/golang-jwt/jwt/v5",
+      "current": "v5.3.1",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "go",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/sirupsen/logrus",
+      "ecosystem": "go",
+      "name": "github.com/sirupsen/logrus",
+      "current": "v1.10.2",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "go",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/stripe/smokescreen",
+      "ecosystem": "go",
+      "name": "github.com/stripe/smokescreen",
+      "current": "v0.1.0",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "go",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/Azure/azure-sdk-for-go/sdk/internal",
+      "ecosystem": "go",
+      "name": "github.com/Azure/azure-sdk-for-go/sdk/internal",
+      "current": "v1.12.0",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/AzureAD/microsoft-authentication-library-for-go",
+      "ecosystem": "go",
+      "name": "github.com/AzureAD/microsoft-authentication-library-for-go",
+      "current": "v1.8.0",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/DataDog/datadog-go",
+      "ecosystem": "go",
+      "name": "github.com/DataDog/datadog-go",
+      "current": "v4.8.3+incompatible",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/MicahParks/jwkset",
+      "ecosystem": "go",
+      "name": "github.com/MicahParks/jwkset",
+      "current": "v0.11.3",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/Microsoft/go-winio",
+      "ecosystem": "go",
+      "name": "github.com/Microsoft/go-winio",
+      "current": "v0.6.2",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/apache/arrow-go/v18",
+      "ecosystem": "go",
+      "name": "github.com/apache/arrow-go/v18",
+      "current": "v18.7.0",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/armon/go-proxyproto",
+      "ecosystem": "go",
+      "name": "github.com/armon/go-proxyproto",
+      "current": "v0.1.0",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/beorn7/perks",
+      "ecosystem": "go",
+      "name": "github.com/beorn7/perks",
+      "current": "v1.0.1",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/carlmjohnson/versioninfo",
+      "ecosystem": "go",
+      "name": "github.com/carlmjohnson/versioninfo",
+      "current": "v0.22.5",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/cespare/xxhash/v2",
+      "ecosystem": "go",
+      "name": "github.com/cespare/xxhash/v2",
+      "current": "v2.3.0",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/goccy/go-json",
+      "ecosystem": "go",
+      "name": "github.com/goccy/go-json",
+      "current": "v0.10.6",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/google/flatbuffers",
+      "ecosystem": "go",
+      "name": "github.com/google/flatbuffers",
+      "current": "v25.12.19+incompatible",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/google/uuid",
+      "ecosystem": "go",
+      "name": "github.com/google/uuid",
+      "current": "v1.6.0",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/hashicorp/golang-lru",
+      "ecosystem": "go",
+      "name": "github.com/hashicorp/golang-lru",
+      "current": "v1.0.2",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/klauspost/compress",
+      "ecosystem": "go",
+      "name": "github.com/klauspost/compress",
+      "current": "v1.19.2",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/klauspost/cpuid/v2",
+      "ecosystem": "go",
+      "name": "github.com/klauspost/cpuid/v2",
+      "current": "v2.4.0",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/kylelemons/godebug",
+      "ecosystem": "go",
+      "name": "github.com/kylelemons/godebug",
+      "current": "v1.1.0",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/munnerz/goautoneg",
+      "ecosystem": "go",
+      "name": "github.com/munnerz/goautoneg",
+      "current": "v0.0.0-20191010083416-a7dc8b61c822",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/patrickmn/go-cache",
+      "ecosystem": "go",
+      "name": "github.com/patrickmn/go-cache",
+      "current": "v2.1.0+incompatible",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/pierrec/lz4/v4",
+      "ecosystem": "go",
+      "name": "github.com/pierrec/lz4/v4",
+      "current": "v4.1.28",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/pkg/browser",
+      "ecosystem": "go",
+      "name": "github.com/pkg/browser",
+      "current": "v0.0.0-20240102092130-5ac0b6a4141c",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/prometheus/client_golang",
+      "ecosystem": "go",
+      "name": "github.com/prometheus/client_golang",
+      "current": "v1.24.1",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/prometheus/client_model",
+      "ecosystem": "go",
+      "name": "github.com/prometheus/client_model",
+      "current": "v0.6.2",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/prometheus/common",
+      "ecosystem": "go",
+      "name": "github.com/prometheus/common",
+      "current": "v0.70.1",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/prometheus/procfs",
+      "ecosystem": "go",
+      "name": "github.com/prometheus/procfs",
+      "current": "v0.21.1",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/rs/xid",
+      "ecosystem": "go",
+      "name": "github.com/rs/xid",
+      "current": "v1.6.0",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/stretchr/objx",
+      "ecosystem": "go",
+      "name": "github.com/stretchr/objx",
+      "current": "v0.5.3",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/stripe/goproxy",
+      "ecosystem": "go",
+      "name": "github.com/stripe/goproxy",
+      "current": "v0.0.0-20260826103935-0cd07c409a76",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:github.com/zeebo/xxh3",
+      "ecosystem": "go",
+      "name": "github.com/zeebo/xxh3",
+      "current": "v1.1.0",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:golang.org/x/crypto",
+      "ecosystem": "go",
+      "name": "golang.org/x/crypto",
+      "current": "v0.55.0",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "go",
+        "looked_up_at": "2026-10-10T08:55:56+00:00"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:golang.org/x/exp",
+      "ecosystem": "go",
+      "name": "golang.org/x/exp",
+      "current": "v0.0.0-20260813180055-c1d0aacb2297",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:golang.org/x/net",
+      "ecosystem": "go",
+      "name": "golang.org/x/net",
+      "current": "v0.58.0",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "go",
+        "looked_up_at": "2026-10-10T08:55:56+00:00"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:golang.org/x/sync",
+      "ecosystem": "go",
+      "name": "golang.org/x/sync",
+      "current": "v0.22.0",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:golang.org/x/sys",
+      "ecosystem": "go",
+      "name": "golang.org/x/sys",
+      "current": "v0.47.0",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:golang.org/x/text",
+      "ecosystem": "go",
+      "name": "golang.org/x/text",
+      "current": "v0.41.0",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:golang.org/x/time",
+      "ecosystem": "go",
+      "name": "golang.org/x/time",
+      "current": "v0.15.0",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:google.golang.org/protobuf",
+      "ecosystem": "go",
+      "name": "google.golang.org/protobuf",
+      "current": "v1.36.11",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:gopkg.in/urfave/cli.v1",
+      "ecosystem": "go",
+      "name": "gopkg.in/urfave/cli.v1",
+      "current": "v1.20.0",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:gopkg.in/yaml.v2",
+      "ecosystem": "go",
+      "name": "gopkg.in/yaml.v2",
+      "current": "v2.4.0",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "Not looked up: Renovate skips this kind of dependency by default.",
+        "datasource": "go"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:xunit.runner.visualstudio",
+      "ecosystem": "nuget",
+      "name": "xunit.runner.visualstudio",
+      "current": "4.0.0",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 43
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:xunit",
+      "ecosystem": "nuget",
+      "name": "xunit",
+      "current": "2.9.3",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 42
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:System.IdentityModel.Tokens.Jwt",
+      "ecosystem": "nuget",
+      "name": "System.IdentityModel.Tokens.Jwt",
+      "current": "8.23.0",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 41
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:Scalar.AspNetCore",
+      "ecosystem": "nuget",
+      "name": "Scalar.AspNetCore",
+      "current": "2.17.9",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 40
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:OpenTelemetry.Instrumentation.Runtime",
+      "ecosystem": "nuget",
+      "name": "OpenTelemetry.Instrumentation.Runtime",
+      "current": "1.19.0",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 39
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:OpenTelemetry.Instrumentation.Http",
+      "ecosystem": "nuget",
+      "name": "OpenTelemetry.Instrumentation.Http",
+      "current": "1.19.0",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 38
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:OpenTelemetry.Instrumentation.AspNetCore",
+      "ecosystem": "nuget",
+      "name": "OpenTelemetry.Instrumentation.AspNetCore",
+      "current": "1.19.0",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 37
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:OpenTelemetry.Extensions.Hosting",
+      "ecosystem": "nuget",
+      "name": "OpenTelemetry.Extensions.Hosting",
+      "current": "1.19.1",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 36
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:OpenTelemetry.Exporter.OpenTelemetryProtocol",
+      "ecosystem": "nuget",
+      "name": "OpenTelemetry.Exporter.OpenTelemetryProtocol",
+      "current": "1.19.1",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 35
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:Microsoft.OpenApi",
+      "ecosystem": "nuget",
+      "name": "Microsoft.OpenApi",
+      "current": "2.12.2",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 34
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:Microsoft.NET.Test.Sdk",
+      "ecosystem": "nuget",
+      "name": "Microsoft.NET.Test.Sdk",
+      "current": "18.10.1",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 31
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:Microsoft.Extensions.ServiceDiscovery",
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.ServiceDiscovery",
+      "current": "10.10.0",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 30
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:Microsoft.Extensions.Http.Resilience",
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.Http.Resilience",
+      "current": "10.10.0",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 29
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:Microsoft.Extensions.Http",
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.Http",
+      "current": "10.0.12",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 28
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:Microsoft.AspNetCore.OpenApi",
+      "ecosystem": "nuget",
+      "name": "Microsoft.AspNetCore.OpenApi",
+      "current": "10.0.12",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 27
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:Microsoft.AspNetCore.Mvc.Testing",
+      "ecosystem": "nuget",
+      "name": "Microsoft.AspNetCore.Mvc.Testing",
+      "current": "10.0.12",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 26
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:Microsoft.AspNetCore.Authentication.JwtBearer",
+      "ecosystem": "nuget",
+      "name": "Microsoft.AspNetCore.Authentication.JwtBearer",
+      "current": "10.0.12",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 25
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:coverlet.collector",
+      "ecosystem": "nuget",
+      "name": "coverlet.collector",
+      "current": "10.0.1",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 24
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:Azure.Storage.Blobs",
+      "ecosystem": "nuget",
+      "name": "Azure.Storage.Blobs",
+      "current": "12.29.2",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 23
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:Azure.ResourceManager.Network",
+      "ecosystem": "nuget",
+      "name": "Azure.ResourceManager.Network",
+      "current": "1.17.0",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 22
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:Azure.ResourceManager.Compute",
+      "ecosystem": "nuget",
+      "name": "Azure.ResourceManager.Compute",
+      "current": "1.17.0",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 21
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:Azure.Monitor.Query",
+      "ecosystem": "nuget",
+      "name": "Azure.Monitor.Query",
+      "current": "1.7.1",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 20
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:Azure.Monitor.OpenTelemetry.AspNetCore",
+      "ecosystem": "nuget",
+      "name": "Azure.Monitor.OpenTelemetry.AspNetCore",
+      "current": "1.6.0",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 16
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:Azure.Identity",
+      "ecosystem": "nuget",
+      "name": "Azure.Identity",
+      "current": "1.21.0",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 15
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:Azure.Core",
+      "ecosystem": "nuget",
+      "name": "Azure.Core",
+      "current": "1.62.0",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 14
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:src/AppHost/AllowlistSeeder/AllowlistSeeder.csproj:Azure.Storage.Blobs",
+      "ecosystem": "nuget",
+      "name": "Azure.Storage.Blobs",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/AppHost/AllowlistSeeder/AllowlistSeeder.csproj",
+        "line": 10
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/AppHost/AppHost.csproj:Aspire.AppHost.Sdk",
+      "ecosystem": "nuget",
+      "name": "Aspire.AppHost.Sdk",
+      "current": "13.5.4",
+      "origin": "declared",
+      "location": {
+        "file": "src/AppHost/AppHost.csproj",
+        "line": 1
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "nuget:src/ControlPlane.Tests/ControlPlane.Tests.csproj:xunit.runner.visualstudio",
+      "ecosystem": "nuget",
+      "name": "xunit.runner.visualstudio",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/ControlPlane.Tests/ControlPlane.Tests.csproj",
+        "line": 16
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/ControlPlane.Tests/ControlPlane.Tests.csproj:xunit",
+      "ecosystem": "nuget",
+      "name": "xunit",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/ControlPlane.Tests/ControlPlane.Tests.csproj",
+        "line": 15
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/ControlPlane.Tests/ControlPlane.Tests.csproj:System.IdentityModel.Tokens.Jwt",
+      "ecosystem": "nuget",
+      "name": "System.IdentityModel.Tokens.Jwt",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/ControlPlane.Tests/ControlPlane.Tests.csproj",
+        "line": 14
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/ControlPlane.Tests/ControlPlane.Tests.csproj:Microsoft.NET.Test.Sdk",
+      "ecosystem": "nuget",
+      "name": "Microsoft.NET.Test.Sdk",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/ControlPlane.Tests/ControlPlane.Tests.csproj",
+        "line": 13
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/ControlPlane.Tests/ControlPlane.Tests.csproj:Microsoft.AspNetCore.Mvc.Testing",
+      "ecosystem": "nuget",
+      "name": "Microsoft.AspNetCore.Mvc.Testing",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/ControlPlane.Tests/ControlPlane.Tests.csproj",
+        "line": 12
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/ControlPlane.Tests/ControlPlane.Tests.csproj:coverlet.collector",
+      "ecosystem": "nuget",
+      "name": "coverlet.collector",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/ControlPlane.Tests/ControlPlane.Tests.csproj",
+        "line": 11
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/ControlPlane/ControlPlane.csproj:Scalar.AspNetCore",
+      "ecosystem": "nuget",
+      "name": "Scalar.AspNetCore",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/ControlPlane/ControlPlane.csproj",
+        "line": 21
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/ControlPlane/ControlPlane.csproj:Microsoft.OpenApi",
+      "ecosystem": "nuget",
+      "name": "Microsoft.OpenApi",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/ControlPlane/ControlPlane.csproj",
+        "line": 20
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/ControlPlane/ControlPlane.csproj:Microsoft.AspNetCore.OpenApi",
+      "ecosystem": "nuget",
+      "name": "Microsoft.AspNetCore.OpenApi",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/ControlPlane/ControlPlane.csproj",
+        "line": 16
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/ControlPlane/ControlPlane.csproj:Microsoft.AspNetCore.Authentication.JwtBearer",
+      "ecosystem": "nuget",
+      "name": "Microsoft.AspNetCore.Authentication.JwtBearer",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/ControlPlane/ControlPlane.csproj",
+        "line": 15
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/ControlPlane/ControlPlane.csproj:Azure.Storage.Blobs",
+      "ecosystem": "nuget",
+      "name": "Azure.Storage.Blobs",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/ControlPlane/ControlPlane.csproj",
+        "line": 14
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/EgressProxy.Client.Tests/EgressProxy.Client.Tests.csproj:xunit.runner.visualstudio",
+      "ecosystem": "nuget",
+      "name": "xunit.runner.visualstudio",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/EgressProxy.Client.Tests/EgressProxy.Client.Tests.csproj",
+        "line": 14
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/EgressProxy.Client.Tests/EgressProxy.Client.Tests.csproj:xunit",
+      "ecosystem": "nuget",
+      "name": "xunit",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/EgressProxy.Client.Tests/EgressProxy.Client.Tests.csproj",
+        "line": 13
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/EgressProxy.Client.Tests/EgressProxy.Client.Tests.csproj:Microsoft.NET.Test.Sdk",
+      "ecosystem": "nuget",
+      "name": "Microsoft.NET.Test.Sdk",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/EgressProxy.Client.Tests/EgressProxy.Client.Tests.csproj",
+        "line": 12
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/EgressProxy.Client.Tests/EgressProxy.Client.Tests.csproj:coverlet.collector",
+      "ecosystem": "nuget",
+      "name": "coverlet.collector",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/EgressProxy.Client.Tests/EgressProxy.Client.Tests.csproj",
+        "line": 11
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/EgressProxy.Client/EgressProxy.Client.csproj:Microsoft.Extensions.Http",
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.Http",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/EgressProxy.Client/EgressProxy.Client.csproj",
+        "line": 12
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/EgressProxy.Client/EgressProxy.Client.csproj:Azure.Identity",
+      "ecosystem": "nuget",
+      "name": "Azure.Identity",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/EgressProxy.Client/EgressProxy.Client.csproj",
+        "line": 11
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/Portal.Tests/Portal.Tests.csproj:xunit.runner.visualstudio",
+      "ecosystem": "nuget",
+      "name": "xunit.runner.visualstudio",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/Portal.Tests/Portal.Tests.csproj",
+        "line": 15
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/Portal.Tests/Portal.Tests.csproj:xunit",
+      "ecosystem": "nuget",
+      "name": "xunit",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/Portal.Tests/Portal.Tests.csproj",
+        "line": 14
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/Portal.Tests/Portal.Tests.csproj:Microsoft.NET.Test.Sdk",
+      "ecosystem": "nuget",
+      "name": "Microsoft.NET.Test.Sdk",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/Portal.Tests/Portal.Tests.csproj",
+        "line": 13
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/Portal.Tests/Portal.Tests.csproj:Microsoft.AspNetCore.Mvc.Testing",
+      "ecosystem": "nuget",
+      "name": "Microsoft.AspNetCore.Mvc.Testing",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/Portal.Tests/Portal.Tests.csproj",
+        "line": 12
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/Portal.Tests/Portal.Tests.csproj:coverlet.collector",
+      "ecosystem": "nuget",
+      "name": "coverlet.collector",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/Portal.Tests/Portal.Tests.csproj",
+        "line": 11
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/Portal/Portal.csproj:Azure.ResourceManager.Network",
+      "ecosystem": "nuget",
+      "name": "Azure.ResourceManager.Network",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/Portal/Portal.csproj",
+        "line": 22
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/Portal/Portal.csproj:Azure.ResourceManager.Compute",
+      "ecosystem": "nuget",
+      "name": "Azure.ResourceManager.Compute",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/Portal/Portal.csproj",
+        "line": 21
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/Portal/Portal.csproj:Azure.Monitor.Query",
+      "ecosystem": "nuget",
+      "name": "Azure.Monitor.Query",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/Portal/Portal.csproj",
+        "line": 20
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/Portal/Portal.csproj:Azure.Identity",
+      "ecosystem": "nuget",
+      "name": "Azure.Identity",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/Portal/Portal.csproj",
+        "line": 19
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/ServiceDefaults.Tests/ServiceDefaults.Tests.csproj:xunit.runner.visualstudio",
+      "ecosystem": "nuget",
+      "name": "xunit.runner.visualstudio",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/ServiceDefaults.Tests/ServiceDefaults.Tests.csproj",
+        "line": 20
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/ServiceDefaults.Tests/ServiceDefaults.Tests.csproj:xunit",
+      "ecosystem": "nuget",
+      "name": "xunit",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/ServiceDefaults.Tests/ServiceDefaults.Tests.csproj",
+        "line": 19
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/ServiceDefaults.Tests/ServiceDefaults.Tests.csproj:Microsoft.NET.Test.Sdk",
+      "ecosystem": "nuget",
+      "name": "Microsoft.NET.Test.Sdk",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/ServiceDefaults.Tests/ServiceDefaults.Tests.csproj",
+        "line": 18
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/ServiceDefaults.Tests/ServiceDefaults.Tests.csproj:coverlet.collector",
+      "ecosystem": "nuget",
+      "name": "coverlet.collector",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/ServiceDefaults.Tests/ServiceDefaults.Tests.csproj",
+        "line": 17
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/ServiceDefaults/ServiceDefaults.csproj:OpenTelemetry.Instrumentation.Runtime",
+      "ecosystem": "nuget",
+      "name": "OpenTelemetry.Instrumentation.Runtime",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/ServiceDefaults/ServiceDefaults.csproj",
+        "line": 22
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/ServiceDefaults/ServiceDefaults.csproj:OpenTelemetry.Instrumentation.Http",
+      "ecosystem": "nuget",
+      "name": "OpenTelemetry.Instrumentation.Http",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/ServiceDefaults/ServiceDefaults.csproj",
+        "line": 21
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/ServiceDefaults/ServiceDefaults.csproj:OpenTelemetry.Instrumentation.AspNetCore",
+      "ecosystem": "nuget",
+      "name": "OpenTelemetry.Instrumentation.AspNetCore",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/ServiceDefaults/ServiceDefaults.csproj",
+        "line": 20
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/ServiceDefaults/ServiceDefaults.csproj:OpenTelemetry.Extensions.Hosting",
+      "ecosystem": "nuget",
+      "name": "OpenTelemetry.Extensions.Hosting",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/ServiceDefaults/ServiceDefaults.csproj",
+        "line": 19
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/ServiceDefaults/ServiceDefaults.csproj:OpenTelemetry.Exporter.OpenTelemetryProtocol",
+      "ecosystem": "nuget",
+      "name": "OpenTelemetry.Exporter.OpenTelemetryProtocol",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/ServiceDefaults/ServiceDefaults.csproj",
+        "line": 18
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/ServiceDefaults/ServiceDefaults.csproj:Microsoft.Extensions.ServiceDiscovery",
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.ServiceDiscovery",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/ServiceDefaults/ServiceDefaults.csproj",
+        "line": 17
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/ServiceDefaults/ServiceDefaults.csproj:Microsoft.Extensions.Http.Resilience",
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.Http.Resilience",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/ServiceDefaults/ServiceDefaults.csproj",
+        "line": 16
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/ServiceDefaults/ServiceDefaults.csproj:Azure.Monitor.OpenTelemetry.AspNetCore",
+      "ecosystem": "nuget",
+      "name": "Azure.Monitor.OpenTelemetry.AspNetCore",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/ServiceDefaults/ServiceDefaults.csproj",
+        "line": 15
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "nuget:src/ServiceDefaults/ServiceDefaults.csproj:Azure.Core",
+      "ecosystem": "nuget",
+      "name": "Azure.Core",
+      "current": null,
+      "origin": "declared",
+      "location": {
+        "file": "src/ServiceDefaults/ServiceDefaults.csproj",
+        "line": 13
+      },
+      "lookup": {
+        "state": "skipped",
+        "reason": "The declared value isn't a version, so it can't be compared.",
+        "datasource": "nuget"
+      }
+    },
+    {
+      "id": "regex:mock-idp/Dockerfile:PyJWT",
+      "ecosystem": "pypi",
+      "name": "PyJWT",
+      "current": "2.15.0",
+      "origin": "declared",
+      "location": {
+        "file": "mock-idp/Dockerfile",
+        "line": 2
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "pypi",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:.github/workflows/ci.yml:github.com/rhysd/actionlint/cmd/actionlint",
+      "ecosystem": "go",
+      "name": "github.com/rhysd/actionlint/cmd/actionlint",
+      "current": "v1.7.12",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 139
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "go",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:.github/workflows/ci.yml:golang.org/x/vuln/cmd/govulncheck",
+      "ecosystem": "go",
+      "name": "golang.org/x/vuln/cmd/govulncheck",
+      "current": "v1.7.0",
+      "origin": "declared",
+      "location": {
+        "file": ".github/workflows/ci.yml",
+        "line": 165
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "go",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/bootstrap.bicep:avm/res/resources/resource-group",
+      "ecosystem": "docker",
+      "name": "avm/res/resources/resource-group",
+      "current": "0.4.4",
+      "origin": "declared",
+      "location": {
+        "file": "infra/bootstrap.bicep",
+        "line": 44
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/bootstrap.bicep:avm/res/storage/storage-account",
+      "ecosystem": "docker",
+      "name": "avm/res/storage/storage-account",
+      "current": "0.33.1",
+      "origin": "declared",
+      "location": {
+        "file": "infra/bootstrap.bicep",
+        "line": 62
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/bootstrap.bicep:avm/res/container-registry/registry",
+      "ecosystem": "docker",
+      "name": "avm/res/container-registry/registry",
+      "current": "0.13.1",
+      "origin": "declared",
+      "location": {
+        "file": "infra/bootstrap.bicep",
+        "line": 119
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/main.bicep:avm/res/resources/resource-group",
+      "ecosystem": "docker",
+      "name": "avm/res/resources/resource-group",
+      "current": "0.4.4",
+      "origin": "declared",
+      "location": {
+        "file": "infra/main.bicep",
+        "line": 151
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/main.bicep:avm/res/resources/resource-group#2",
+      "ecosystem": "docker",
+      "name": "avm/res/resources/resource-group",
+      "current": "0.4.4",
+      "origin": "declared",
+      "location": {
+        "file": "infra/main.bicep",
+        "line": 166
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/main.bicep:avm/res/network/private-dns-zone",
+      "ecosystem": "docker",
+      "name": "avm/res/network/private-dns-zone",
+      "current": "0.8.1",
+      "origin": "declared",
+      "location": {
+        "file": "infra/main.bicep",
+        "line": 326
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/hub-identity.bicep:avm/res/managed-identity/user-assigned-identity",
+      "ecosystem": "docker",
+      "name": "avm/res/managed-identity/user-assigned-identity",
+      "current": "0.6.0",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/hub-identity.bicep",
+        "line": 22
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/hub.bicep:avm/res/network/network-security-group",
+      "ecosystem": "docker",
+      "name": "avm/res/network/network-security-group",
+      "current": "0.5.3",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/hub.bicep",
+        "line": 172
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/hub.bicep:avm/res/network/virtual-network",
+      "ecosystem": "docker",
+      "name": "avm/res/network/virtual-network",
+      "current": "0.10.2",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/hub.bicep",
+        "line": 181
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/hub.bicep:avm/ptn/authorization/resource-role-assignment",
+      "ecosystem": "docker",
+      "name": "avm/ptn/authorization/resource-role-assignment",
+      "current": "0.1.2",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/hub.bicep",
+        "line": 288
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/hub.bicep:avm/ptn/authorization/resource-role-assignment#2",
+      "ecosystem": "docker",
+      "name": "avm/ptn/authorization/resource-role-assignment",
+      "current": "0.1.2",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/hub.bicep",
+        "line": 300
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/hub.bicep:avm/res/network/public-ip-prefix",
+      "ecosystem": "docker",
+      "name": "avm/res/network/public-ip-prefix",
+      "current": "0.8.0",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/hub.bicep",
+        "line": 312
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/hub.bicep:avm/res/storage/storage-account",
+      "ecosystem": "docker",
+      "name": "avm/res/storage/storage-account",
+      "current": "0.33.1",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/hub.bicep",
+        "line": 396
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/hub.bicep:avm/res/compute/virtual-machine-scale-set",
+      "ecosystem": "docker",
+      "name": "avm/res/compute/virtual-machine-scale-set",
+      "current": "0.11.1",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/hub.bicep",
+        "line": 494
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/mgmt-identity.bicep:avm/res/managed-identity/user-assigned-identity",
+      "ecosystem": "docker",
+      "name": "avm/res/managed-identity/user-assigned-identity",
+      "current": "0.6.0",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/mgmt-identity.bicep",
+        "line": 21
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/mgmt-identity.bicep:avm/res/managed-identity/user-assigned-identity#2",
+      "ecosystem": "docker",
+      "name": "avm/res/managed-identity/user-assigned-identity",
+      "current": "0.6.0",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/mgmt-identity.bicep",
+        "line": 35
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/mgmt-identity.bicep:avm/res/managed-identity/user-assigned-identity#3",
+      "ecosystem": "docker",
+      "name": "avm/res/managed-identity/user-assigned-identity",
+      "current": "0.6.0",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/mgmt-identity.bicep",
+        "line": 49
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/mgmt.bicep:avm/res/network/network-security-group",
+      "ecosystem": "docker",
+      "name": "avm/res/network/network-security-group",
+      "current": "0.5.3",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/mgmt.bicep",
+        "line": 358
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/mgmt.bicep:avm/res/network/virtual-network",
+      "ecosystem": "docker",
+      "name": "avm/res/network/virtual-network",
+      "current": "0.10.2",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/mgmt.bicep",
+        "line": 367
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/mgmt.bicep:avm/res/insights/component",
+      "ecosystem": "docker",
+      "name": "avm/res/insights/component",
+      "current": "0.8.0",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/mgmt.bicep",
+        "line": 387
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/mgmt.bicep:avm/res/app/managed-environment",
+      "ecosystem": "docker",
+      "name": "avm/res/app/managed-environment",
+      "current": "0.16.0",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/mgmt.bicep",
+        "line": 400
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/mgmt.bicep:avm/res/app/container-app",
+      "ecosystem": "docker",
+      "name": "avm/res/app/container-app",
+      "current": "0.23.0",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/mgmt.bicep",
+        "line": 478
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/mgmt.bicep:avm/res/app/container-app#2",
+      "ecosystem": "docker",
+      "name": "avm/res/app/container-app",
+      "current": "0.23.0",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/mgmt.bicep",
+        "line": 582
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/observability.bicep:avm/res/operational-insights/workspace",
+      "ecosystem": "docker",
+      "name": "avm/res/operational-insights/workspace",
+      "current": "0.16.1",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/observability.bicep",
+        "line": 47
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/observability.bicep:avm/res/insights/data-collection-rule",
+      "ecosystem": "docker",
+      "name": "avm/res/insights/data-collection-rule",
+      "current": "0.11.0",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/observability.bicep",
+        "line": 109
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/spoke-identity.bicep:avm/res/managed-identity/user-assigned-identity",
+      "ecosystem": "docker",
+      "name": "avm/res/managed-identity/user-assigned-identity",
+      "current": "0.6.0",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/spoke-identity.bicep",
+        "line": 15
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/spoke-identity.bicep:avm/res/managed-identity/user-assigned-identity#2",
+      "ecosystem": "docker",
+      "name": "avm/res/managed-identity/user-assigned-identity",
+      "current": "0.6.0",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/spoke-identity.bicep",
+        "line": 34
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/spoke.bicep:avm/res/network/network-security-group",
+      "ecosystem": "docker",
+      "name": "avm/res/network/network-security-group",
+      "current": "0.5.3",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/spoke.bicep",
+        "line": 244
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/spoke.bicep:avm/res/network/virtual-network",
+      "ecosystem": "docker",
+      "name": "avm/res/network/virtual-network",
+      "current": "0.10.2",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/spoke.bicep",
+        "line": 253
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/spoke.bicep:avm/res/insights/component",
+      "ecosystem": "docker",
+      "name": "avm/res/insights/component",
+      "current": "0.8.0",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/spoke.bicep",
+        "line": 273
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/spoke.bicep:avm/res/app/managed-environment",
+      "ecosystem": "docker",
+      "name": "avm/res/app/managed-environment",
+      "current": "0.16.0",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/spoke.bicep",
+        "line": 284
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:infra/modules/spoke.bicep:avm/res/app/container-app",
+      "ecosystem": "docker",
+      "name": "avm/res/app/container-app",
+      "current": "0.23.0",
+      "origin": "declared",
+      "location": {
+        "file": "infra/modules/spoke.bicep",
+        "line": 342
+      },
+      "lookup": {
+        "state": "current",
+        "datasource": "docker",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    },
+    {
+      "id": "regex:.devcontainer/Dockerfile:Aspire.Cli",
+      "ecosystem": "nuget",
+      "name": "Aspire.Cli",
+      "current": "13.5.4",
+      "origin": "declared",
+      "location": {
+        "file": ".devcontainer/Dockerfile",
+        "line": 4
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-10T08:54:34+00:00"
+      }
+    }
+  ],
+  "candidates": [
+    {
+      "dependency": "bicep:infra/main.bicep:Microsoft.Resources/resourceGroups",
+      "update_type": "major",
+      "version": "2024-07-01",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "bicep:infra/modules/hub.bicep:Microsoft.Network/loadBalancers",
+      "update_type": "major",
+      "version": "2024-10-01",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "bicep:infra/modules/peering.bicep:Microsoft.Network/virtualNetworks",
+      "update_type": "major",
+      "version": "2025-05-01",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "bicep:infra/modules/peering.bicep:Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+      "update_type": "major",
+      "version": "2025-05-01",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "devcontainer:.devcontainer/devcontainer.json:ghcr.io/devcontainers/features/docker-in-docker",
+      "update_type": "major",
+      "version": "4",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "devcontainer:.devcontainer/worktree/devcontainer.json:ghcr.io/devcontainers/features/docker-in-docker",
+      "update_type": "major",
+      "version": "4",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "dockerfile:.devcontainer/Dockerfile:mcr.microsoft.com/devcontainers/dotnet",
+      "update_type": "minor",
+      "version": "2.3.2-10.0-noble",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "dockerfile:mock-idp/Dockerfile:python",
+      "update_type": "minor",
+      "version": "3.14-alpine",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "dockerfile:proxy/Dockerfile:docker.io/library/golang",
+      "update_type": "minor",
+      "version": "1.27-alpine",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "dockerfile:src/ControlPlane/Dockerfile:mcr.microsoft.com/dotnet/sdk",
+      "update_type": "major",
+      "version": "11.0",
+      "classification": "held_by_policy",
+      "held_by": ".NET SDK and images stay on the .NET runtime's major"
+    },
+    {
+      "dependency": "dockerfile:src/ControlPlane/Dockerfile:mcr.microsoft.com/dotnet/aspnet",
+      "update_type": "major",
+      "version": "11.0",
+      "classification": "held_by_policy",
+      "held_by": ".NET SDK and images stay on the .NET runtime's major"
+    },
+    {
+      "dependency": "dockerfile:src/Portal/Dockerfile:mcr.microsoft.com/dotnet/sdk",
+      "update_type": "major",
+      "version": "11.0",
+      "classification": "held_by_policy",
+      "held_by": ".NET SDK and images stay on the .NET runtime's major"
+    },
+    {
+      "dependency": "dockerfile:src/Portal/Dockerfile:mcr.microsoft.com/dotnet/aspnet",
+      "update_type": "major",
+      "version": "11.0",
+      "classification": "held_by_policy",
+      "held_by": ".NET SDK and images stay on the .NET runtime's major"
+    },
+    {
+      "dependency": "dockerfile:src/SampleApp/Dockerfile:mcr.microsoft.com/dotnet/sdk",
+      "update_type": "major",
+      "version": "11.0",
+      "classification": "held_by_policy",
+      "held_by": ".NET SDK and images stay on the .NET runtime's major"
+    },
+    {
+      "dependency": "dockerfile:src/SampleApp/Dockerfile:mcr.microsoft.com/dotnet/aspnet",
+      "update_type": "major",
+      "version": "11.0",
+      "classification": "held_by_policy",
+      "held_by": ".NET SDK and images stay on the .NET runtime's major"
+    },
+    {
+      "dependency": "github-actions:.github/workflows/allowlist.yml:azure/login",
+      "update_type": "minor",
+      "version": "v3.1.0",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "github-actions:.github/workflows/ci.yml:go",
+      "update_type": "minor",
+      "version": "1.27",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "github-actions:.github/workflows/ci.yml:go#2",
+      "update_type": "minor",
+      "version": "1.27",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "github-actions:.github/workflows/deploy.yml:azure/login",
+      "update_type": "minor",
+      "version": "v3.1.0",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "github-actions:.github/workflows/images.yml:docker/setup-qemu-action",
+      "update_type": "minor",
+      "version": "v4.4.0",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "github-actions:.github/workflows/images.yml:docker/setup-buildx-action",
+      "update_type": "minor",
+      "version": "v4.4.1",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "github-actions:.github/workflows/release.yml:actions/upload-artifact",
+      "update_type": "digest",
+      "version": "v7",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "github-actions:.github/workflows/release.yml:go",
+      "update_type": "minor",
+      "version": "1.27",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "gomod:proxy/go.mod:go",
+      "update_type": "minor",
+      "version": "1.27.2",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "gomod:proxy/go.mod:github.com/Azure/azure-sdk-for-go/sdk/azcore",
+      "update_type": "patch",
+      "version": "v1.23.3",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "gomod:proxy/go.mod:github.com/Azure/azure-sdk-for-go/sdk/storage/azblob",
+      "update_type": "patch",
+      "version": "v1.8.2",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "nuget:Directory.Packages.props:xunit.runner.visualstudio",
+      "update_type": "patch",
+      "version": "4.0.1",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "nuget:Directory.Packages.props:Scalar.AspNetCore",
+      "update_type": "patch",
+      "version": "2.17.14",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "nuget:Directory.Packages.props:Microsoft.OpenApi",
+      "update_type": "major",
+      "version": "3.10.2",
+      "classification": "held_by_policy",
+      "held_by": "Microsoft.OpenApi stays on 2.x"
+    },
+    {
+      "dependency": "nuget:Directory.Packages.props:coverlet.collector",
+      "update_type": "minor",
+      "version": "10.1.0",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "nuget:Directory.Packages.props:Azure.Storage.Blobs",
+      "update_type": "minor",
+      "version": "12.30.1",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "nuget:Directory.Packages.props:Azure.Core",
+      "update_type": "minor",
+      "version": "1.63.0",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "nuget:src/AppHost/AppHost.csproj:Aspire.AppHost.Sdk",
+      "update_type": "minor",
+      "version": "13.6.1",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "regex:mock-idp/Dockerfile:PyJWT",
+      "update_type": "patch",
+      "version": "2.15.1",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "regex:.github/workflows/ci.yml:golang.org/x/vuln/cmd/govulncheck",
+      "update_type": "minor",
+      "version": "v1.8.0",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "regex:.devcontainer/Dockerfile:Aspire.Cli",
+      "update_type": "minor",
+      "version": "13.6.1",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "gomod:proxy/go.mod:golang.org/x/crypto",
+      "update_type": "minor",
+      "version": "v0.56.0",
+      "classification": "in_scope"
+    },
+    {
+      "dependency": "gomod:proxy/go.mod:golang.org/x/net",
+      "update_type": "minor",
+      "version": "v0.60.0",
+      "classification": "in_scope"
+    }
+  ],
+  "vulnerabilities": [
+    {
+      "advisory": "GO-2026-5932",
+      "dependency": "gomod:proxy/go.mod:golang.org/x/crypto",
+      "affected_version": "v0.55.0",
+      "fixed_version": null,
+      "source": "osv",
+      "reachability": "not_reachable"
+    },
+    {
+      "advisory": "GO-2026-6354",
+      "aliases": [
+        "CVE-2026-78662"
+      ],
+      "dependency": "gomod:proxy/go.mod:golang.org/x/crypto",
+      "affected_version": "v0.55.0",
+      "fixed_version": "v0.56.0",
+      "fix_reached_by_candidate": true,
+      "source": "osv",
+      "reachability": "not_reachable"
+    },
+    {
+      "advisory": "GO-2026-6355",
+      "aliases": [
+        "CVE-2026-56855"
+      ],
+      "dependency": "gomod:proxy/go.mod:golang.org/x/crypto",
+      "affected_version": "v0.55.0",
+      "fixed_version": "v0.56.0",
+      "fix_reached_by_candidate": true,
+      "source": "osv",
+      "reachability": "not_reachable"
+    },
+    {
+      "advisory": "GO-2026-6603",
+      "aliases": [
+        "CVE-2026-78659"
+      ],
+      "dependency": "gomod:proxy/go.mod:golang.org/x/net",
+      "affected_version": "v0.58.0",
+      "fixed_version": "v0.60.0",
+      "fix_reached_by_candidate": true,
+      "source": "osv",
+      "reachability": "reachable"
+    },
+    {
+      "advisory": "GO-2026-6610",
+      "aliases": [
+        "CVE-2026-78660"
+      ],
+      "dependency": "gomod:proxy/go.mod:golang.org/x/net",
+      "affected_version": "v0.58.0",
+      "fixed_version": "v0.60.0",
+      "fix_reached_by_candidate": true,
+      "source": "osv",
+      "reachability": "reachable"
+    },
+    {
+      "advisory": "GO-2026-6611",
+      "aliases": [
+        "CVE-2026-78669"
+      ],
+      "dependency": "gomod:proxy/go.mod:golang.org/x/net",
+      "affected_version": "v0.58.0",
+      "fixed_version": "v0.60.0",
+      "fix_reached_by_candidate": true,
+      "source": "osv",
+      "reachability": "reachable"
+    },
+    {
+      "advisory": "GO-2026-6612",
+      "aliases": [
+        "CVE-2026-78663"
+      ],
+      "dependency": "gomod:proxy/go.mod:golang.org/x/net",
+      "affected_version": "v0.58.0",
+      "fixed_version": "v0.60.0",
+      "fix_reached_by_candidate": true,
+      "source": "osv",
+      "reachability": "reachable"
+    },
+    {
+      "advisory": "GO-2026-6617",
+      "aliases": [
+        "CVE-2026-97032"
+      ],
+      "dependency": "gomod:proxy/go.mod:golang.org/x/net",
+      "affected_version": "v0.58.0",
+      "fixed_version": "v0.60.0",
+      "fix_reached_by_candidate": true,
+      "source": "osv",
+      "reachability": "reachable"
+    },
+    {
+      "advisory": "GO-2026-6599",
+      "aliases": [
+        "CVE-2026-94448"
+      ],
+      "dependency": "gomod:proxy/go.mod:go",
+      "affected_version": "1.25.14",
+      "fixed_version": "1.26.9",
+      "fix_reached_by_candidate": true,
+      "source": "govulncheck",
+      "reachability": "not_reachable"
+    },
+    {
+      "advisory": "GO-2026-6600",
+      "aliases": [
+        "CVE-2026-97030"
+      ],
+      "dependency": "gomod:proxy/go.mod:go",
+      "affected_version": "1.25.14",
+      "fixed_version": "1.26.9",
+      "fix_reached_by_candidate": true,
+      "source": "govulncheck",
+      "reachability": "not_reachable"
+    },
+    {
+      "advisory": "GO-2026-6603",
+      "aliases": [
+        "CVE-2026-78659"
+      ],
+      "dependency": "gomod:proxy/go.mod:go",
+      "affected_version": "1.25.14",
+      "fixed_version": "1.26.9",
+      "fix_reached_by_candidate": true,
+      "source": "govulncheck",
+      "reachability": "reachable"
+    },
+    {
+      "advisory": "GO-2026-6604",
+      "aliases": [
+        "CVE-2026-56857"
+      ],
+      "dependency": "gomod:proxy/go.mod:go",
+      "affected_version": "1.25.14",
+      "fixed_version": "1.26.9",
+      "fix_reached_by_candidate": true,
+      "source": "govulncheck",
+      "reachability": "not_reachable"
+    },
+    {
+      "advisory": "GO-2026-6605",
+      "aliases": [
+        "CVE-2026-56866"
+      ],
+      "dependency": "gomod:proxy/go.mod:go",
+      "affected_version": "1.25.14",
+      "fixed_version": "1.26.9",
+      "fix_reached_by_candidate": true,
+      "source": "govulncheck",
+      "reachability": "reachable"
+    },
+    {
+      "advisory": "GO-2026-6607",
+      "aliases": [
+        "CVE-2026-97031"
+      ],
+      "dependency": "gomod:proxy/go.mod:go",
+      "affected_version": "1.25.14",
+      "fixed_version": "1.26.9",
+      "fix_reached_by_candidate": true,
+      "source": "govulncheck",
+      "reachability": "reachable"
+    },
+    {
+      "advisory": "GO-2026-6608",
+      "aliases": [
+        "CVE-2026-94440"
+      ],
+      "dependency": "gomod:proxy/go.mod:go",
+      "affected_version": "1.25.14",
+      "fixed_version": "1.26.9",
+      "fix_reached_by_candidate": true,
+      "source": "govulncheck",
+      "reachability": "reachable"
+    },
+    {
+      "advisory": "GO-2026-6609",
+      "aliases": [
+        "CVE-2026-78667"
+      ],
+      "dependency": "gomod:proxy/go.mod:go",
+      "affected_version": "1.25.14",
+      "fixed_version": "1.26.9",
+      "fix_reached_by_candidate": true,
+      "source": "govulncheck",
+      "reachability": "not_reachable"
+    },
+    {
+      "advisory": "GO-2026-6610",
+      "aliases": [
+        "CVE-2026-78660"
+      ],
+      "dependency": "gomod:proxy/go.mod:go",
+      "affected_version": "1.25.14",
+      "fixed_version": "1.26.9",
+      "fix_reached_by_candidate": true,
+      "source": "govulncheck",
+      "reachability": "reachable"
+    },
+    {
+      "advisory": "GO-2026-6611",
+      "aliases": [
+        "CVE-2026-78669"
+      ],
+      "dependency": "gomod:proxy/go.mod:go",
+      "affected_version": "1.25.14",
+      "fixed_version": "1.26.9",
+      "fix_reached_by_candidate": true,
+      "source": "govulncheck",
+      "reachability": "reachable"
+    },
+    {
+      "advisory": "GO-2026-6612",
+      "aliases": [
+        "CVE-2026-78663"
+      ],
+      "dependency": "gomod:proxy/go.mod:go",
+      "affected_version": "1.25.14",
+      "fixed_version": "1.26.9",
+      "fix_reached_by_candidate": true,
+      "source": "govulncheck",
+      "reachability": "reachable"
+    },
+    {
+      "advisory": "GO-2026-6613",
+      "aliases": [
+        "CVE-2026-94439"
+      ],
+      "dependency": "gomod:proxy/go.mod:go",
+      "affected_version": "1.25.14",
+      "fixed_version": "1.26.9",
+      "fix_reached_by_candidate": true,
+      "source": "govulncheck",
+      "reachability": "reachable"
+    },
+    {
+      "advisory": "GO-2026-6617",
+      "aliases": [
+        "CVE-2026-97032"
+      ],
+      "dependency": "gomod:proxy/go.mod:go",
+      "affected_version": "1.25.14",
+      "fixed_version": "1.26.9",
+      "fix_reached_by_candidate": true,
+      "source": "govulncheck",
+      "reachability": "reachable"
+    }
+  ],
+  "dependabot_alerts": {
+    "ref": "main",
+    "commit": "e93d7062b075352f151f8e6b5a15f60913e7bd98",
+    "is_scanned_commit": true,
+    "read_at": "2026-10-10T08:56:37+00:00",
+    "alerts": []
+  },
+  "lifecycle": [
+    {
+      "product": "dotnet",
+      "line": "10",
+      "state": "supported",
+      "end_of_life": "2028-11-14",
+      "supported_lines": [
+        "8",
+        "9",
+        "10"
+      ],
+      "source": "https://endoflife.date/api/v1/products/dotnet",
+      "dependencies": [
+        "dockerfile:.devcontainer/Dockerfile:mcr.microsoft.com/devcontainers/dotnet",
+        "dockerfile:src/ControlPlane/Dockerfile:mcr.microsoft.com/dotnet/sdk",
+        "dockerfile:src/ControlPlane/Dockerfile:mcr.microsoft.com/dotnet/aspnet",
+        "dockerfile:src/Portal/Dockerfile:mcr.microsoft.com/dotnet/sdk",
+        "dockerfile:src/Portal/Dockerfile:mcr.microsoft.com/dotnet/aspnet",
+        "dockerfile:src/SampleApp/Dockerfile:mcr.microsoft.com/dotnet/sdk",
+        "dockerfile:src/SampleApp/Dockerfile:mcr.microsoft.com/dotnet/aspnet",
+        "github-actions:.github/workflows/ci.yml:dotnet-sdk"
+      ],
+      "locations": [
+        {
+          "file": ".devcontainer/Dockerfile",
+          "line": 1
+        },
+        {
+          "file": "src/ControlPlane/Dockerfile",
+          "line": 1
+        },
+        {
+          "file": "src/ControlPlane/Dockerfile",
+          "line": 16
+        },
+        {
+          "file": "src/Portal/Dockerfile",
+          "line": 1
+        },
+        {
+          "file": "src/Portal/Dockerfile",
+          "line": 16
+        },
+        {
+          "file": "src/SampleApp/Dockerfile",
+          "line": 1
+        },
+        {
+          "file": "src/SampleApp/Dockerfile",
+          "line": 17
+        },
+        {
+          "file": ".github/workflows/ci.yml",
+          "line": 183
+        }
+      ]
+    },
+    {
+      "product": "ubuntu",
+      "line": "24.04",
+      "state": "supported",
+      "end_of_life": "2029-05-31",
+      "supported_lines": [
+        "22.04",
+        "24.04",
+        "26.04"
+      ],
+      "source": "https://endoflife.date/api/v1/products/ubuntu",
+      "dependencies": [
+        "dockerfile:.devcontainer/Dockerfile:mcr.microsoft.com/devcontainers/dotnet"
+      ],
+      "locations": [
+        {
+          "file": ".devcontainer/Dockerfile",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "product": "python",
+      "line": "3.12",
+      "state": "supported",
+      "end_of_life": "2028-10-31",
+      "supported_lines": [
+        "3.11",
+        "3.12",
+        "3.13",
+        "3.14",
+        "3.15"
+      ],
+      "source": "https://endoflife.date/api/v1/products/python",
+      "dependencies": [
+        "dockerfile:mock-idp/Dockerfile:python"
+      ],
+      "locations": [
+        {
+          "file": "mock-idp/Dockerfile",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "product": "alpine-linux",
+      "line": "alpine",
+      "state": "unknown",
+      "reason": "'alpine' names no release: it follows whichever one the image was last built on.",
+      "dependencies": [
+        "dockerfile:mock-idp/Dockerfile:python",
+        "dockerfile:proxy/Dockerfile:docker.io/library/golang"
+      ],
+      "locations": [
+        {
+          "file": "mock-idp/Dockerfile",
+          "line": 1
+        },
+        {
+          "file": "proxy/Dockerfile",
+          "line": 5
+        }
+      ]
+    },
+    {
+      "product": "go",
+      "line": "1.25",
+      "state": "end_of_life",
+      "end_of_life": "2026-08-19",
+      "supported_lines": [
+        "1.26",
+        "1.27"
+      ],
+      "source": "https://endoflife.date/api/v1/products/go",
+      "dependencies": [
+        "dockerfile:proxy/Dockerfile:docker.io/library/golang",
+        "github-actions:.github/workflows/ci.yml:go",
+        "github-actions:.github/workflows/ci.yml:go#2",
+        "github-actions:.github/workflows/release.yml:go",
+        "gomod:proxy/go.mod:go"
+      ],
+      "locations": [
+        {
+          "file": "proxy/Dockerfile",
+          "line": 5
+        },
+        {
+          "file": ".github/workflows/ci.yml",
+          "line": 134
+        },
+        {
+          "file": ".github/workflows/ci.yml",
+          "line": 160
+        },
+        {
+          "file": ".github/workflows/release.yml",
+          "line": 86
+        },
+        {
+          "file": "proxy/go.mod",
+          "line": 3
+        }
+      ]
+    },
+    {
+      "product": "debian",
+      "line": "12",
+      "state": "supported",
+      "end_of_life": "2028-06-30",
+      "supported_lines": [
+        "12",
+        "13"
+      ],
+      "source": "https://endoflife.date/api/v1/products/debian",
+      "dependencies": [
+        "dockerfile:proxy/Dockerfile:gcr.io/distroless/static-debian12"
+      ],
+      "locations": [
+        {
+          "file": "proxy/Dockerfile",
+          "line": 26
+        }
+      ]
+    },
+    {
+      "product": "ubuntu",
+      "line": "latest",
+      "state": "unknown",
+      "reason": "No lifecycle mapping: the table in sdlc/lifecycle.py doesn't link it to an endoflife.date product.",
+      "dependencies": [
+        "github-actions:.github/workflows/allowlist.yml:ubuntu",
+        "github-actions:.github/workflows/ci.yml:ubuntu",
+        "github-actions:.github/workflows/ci.yml:ubuntu#2",
+        "github-actions:.github/workflows/ci.yml:ubuntu#3",
+        "github-actions:.github/workflows/ci.yml:ubuntu#4",
+        "github-actions:.github/workflows/ci.yml:ubuntu#5",
+        "github-actions:.github/workflows/ci.yml:ubuntu#6",
+        "github-actions:.github/workflows/ci.yml:ubuntu#7",
+        "github-actions:.github/workflows/ci.yml:ubuntu#8",
+        "github-actions:.github/workflows/ci.yml:ubuntu#9",
+        "github-actions:.github/workflows/deploy.yml:ubuntu",
+        "github-actions:.github/workflows/images.yml:ubuntu",
+        "github-actions:.github/workflows/release.yml:ubuntu"
+      ],
+      "locations": [
+        {
+          "file": ".github/workflows/allowlist.yml",
+          "line": 19
+        },
+        {
+          "file": ".github/workflows/ci.yml",
+          "line": 20
+        },
+        {
+          "file": ".github/workflows/ci.yml",
+          "line": 93
+        },
+        {
+          "file": ".github/workflows/ci.yml",
+          "line": 107
+        },
+        {
+          "file": ".github/workflows/ci.yml",
+          "line": 120
+        },
+        {
+          "file": ".github/workflows/ci.yml",
+          "line": 143
+        },
+        {
+          "file": ".github/workflows/ci.yml",
+          "line": 148
+        },
+        {
+          "file": ".github/workflows/ci.yml",
+          "line": 174
+        },
+        {
+          "file": ".github/workflows/ci.yml",
+          "line": 198
+        },
+        {
+          "file": ".github/workflows/ci.yml",
+          "line": 215
+        },
+        {
+          "file": ".github/workflows/deploy.yml",
+          "line": 23
+        },
+        {
+          "file": ".github/workflows/images.yml",
+          "line": 35
+        },
+        {
+          "file": ".github/workflows/release.yml",
+          "line": 25
+        }
+      ]
+    }
+  ],
+  "consistency": [
+    {
+      "dependency": "Go toolchain",
+      "compared": [
+        "dockerfile:proxy/Dockerfile:docker.io/library/golang",
+        "github-actions:.github/workflows/ci.yml:go",
+        "github-actions:.github/workflows/ci.yml:go#2",
+        "github-actions:.github/workflows/release.yml:go",
+        "gomod:proxy/go.mod:go"
+      ]
+    },
+    {
+      "dependency": ".NET",
+      "compared": [
+        "dockerfile:.devcontainer/Dockerfile:mcr.microsoft.com/devcontainers/dotnet",
+        "dockerfile:src/ControlPlane/Dockerfile:mcr.microsoft.com/dotnet/sdk",
+        "dockerfile:src/ControlPlane/Dockerfile:mcr.microsoft.com/dotnet/aspnet",
+        "dockerfile:src/Portal/Dockerfile:mcr.microsoft.com/dotnet/sdk",
+        "dockerfile:src/Portal/Dockerfile:mcr.microsoft.com/dotnet/aspnet",
+        "dockerfile:src/SampleApp/Dockerfile:mcr.microsoft.com/dotnet/sdk",
+        "dockerfile:src/SampleApp/Dockerfile:mcr.microsoft.com/dotnet/aspnet",
+        "github-actions:.github/workflows/ci.yml:dotnet-sdk"
+      ]
+    },
+    {
+      "dependency": "Aspire",
+      "compared": [
+        "nuget:src/AppHost/AppHost.csproj:Aspire.AppHost.Sdk",
+        "regex:.devcontainer/Dockerfile:Aspire.Cli"
+      ]
+    }
+  ],
+  "inconsistencies": [],
+  "cross_checks": [],
+  "parity": {
+    "baseline": "dependabot",
+    "looked_up_at": "2026-10-10T08:54:34+00:00",
+    "captured_at": "2026-10-10T08:56:37+00:00",
+    "complete": true,
+    "pull_requests": [
+      {
+        "number": 75,
+        "title": "ci: bump the actions-minor-patch group across 1 directory with 3 updates",
+        "head": "dd10dde1a2b8d937414aba270e670a67762ddbaf",
+        "base": "main",
+        "state": "current",
+        "updates": [
+          {
+            "name": "azure/login",
+            "ecosystem": "github-actions",
+            "directory": "/",
+            "group": "actions-minor-patch",
+            "update_type": "minor",
+            "update_type_derived": false,
+            "from_source": "text",
+            "from": "3.0.2",
+            "from_versions": [
+              {
+                "file": ".github/workflows/allowlist.yml",
+                "version": "3.0.2"
+              },
+              {
+                "file": ".github/workflows/deploy.yml",
+                "version": "3.0.2"
+              }
+            ],
+            "to": "3.1.0",
+            "dependencies": [
+              "github-actions:.github/workflows/allowlist.yml:azure/login",
+              "github-actions:.github/workflows/deploy.yml:azure/login"
+            ],
+            "result": "matched",
+            "candidate": "v3.1.0"
+          },
+          {
+            "name": "docker/setup-buildx-action",
+            "ecosystem": "github-actions",
+            "directory": "/",
+            "group": "actions-minor-patch",
+            "update_type": "minor",
+            "update_type_derived": false,
+            "from_source": "text",
+            "from": "4.3.0",
+            "from_versions": [
+              {
+                "file": ".github/workflows/images.yml",
+                "version": "4.3.0"
+              }
+            ],
+            "to": "4.4.1",
+            "dependencies": [
+              "github-actions:.github/workflows/images.yml:docker/setup-buildx-action"
+            ],
+            "result": "matched",
+            "candidate": "v4.4.1"
+          },
+          {
+            "name": "docker/setup-qemu-action",
+            "ecosystem": "github-actions",
+            "directory": "/",
+            "group": "actions-minor-patch",
+            "update_type": "minor",
+            "update_type_derived": false,
+            "from_source": "text",
+            "from": "4.3.0",
+            "from_versions": [
+              {
+                "file": ".github/workflows/images.yml",
+                "version": "4.3.0"
+              }
+            ],
+            "to": "4.4.0",
+            "dependencies": [
+              "github-actions:.github/workflows/images.yml:docker/setup-qemu-action"
+            ],
+            "result": "matched",
+            "candidate": "v4.4.0"
+          }
+        ]
+      },
+      {
+        "number": 76,
+        "title": "docker: bump the docker-minor-patch group across 2 directories with 2 updates",
+        "head": "bdf6a9d2e88e4bef3b4eca254962c7b94165c648",
+        "base": "main",
+        "state": "current",
+        "updates": [
+          {
+            "name": "library/golang",
+            "ecosystem": "docker",
+            "directory": "/proxy",
+            "group": "docker-minor-patch",
+            "update_type": "minor",
+            "update_type_derived": true,
+            "from_source": "text",
+            "from": "1.25-alpine",
+            "from_versions": [
+              {
+                "file": "proxy/Dockerfile",
+                "version": "1.25-alpine"
+              }
+            ],
+            "to": "1.27-alpine",
+            "dependencies": [
+              "dockerfile:proxy/Dockerfile:docker.io/library/golang"
+            ],
+            "result": "matched",
+            "candidate": "1.27-alpine"
+          },
+          {
+            "name": "python",
+            "ecosystem": "docker",
+            "directory": "/mock-idp",
+            "group": "docker-minor-patch",
+            "update_type": "minor",
+            "update_type_derived": true,
+            "from_source": "text",
+            "from": "3.12-alpine",
+            "from_versions": [
+              {
+                "file": "mock-idp/Dockerfile",
+                "version": "3.12-alpine"
+              }
+            ],
+            "to": "3.14-alpine",
+            "dependencies": [
+              "dockerfile:mock-idp/Dockerfile:python"
+            ],
+            "result": "matched",
+            "candidate": "3.14-alpine"
+          }
+        ]
+      },
+      {
+        "number": 99,
+        "title": "proxy: bump the gomod-minor-patch group across 1 directory with 2 updates",
+        "head": "5dde1e0ff3aa3b5ced29f9bfb3cae55b2a4686ba",
+        "base": "main",
+        "state": "current",
+        "updates": [
+          {
+            "name": "github.com/Azure/azure-sdk-for-go/sdk/azcore",
+            "ecosystem": "gomod",
+            "directory": "/proxy",
+            "group": "gomod-minor-patch",
+            "update_type": "patch",
+            "update_type_derived": false,
+            "from_source": "text",
+            "from": "1.23.1",
+            "from_versions": [
+              {
+                "file": "proxy/go.mod",
+                "version": "1.23.1"
+              }
+            ],
+            "to": "1.23.2",
+            "dependencies": [
+              "gomod:proxy/go.mod:github.com/Azure/azure-sdk-for-go/sdk/azcore"
+            ],
+            "result": "matched",
+            "candidate": "v1.23.3"
+          },
+          {
+            "name": "github.com/Azure/azure-sdk-for-go/sdk/storage/azblob",
+            "ecosystem": "gomod",
+            "directory": "/proxy",
+            "group": "gomod-minor-patch",
+            "update_type": "patch",
+            "update_type_derived": false,
+            "from_source": "text",
+            "from": "1.8.1",
+            "from_versions": [
+              {
+                "file": "proxy/go.mod",
+                "version": "1.8.1"
+              }
+            ],
+            "to": "1.8.2",
+            "dependencies": [
+              "gomod:proxy/go.mod:github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
+            ],
+            "result": "matched",
+            "candidate": "v1.8.2"
+          }
+        ]
+      }
+    ],
+    "scan_only": [
+      "bicep:infra/main.bicep:Microsoft.Resources/resourceGroups",
+      "bicep:infra/modules/hub.bicep:Microsoft.Network/loadBalancers",
+      "bicep:infra/modules/peering.bicep:Microsoft.Network/virtualNetworks",
+      "bicep:infra/modules/peering.bicep:Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+      "devcontainer:.devcontainer/devcontainer.json:ghcr.io/devcontainers/features/docker-in-docker",
+      "devcontainer:.devcontainer/worktree/devcontainer.json:ghcr.io/devcontainers/features/docker-in-docker",
+      "dockerfile:.devcontainer/Dockerfile:mcr.microsoft.com/devcontainers/dotnet",
+      "github-actions:.github/workflows/ci.yml:go",
+      "github-actions:.github/workflows/ci.yml:go#2",
+      "github-actions:.github/workflows/release.yml:actions/upload-artifact",
+      "github-actions:.github/workflows/release.yml:go",
+      "gomod:proxy/go.mod:go",
+      "gomod:proxy/go.mod:golang.org/x/crypto",
+      "gomod:proxy/go.mod:golang.org/x/net",
+      "nuget:Directory.Packages.props:xunit.runner.visualstudio",
+      "nuget:Directory.Packages.props:Scalar.AspNetCore",
+      "nuget:Directory.Packages.props:coverlet.collector",
+      "nuget:Directory.Packages.props:Azure.Storage.Blobs",
+      "nuget:Directory.Packages.props:Azure.Core",
+      "nuget:src/AppHost/AppHost.csproj:Aspire.AppHost.Sdk",
+      "regex:mock-idp/Dockerfile:PyJWT",
+      "regex:.github/workflows/ci.yml:golang.org/x/vuln/cmd/govulncheck",
+      "regex:.devcontainer/Dockerfile:Aspire.Cli"
+    ]
+  },
+  "gaps": [
+    {
+      "kind": "unsupported_source",
+      "subject": "infra/assets/cloud-init.yaml",
+      "reason": "cloud-init config that no scan adapter reads."
+    }
+  ]
+}

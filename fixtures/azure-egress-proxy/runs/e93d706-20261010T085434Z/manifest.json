@@ -1,0 +1,86 @@
+{
+  "command": "scripts/with-github-token.py uv run sdlc scan --repo alanta/azure-egress-proxy --ref main --trial-policy policies/azure-egress-proxy.renovate.json5",
+  "exit_status": 0,
+  "attempts": 1,
+  "subject": {
+    "repository": "alanta/azure-egress-proxy",
+    "ref": "main",
+    "commit": "e93d7062b075352f151f8e6b5a15f60913e7bd98"
+  },
+  "policy": {
+    "source": "trial",
+    "path": "policies/azure-egress-proxy.renovate.json5"
+  },
+  "scan_started": "2026-10-10T08:54:33Z",
+  "scan_finished": "2026-10-10T08:56:46Z",
+  "snapshots": {
+    "before": "2026-10-10T08:54:33Z",
+    "after": "2026-10-10T08:56:50Z"
+  },
+  "snapshot_scope": "9 branches with head SHAs; 77 PRs (all states) with head, updated_at, comment count, labels; the 30 most recent workflow runs; check runs on main's head",
+  "snapshot_diff": "identical apart from taken_at",
+  "tools": [
+    {
+      "name": "renovate",
+      "version": "44.145.1"
+    },
+    {
+      "name": "dotnet",
+      "version": "10.0"
+    },
+    {
+      "name": "go",
+      "version": "1.27"
+    },
+    {
+      "name": "osv-scanner",
+      "version": "2.6.0"
+    },
+    {
+      "name": "govulncheck",
+      "version": "v1.8.0"
+    },
+    {
+      "name": "go toolchain for govulncheck (proxy/go.mod, linux/amd64, linux/arm64)",
+      "version": "go1.25.14"
+    },
+    {
+      "name": "govulncheck database https://vuln.go.dev",
+      "version": "2026-10-08T22:31:09Z"
+    },
+    {
+      "name": "endoflife.date",
+      "version": "v1"
+    },
+    {
+      "name": "endoflife.date",
+      "version": "v1"
+    },
+    {
+      "name": "endoflife.date",
+      "version": "v1"
+    },
+    {
+      "name": "endoflife.date",
+      "version": "v1"
+    },
+    {
+      "name": "endoflife.date",
+      "version": "v1"
+    }
+  ],
+  "record_schema_version": "1",
+  "parity": {
+    "open_prs": [
+      75,
+      76,
+      99
+    ],
+    "matched": 7,
+    "held_by_policy": 0,
+    "missed": 0,
+    "stale": 0,
+    "scan_only": 23
+  },
+  "note": "Second run, after the go directive fix (PR #29). The first run is not kept. Original run directory: runs/alanta/azure-egress-proxy/e93d7062b075352f151f8e6b5a15f60913e7bd98/20261010T085434Z/ (git-ignored)."
+}
