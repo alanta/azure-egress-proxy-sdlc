@@ -106,12 +106,40 @@ def _consistency_problems(record: dict[str, Any]) -> list[str]:
         if state != "outdated" and dep_id in with_candidates:
             problems.append(f"$.candidates: {dep_id!r} has candidates but its lookup is {state!r}")
 
+    problems += _advisory_fix_problems(record)
     problems += _alert_problems(record)
     problems += _inconsistency_problems(record)
     problems += _lifecycle_problems(record)
 
     problems += _parity_problems(record)
 
+    return problems
+
+
+def _advisory_fix_problems(record: dict[str, Any]) -> list[str]:
+    """A candidate taken from an advisory is a fixed version of one; an entry nobody looked up
+    has only such candidates."""
+    problems = []
+    fixed = {
+        (v["dependency"], v["fixed_version"])
+        for v in record["vulnerabilities"]
+        if v["fixed_version"] is not None
+    }
+    from_advisory = {
+        d["id"] for d in record["inventory"] if d["lookup"].get("basis") == "advisory_fix"
+    }
+    for i, c in enumerate(record["candidates"]):
+        path = f"$.candidates[{i}]"
+        if c.get("basis") == "advisory_fix":
+            if (c["dependency"], c["version"]) not in fixed:
+                problems.append(
+                    f"{path}: no advisory on {c['dependency']!r} names {c['version']!r} as fixed"
+                )
+        elif c["dependency"] in from_advisory:
+            problems.append(
+                f"{path}: {c['dependency']!r} wasn't looked up, so its candidates come from "
+                "advisories, yet this one doesn't say so"
+            )
     return problems
 
 
@@ -137,6 +165,23 @@ def _parity_problems(record: dict[str, Any]) -> list[str]:
             problems.append(
                 f"$.parity.pull_requests[{i}]: {pr['state']} needs a reason and no updates"
             )
+        if pr["state"] in ("current", "partly_stale", "stale"):
+            stale = sum(u["result"] == "stale" for u in pr["updates"])
+            fits = {
+                "current": stale == 0,
+                "partly_stale": 0 < stale < len(pr["updates"]),
+                "stale": 0 < stale == len(pr["updates"]),
+            }
+            if not fits[pr["state"]]:
+                problems.append(
+                    f"$.parity.pull_requests[{i}]: {pr['state']}, yet {stale} of its "
+                    f"{len(pr['updates'])} updates are stale"
+                )
+            if (pr["state"] == "current") == ("reason" in pr):
+                problems.append(
+                    f"$.parity.pull_requests[{i}]: a reason must name its stale updates exactly "
+                    "when it has some"
+                )
         for j, update in enumerate(pr["updates"]):
             path = f"$.parity.pull_requests[{i}].updates[{j}]"
             if (update["result"] == "held_by_policy") != ("held_by" in update):

@@ -321,6 +321,29 @@ def update_type(current: Version, target: Version) -> str:
     return "patch"
 
 
+def go_require_line(checkout: Path | None, file: str, name: str) -> int | None:
+    """The go.mod line requiring the module: `require name v1.2.3`, or a line of a `require (`
+    block, also written `require(`. A module path may be quoted. A `replace` or `exclude`
+    block can name the same module, so its lines don't count."""
+    if checkout is None or not (checkout / file).exists():
+        return None
+    block = None
+    for number, line in enumerate((checkout / file).read_text().splitlines(), 1):
+        words = [w.strip('"`') for w in line.split("//", 1)[0].split()]
+        if not words:
+            continue
+        if block is not None:
+            if words[0] == ")":
+                block = None
+            elif block == "require" and words[0] == name:
+                return number
+        elif words[0].endswith("(") or words[-1] == "(":
+            block = words[0].removesuffix("(")
+        elif words[0] == "require" and words[1:2] == [name]:
+            return number
+    return None
+
+
 def line_naming(checkout: Path | None, file: str, name: str) -> int | None:
     """The line a `packages.lock.json` entry for the package starts on."""
     if checkout is None or not (checkout / file).exists():

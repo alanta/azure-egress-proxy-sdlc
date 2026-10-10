@@ -46,7 +46,6 @@ def find(output, inventory, report, checkout=None, **options):
         inventory.dependencies,
         inventory.candidates,
         indirect=indirect(report),
-        looked_up_at=AT,
         checkout=checkout,
         **options,
     )
@@ -94,9 +93,18 @@ def test_x_crypto_advisories_refer_to_renovates_indirect_entry(scanned, inventor
     }
     assert crypto["origin"] == "declared"
     assert crypto["current"] == "v0.55.0"
-    assert crypto["lookup"] == {"state": "outdated", "datasource": "go", "looked_up_at": AT}
+    # No registry was asked: the lookup says so and claims no lookup time.
+    assert crypto["lookup"] == {
+        "state": "outdated",
+        "basis": "advisory_fix",
+        "reason": "Not looked up in a registry: lock-file-only dependencies and indirect "
+        "modules aren't. Its candidate is the fixed version its advisories name, which may not "
+        "be the newest.",
+        "datasource": "go",
+    }
     (candidate,) = [c for c in found.candidates if c["dependency"] == CRYPTO]
     assert candidate["version"] == "v0.56.0"
+    assert candidate["basis"] == "advisory_fix"
 
     advisories = {v["advisory"]: v for v in found.vulnerabilities if v["dependency"] == CRYPTO}
     assert set(advisories) == {"GO-2026-5932", "GO-2026-6354", "GO-2026-6355"}
@@ -203,8 +211,10 @@ def test_an_undeclared_transitive_package_gets_one_locked_entry_per_lock_file(in
             "update_type": "patch",
             "version": "2.0.1",
             "classification": "in_scope",
+            "basis": "advisory_fix",
         }
     ]
+    assert entry["lookup"]["basis"] == "advisory_fix"
     assert len(found.vulnerabilities) == 1
 
 
@@ -298,7 +308,7 @@ def test_an_indirect_module_renovate_looked_up_keeps_its_lookup(report):
     looked_up = {"state": "outdated", "datasource": "go", "looked_up_at": AT}
     entry, candidates = go_entry(looked_up, "v0.57.0")
     output = output_for("proxy/go.mod", "golang.org/x/crypto", "0.55.0", CRYPTO_FIX, ecosystem="Go")
-    found = osv.findings(output, [entry], candidates, indirect={entry["id"]}, looked_up_at=AT)
+    found = osv.findings(output, [entry], candidates, indirect={entry["id"]})
     assert (found.dependencies, found.updated, found.candidates) == ([], [], [])
     (vulnerability,) = found.vulnerabilities
     assert vulnerability["dependency"] == entry["id"]
@@ -311,10 +321,52 @@ def test_an_indirect_module_renovate_looked_up_gets_the_fix_its_candidates_miss(
         {"state": "outdated", "datasource": "go", "looked_up_at": AT}, "v0.55.1"
     )
     output = output_for("proxy/go.mod", "golang.org/x/crypto", "0.55.0", CRYPTO_FIX, ecosystem="Go")
-    found = osv.findings(output, [entry], candidates, indirect={entry["id"]}, looked_up_at=AT)
+    found = osv.findings(output, [entry], candidates, indirect={entry["id"]})
     assert found.updated == []
     assert [c["version"] for c in found.candidates] == ["v0.56.0"]
+    # Renovate's lookup stands; only the added fix says it came from the advisory.
+    assert [c["basis"] for c in found.candidates] == ["advisory_fix"]
+    assert "basis" not in entry["lookup"]
     assert found.vulnerabilities[0]["fix_reached_by_candidate"] is True
+
+
+def advisory_fix_record(record_from, inventory, report, scanned):
+    found = find(scanned, inventory, report)
+    record = record_from(merged(inventory, found))
+    record["vulnerabilities"] = found.vulnerabilities
+    return record
+
+
+def test_a_candidate_from_an_advisory_must_be_a_fixed_version_it_names(
+    scanned, inventory, report, record_from
+):
+    record = advisory_fix_record(record_from, inventory, report, scanned)
+    assert validate_record(record) == []
+    (candidate,) = [c for c in record["candidates"] if c["dependency"] == CRYPTO]
+    candidate["version"] = "v0.57.0"
+    assert validate_record(record) == [
+        f"$.candidates[{record['candidates'].index(candidate)}]: no advisory on {CRYPTO!r} "
+        "names 'v0.57.0' as fixed"
+    ]
+
+
+def test_an_entry_not_looked_up_has_only_candidates_from_advisories(
+    scanned, inventory, report, record_from
+):
+    record = advisory_fix_record(record_from, inventory, report, scanned)
+    (candidate,) = [c for c in record["candidates"] if c["dependency"] == CRYPTO]
+    del candidate["basis"]
+    assert validate_record(record) == [
+        f"$.candidates[{record['candidates'].index(candidate)}]: {CRYPTO!r} wasn't looked up, "
+        "so its candidates come from advisories, yet this one doesn't say so"
+    ]
+
+
+def test_a_lookup_from_advisories_claims_no_lookup_time(scanned, inventory, report, record_from):
+    record = advisory_fix_record(record_from, inventory, report, scanned)
+    (entry,) = [d for d in record["inventory"] if d["id"] == CRYPTO]
+    entry["lookup"]["looked_up_at"] = AT
+    assert validate_record(record) != []
 
 
 def test_versions_match_at_any_precision(report):
@@ -333,7 +385,7 @@ def test_versions_match_at_any_precision(report):
         "2.1.0",
         advisory("GHSA-p", "Pkg", "NuGet", [{"introduced": "0"}, {"fixed": "2.2.0"}]),
     )
-    found = osv.findings(output, [entry], [], indirect=set(), looked_up_at=AT)
+    found = osv.findings(output, [entry], [], indirect=set())
     assert found.dependencies == []
     assert found.vulnerabilities[0]["dependency"] == entry["id"]
 
@@ -408,7 +460,7 @@ def test_a_locked_go_module_is_found_on_its_go_mod_line(tmp_path):
     )
     vuln = advisory("GO-1", "golang.org/x/crypto", "Go", [{"introduced": "0"}])
     output = output_for("proxy/go.mod", "golang.org/x/crypto", "0.55.0", vuln, ecosystem="Go")
-    found = osv.findings(output, [], [], indirect=set(), looked_up_at=AT, checkout=tmp_path)
+    found = osv.findings(output, [], [], indirect=set(), checkout=tmp_path)
     (entry,) = found.dependencies
     assert entry["location"] == {"file": "proxy/go.mod", "line": 6}
     assert entry["lookup"]["state"] == "skipped"
@@ -496,7 +548,7 @@ def test_a_last_affected_version_is_judged_against_candidates(record_from):
         "1.2.0",
         advisory("GHSA-l", "Pkg", "NuGet", [{"introduced": "0"}, {"last_affected": "1.2.3"}]),
     )
-    found = osv.findings(output, [entry], [candidate], indirect=set(), looked_up_at=AT)
+    found = osv.findings(output, [entry], [candidate], indirect=set())
     (vulnerability,) = found.vulnerabilities
     assert vulnerability["fixed_version"] is None
     assert vulnerability["last_affected"] == "1.2.3"

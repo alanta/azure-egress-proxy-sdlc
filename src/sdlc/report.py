@@ -149,6 +149,20 @@ def origin(dep: dict[str, Any]) -> str:
     return f"locked, {LOCKED_BECAUSE[dep['locked_because']]}"
 
 
+ADVISORY_FIX = "advisory_fix"
+
+
+def candidate_version(c: dict[str, Any]) -> str:
+    """A candidate's version, marked when it is an advisory's fix rather than a lookup's find."""
+    return text(c["version"]) + (" (advisory's fix)" if c.get("basis") == ADVISORY_FIX else "")
+
+
+def lookup_state(dep: dict[str, Any]) -> str:
+    if dep["lookup"].get("basis") == ADVISORY_FIX:
+        return f"{dep['lookup']['state']}, from advisories"
+    return dep["lookup"]["state"]
+
+
 def label(state: str) -> str:
     return state.replace("_", " ")
 
@@ -311,6 +325,12 @@ def _unknowns(view: _View) -> list[str]:
         found.append(
             f"{skipped} of {dependencies(len(inventory))} not looked up (skipped), with the "
             "reasons under Not looked up"
+        )
+    from_advisories = sum(d["lookup"].get("basis") == ADVISORY_FIX for d in inventory)
+    if from_advisories:
+        found.append(
+            f"whether newer versions exist for {dependencies(from_advisories)} not looked up, "
+            "whose only candidates are their advisories' fixes"
         )
     reach = sum(v["reachability"] == "unknown" for v in record["vulnerabilities"])
     if reach:
@@ -634,7 +654,7 @@ def _parity(view: _View) -> list[str]:
         for dep_id in sorted(scan_only, key=lambda i: _by_ecosystem(view.entries[i])):
             dep = view.entries[dep_id]
             in_scope = [
-                text(c["version"])
+                candidate_version(c)
                 for c in view.candidates.get(dep_id, [])
                 if c["classification"] == "in_scope"
             ]
@@ -710,6 +730,7 @@ def _candidates(view: _View) -> list[str]:
         f"{dependencies(len(view.candidates))}: {len(in_scope)} in scope, "
         f"{len(held)} held by policy. Dependencies whose lookup failed have no candidates; "
         "they are listed under Inventory as unknown.",
+        *_advisory_fixes_note(candidates),
         "",
         "### Held by policy",
         "",
@@ -732,6 +753,17 @@ def _candidates(view: _View) -> list[str]:
     return lines
 
 
+def _advisory_fixes_note(candidates: list[dict[str, Any]]) -> list[str]:
+    fixes = sum(c.get("basis") == ADVISORY_FIX for c in candidates)
+    if not fixes:
+        return []
+    return [
+        "",
+        f"{count(fixes, 'candidate is', 'candidates are')} marked advisory's fix: the fixed "
+        "version an advisory names, not a version a lookup found, so a newer one may exist.",
+    ]
+
+
 def _candidate_row(view: _View, c: dict[str, Any]) -> list[str]:
     dep = view.entries[c["dependency"]]
     return [
@@ -739,7 +771,7 @@ def _candidate_row(view: _View, c: dict[str, Any]) -> list[str]:
         view.where(c["dependency"]),
         version(dep["current"]),
         label(c["update_type"]),
-        text(c["version"]),
+        candidate_version(c),
     ]
 
 
@@ -799,11 +831,13 @@ def _inventory(view: _View) -> list[str]:
     origins = Counter(d["origin"] for d in inventory)
     because = Counter(d.get("locked_because") for d in inventory)
     ecosystems = Counter(d["ecosystem"] for d in inventory)
+    from_advisories = sum(d["lookup"].get("basis") == ADVISORY_FIX for d in inventory)
     lines = [
         "## Inventory",
         "",
         f"{dependencies(len(inventory))}: "
         + ", ".join(f"{states[s]} {s}" for s in ("outdated", "current", "unknown", "skipped"))
+        + (f" ({from_advisories} outdated by their advisories alone)" if from_advisories else "")
         + f"; {origins['declared']} declared in a manifest, {origins['locked']} resolved in a "
         f"lock file ({because['drift']} lock drift: the lock file resolves an older version "
         f"than the repository declares; {because['vulnerability']} added because an advisory "
@@ -811,19 +845,25 @@ def _inventory(view: _View) -> list[str]:
         "",
         "By ecosystem: " + ", ".join(f"{text(e)} {n}" for e, n in sorted(ecosystems.items())) + ".",
     ]
-    unlooked = [d for d in inventory if d["lookup"]["state"] in ("unknown", "skipped")]
+    unlooked = [
+        d
+        for d in inventory
+        if d["lookup"]["state"] in ("unknown", "skipped")
+        or d["lookup"].get("basis") == ADVISORY_FIX
+    ]
     lines += ["", "### Not looked up", ""]
     if unlooked:
         lines.append(
             "An unknown lookup failed: whether the dependency is up to date is unknown. A "
-            "skipped one wasn't attempted, for the reason given."
+            "skipped one wasn't attempted, for the reason given. One outdated from advisories "
+            "wasn't looked up either: its candidates are the fixed versions its advisories name."
         )
         lines.append("")
         lines += table(
             ["Lookup", "Dependency", "Where", "Current", "Reason"],
             [
                 [
-                    d["lookup"]["state"],
+                    lookup_state(d),
                     text(d["name"]),
                     location(d["location"]),
                     version(d["current"]),
@@ -844,7 +884,7 @@ def _inventory(view: _View) -> list[str]:
     for d in ordered:
         candidates = view.candidates.get(d["id"], [])
         found = ", ".join(
-            text(c["version"]) + (" (held)" if c["classification"] == "held_by_policy" else "")
+            candidate_version(c) + (" (held)" if c["classification"] == "held_by_policy" else "")
             for c in candidates
         )
         rows.append(
@@ -854,7 +894,7 @@ def _inventory(view: _View) -> list[str]:
                 version(d["current"]),
                 origin(d),
                 text(d["ecosystem"]),
-                d["lookup"]["state"],
+                lookup_state(d),
                 found,
             ]
         )

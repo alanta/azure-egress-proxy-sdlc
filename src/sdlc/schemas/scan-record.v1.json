@@ -302,24 +302,56 @@
             "reason": {
               "type": "string",
               "minLength": 1
+            },
+            "basis": {
+              "enum": [
+                "advisory_fix"
+              ],
+              "description": "advisory_fix: no registry was asked; the dependency's candidates are the fixed versions its advisories name, which need not be the newest. Absent when the state comes from a lookup."
             }
           },
-          "if": {
-            "properties": {
-              "state": {
-                "enum": [
-                  "unknown",
-                  "skipped"
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "state": {
+                    "enum": [
+                      "unknown",
+                      "skipped"
+                    ]
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "state",
+                  "reason"
                 ]
               }
+            },
+            {
+              "if": {
+                "required": [
+                  "basis"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "state": {
+                    "const": "outdated"
+                  }
+                },
+                "required": [
+                  "reason"
+                ],
+                "not": {
+                  "required": [
+                    "looked_up_at"
+                  ]
+                }
+              }
             }
-          },
-          "then": {
-            "required": [
-              "state",
-              "reason"
-            ]
-          }
+          ]
         }
       },
       "if": {
@@ -378,6 +410,12 @@
           "type": "string",
           "minLength": 1,
           "description": "The policy rule that holds the candidate."
+        },
+        "basis": {
+          "enum": [
+            "advisory_fix"
+          ],
+          "description": "advisory_fix: the fixed version an advisory on the dependency names, added by the scan rather than found by a lookup, so not necessarily the newest version. Absent when a lookup found it, or, for lock drift, when it is the version the repository declares."
         }
       },
       "if": {
@@ -861,11 +899,12 @@
               "state": {
                 "enum": [
                   "current",
+                  "partly_stale",
                   "stale",
                   "unparseable",
                   "not_compared"
                 ],
-                "description": "not_compared: it targets another branch than the scanned revision's."
+                "description": "Staleness is judged per update. current: none of its updates is stale; partly_stale: some are, and the others are compared; stale: all are; not_compared: it targets another branch than the scanned revision's."
               },
               "reason": {
                 "type": "string",

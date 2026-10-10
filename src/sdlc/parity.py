@@ -4,8 +4,9 @@ Dependabot is the baseline the scan has to match (design decision 7). Only PRs t
 branch the scanned revision is on are compared, or the default branch when the scan names a
 commit or tag; others are listed as `not_compared`, with the reason. Each update a compared,
 parsed PR proposes gets one result:
-- `stale`: the PR was made for another revision. None of its from-versions is what the scanned
-  revision has, so it says nothing about this scan and counts neither as matched nor missed;
+- `stale`: the update was made for another revision. None of its from-versions is what the
+  scanned revision has, so it says nothing about this scan and counts neither as matched nor
+  missed;
 - `held_by_policy`: the subject's policy holds the version Dependabot proposes, by a rule the
   record names;
 - `matched`: every entry the update changes, in every file that still has its from-version,
@@ -13,7 +14,9 @@ parsed PR proposes gets one result:
 - `missed`: anything else, with the reasons the scan knows, per entry: the dependency isn't in
   the inventory in a file it changes (never `stale`, since that may be the scan's blind spot),
   its lookup was unknown or skipped, it has no candidate, or only older or held ones.
-A PR with a stale update is stale itself: Dependabot would have to rebase it first.
+Staleness is judged per update, so one stale update in a grouped PR doesn't hide the others:
+they are compared on their own. The PR is `stale` only when all its updates are, `partly_stale`
+when some are, with the reason naming them, and `current` when none is.
 
 An update is tied to inventory entries by ecosystem (Dependabot's package-ecosystem to
 Renovate's managers and datasources), by name (NuGet ids ignore case; an image is its path,
@@ -55,7 +58,8 @@ Versions compare per ecosystem: image tags by their numbers, only with the same 
 neither); PyPI by PEP 440; everything else as SemVer, with a leading `v`, any number of parts,
 and NuGet's prerelease labels in any case. Versions that can't be compared don't match.
 
-Scan-only candidates are in-scope candidates of entries no compared update maps to. The
+Scan-only candidates are in-scope candidates of entries no compared update maps to; a stale
+update doesn't count, since it was made for another revision. The
 record lists their dependencies, one id per entry, however many candidates it has.
 
 Parity holds only at a point in time, so the section records when the PRs were read and when
@@ -146,15 +150,21 @@ def compare(
         updates = []
         for update in pull.updates:
             result, mapped, doubts = _compare(update, index, policy)
-            covered |= set(mapped)
+            if result["result"] != "stale":
+                # A stale update says nothing about this revision, so it covers nothing.
+                covered |= set(mapped)
             reasons += [f"#{pull.number}: {doubt}" for doubt in doubts]
             updates.append(result)
         stale = [u["name"] for u in updates if u["result"] == "stale"]
-        if stale:
-            reason = f"the revision no longer has what it updates for {', '.join(stale)}"
+        if not stale:
+            compared.append(_pull(pull, "current", updates))
+            continue
+        reason = f"the revision no longer has what it updates for {', '.join(stale)}"
+        if len(stale) == len(updates):
             compared.append(_pull(pull, "stale", updates, reason))
         else:
-            compared.append(_pull(pull, "current", updates))
+            reason += "; its other updates are compared on their own"
+            compared.append(_pull(pull, "partly_stale", updates, reason))
 
     in_scope = {c["dependency"] for c in candidates if c["classification"] == "in_scope"}
     section |= {"captured_at": pulls.read_at, "complete": not reasons}
@@ -568,7 +578,11 @@ def _why_missed(update: Update, dep: dict[str, Any], index: _Index) -> str:
     if not own:
         found = " (its lookup found it current)" if lookup["state"] == "current" else ""
         return f"the scan has no candidate in {file}{found}"
-    return _candidates_fall_short(update, file, own)
+    short = _candidates_fall_short(update, file, own)
+    if lookup.get("basis") == "advisory_fix":
+        # Its candidates are advisories' fixes: nothing asked whether newer versions exist.
+        short += " (it wasn't looked up; its candidates are its advisories' fixes)"
+    return short
 
 
 def _candidates_fall_short(update: Update, file: str, own: list[dict[str, Any]]) -> str:

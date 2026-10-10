@@ -16,7 +16,7 @@ What `sdlc scan` reads, where its versions come from, and what it knowingly leav
 | `pip install pkg==x.y.z` in Dockerfiles | Scan rule: PyPI | 1 | 1 | |
 | `go install module@vX.Y.Z` in workflows, scripts and Dockerfiles | Scan rule: Go proxy | 1 | 1 | govulncheck at `064aa09`; actionlint on later commits. |
 | The devcontainer's Aspire CLI `ARG` | Subject's trial policy | 1 | 1 | Specific to this repository, so it lives with its policy. |
-| Lock files lagging behind a declared version | `dotnet list package --include-transitive` | 7 lock files | 7 | See [Locked entries](#locked-entries). |
+| Lock files lagging behind a declared version | `dotnet list package --include-transitive` | 5 lock files | 7 | See [Locked entries](#locked-entries). |
 
 **"Scan rule"** means a Renovate custom manager in `src/sdlc/config/scan.renovate.json5`, applied to every subject. Rules that describe one subject's own files belong in that subject's policy instead.
 
@@ -26,7 +26,7 @@ The same file has one package rule: the `go` directive gets `rangeStrategy: "bum
 
 Every entry has exactly one state:
 - **`current`:** looked up, and nothing newer exists.
-- **`outdated`:** looked up, and at least one candidate exists. The scan reports the newest patch, minor and major version separately.
+- **`outdated`:** looked up, and at least one candidate exists. The scan reports the newest patch, minor and major version separately. An entry listed only for its advisories isn't looked up: its lookup and candidate say they come from the advisory (`basis: advisory_fix`), with no lookup time, and the candidate is the fixed version, which need not be the newest.
 - **`unknown`:** the lookup failed: no token, rate limited, an unreachable registry, or an update type the scan doesn't handle. It is never reported as current.
 - **`skipped`:** deliberately not looked up, with the reason. Three reasons occur:
   - the value isn't a version (51 entries);
@@ -41,11 +41,11 @@ Every entry has exactly one state:
 
 Dependencies that appear only in lock files are listed in two cases (design decision 3a):
 1. **Drift:** a lock file resolves an older version than the repository declares for the package, for example a central version. The candidate is the declared version.
-2. **A known vulnerability** concerns the dependency, and no inventory entry exists for it in that file, such as a transitive NuGet package. The candidate is the newest fixed version among its advisories; without a fix, the entry is listed but skipped.
+2. **A known vulnerability** concerns the dependency, and no inventory entry exists for it in that file, such as a transitive NuGet package. The candidate is the newest fixed version among its advisories, marked `advisory_fix`, because no registry was asked; without a fix, the entry is listed but skipped.
 
-At `064aa09` there are seven drift entries, all caused by central versions not applying to transitive packages. AppHost locks `Microsoft.Extensions.Http` 10.0.11 while 10.0.12 is declared, which is Dependabot's #77. `EgressProxy.Client` and its tests lock Azure.Core 1.53.0 while 1.62.0 is declared. About 270 other outdated transitive packages and indirect modules are not listed.
+At `064aa09` there are seven drift entries in five lock files, all caused by central versions not applying to transitive packages. AppHost locks `Microsoft.Extensions.Http` 10.0.11 while 10.0.12 is declared, which is Dependabot's #77. `EgressProxy.Client` and its tests lock Azure.Core 1.53.0 while 1.62.0 is declared. About 270 other outdated transitive packages and indirect modules are not listed.
 
-Indirect Go modules are an exception: Renovate already lists them, and skips them by default. An advisory on one refers to Renovate's entry, which keeps its id and location and gets the fixed version as its candidate, so each module is listed once. If the policy has Renovate look indirect modules up, the entry keeps Renovate's lookup and candidates, and gets the fixed version only when none of its candidates reaches it. At `064aa09` that's `golang.org/x/crypto` v0.55.0 and `golang.org/x/net` v0.58.0.
+Indirect Go modules are an exception: Renovate already lists them, and skips them by default. An advisory on one refers to Renovate's entry, which keeps its id and location and gets the fixed version as its candidate, marked `advisory_fix` like its lookup, so each module is listed once. If the policy has Renovate look indirect modules up, the entry keeps Renovate's lookup and candidates, and gets the fixed version only when none of its candidates reaches it. At `064aa09` that's `golang.org/x/crypto` v0.55.0 and `golang.org/x/net` v0.58.0.
 
 ## Vulnerabilities
 
@@ -140,7 +140,7 @@ Every PR captured on 2026-10-07 parses. #98 needs its diff: Dependabot writes on
 ### Parity
 
 Only PRs that target the scanned branch are compared, or the default branch when the scan names a commit or tag; the others are listed as `not_compared`, with the branch they target. Each update is compared with the inventory of the scanned revision (`src/sdlc/parity.py`). It maps to the entries of its ecosystem (Dependabot's `nuget`, `gomod`, `docker`, `github-actions`, `devcontainers` and a few more, to Renovate's managers and datasources) with its name (NuGet ids ignore case; an image is its path, so `library/golang` is `golang` and Dependabot's `dotnet/sdk` is `mcr.microsoft.com/dotnet/sdk`, with Docker Hub preferred when several registries have the path; an action is its `owner/repo`) in the files its diff changes. A lock file follows the entry that governs it: a version in the project file next to it, or else the nearest `Directory.Packages.props` above it. Then, in this order:
-- **`stale`:** every file it changes that the scan can read has another version than the one it replaces. Each file is checked against the revision's version in that same file; for a lock file, the version it resolves in the checkout, which may be above the declared one. A file the revision doesn't have at all is different: the PR was made for a revision that has it, as #75 was once rebased onto a `main` with `images.yml`. A file the scan can't check, such as one in a submodule, is unknown, not different. So #98's Azure.Core is current: 1.62.0 centrally, and 1.53.0 and 1.55.0 in the drifted lock files. When only some files differ, the update isn't stale, those files are left out, and the reason names them. A PR with a stale update is stale.
+- **`stale`:** every file it changes that the scan can read has another version than the one it replaces. Each file is checked against the revision's version in that same file; for a lock file, the version it resolves in the checkout, which may be above the declared one. A file the revision doesn't have at all is different: the PR was made for a revision that has it, as #75 was once rebased onto a `main` with `images.yml`. A file the scan can't check, such as one in a submodule, is unknown, not different. So #98's Azure.Core is current: 1.62.0 centrally, and 1.53.0 and 1.55.0 in the drifted lock files. When only some files differ, the update isn't stale, those files are left out, and the reason names them. Staleness is judged per update, so a grouped PR's other updates are still compared: the PR is `stale` when all its updates are, `partly_stale` when some are, and `current` otherwise.
 - **`held by policy`:** per entry, Renovate's classification of a candidate at Dependabot's version decides; without one, the policy's hold rules are evaluated on the update itself, with the version as the entry writes it (`v1.23.2` in go.mod). The record names the rules. A rule the scan can't evaluate makes the comparison incomplete.
 - **`matched`:** every entry in every file it changes, apart from the stale ones, has an in-scope candidate at the same or a newer version; a lock file's entry may be covered by the entry that governs it. Image tags compare by their numbers, and only with the same suffix: `1.27-alpine` matches `1.27-alpine` or `1.28-alpine`, not `1.27` or `1.27-bookworm`. NuGet's prerelease labels ignore case. The record names the closest candidate.
 - **`missed`:** otherwise, with a reason per entry that falls short: not in the inventory in a file it changes, an unknown or skipped lookup, no candidate, or only older or held ones.

@@ -64,7 +64,7 @@ The scan SHALL report every dependency-bearing file or declaration it detects bu
 
 ### Requirement: Find update candidates
 
-For each inventoried dependency the scan SHALL report the newest available version for each update type the source offers (patch, minor, major), with the source it queried and the time of the lookup. A failed lookup SHALL be reported as `unknown` with the reason, never as up to date.
+For each inventoried dependency the scan SHALL report the newest available version for each update type the source offers (patch, minor, major), with the source it queried and the time of the lookup. A failed lookup SHALL be reported as `unknown` with the reason, never as up to date. A dependency listed only because an advisory concerns it is not looked up: its candidate SHALL be the advisory's fixed version, and the record SHALL say that the candidate came from the advisory, not from a registry lookup.
 
 #### Scenario: Newer minor and major versions exist
 
@@ -80,6 +80,11 @@ For each inventoried dependency the scan SHALL report the newest available versi
 
 - **WHEN** the lookup succeeds and no newer version exists
 - **THEN** the dependency is reported as current, citing the lookup
+
+#### Scenario: A dependency is listed only for its advisory
+
+- **WHEN** an advisory with a fixed version concerns a dependency that only appears in a lock file or as an indirect module
+- **THEN** the dependency's candidate is the fixed version, marked as coming from the advisory, and its lookup records no registry query or lookup time
 
 ### Requirement: Classify candidates by the subject's update policy
 
@@ -183,8 +188,8 @@ The scan SHALL compare its candidates with the updates proposed by open Dependab
 
 #### Scenario: A Dependabot PR is stale for the revision
 
-- **WHEN** a PR's from-version matches neither the version declared nor a version resolved in a lock file of the scanned revision
-- **THEN** the PR is reported as `stale` and not counted as matched or missed
+- **WHEN** an update a PR proposes has a from-version that matches neither the version declared nor a version resolved in a lock file of the scanned revision
+- **THEN** that update is reported as `stale` and not counted as matched or missed, the PR's other updates are compared on their own, and the PR is reported as `stale` only when all its updates are
 
 #### Scenario: The scan finds more than Dependabot
 

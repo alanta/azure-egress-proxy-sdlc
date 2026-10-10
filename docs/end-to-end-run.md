@@ -6,7 +6,7 @@ Command: `scripts/with-github-token.py uv run sdlc scan --repo alanta/azure-egre
 
 ## What the first run found
 
-The first run of this task, a few minutes earlier, recorded `go.mod`'s `go 1.25.14` directive as `current` with no candidate, although Go 1.26 and 1.27 exist. As a result the 13 standard library advisories said no in-scope candidate reaches the fix (1.26.9). That was a bug in the scan, found by checking the known gaps against the record. PR #29 fixed it, and this run was repeated on top of that fix. The first run is not kept; only this one is committed as evidence.
+The first run of this task, a few minutes earlier, recorded `go.mod`'s `go 1.25.14` directive as `current` with no candidate, although Go 1.26 and 1.27 exist. As a result the 13 standard library advisories said no in-scope candidate reaches the fix (1.26.9). That was a bug in the scan, found by checking the known gaps against the record. PR #29 fixed it, and this run was repeated on top of that fix. The first run is not kept; only this one is committed as evidence. The committed run also predates the verification fixes, so its record shows the advisory-fix entries (`golang.org/x/crypto`, `golang.org/x/net`) as looked up and without lines.
 
 ## Result
 

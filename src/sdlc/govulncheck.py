@@ -238,7 +238,6 @@ def apply(
     *,
     toolchains: dict[str, str],
     indirect: set[str],
-    looked_up_at: str,
     classify: Callable[[list[dict], dict[str, dict]], list[dict]] = lambda c, fields: c,
     checkout: Path | None = None,
 ) -> Reachability:
@@ -336,7 +335,6 @@ def apply(
                 dependencies + locked,
                 candidates + new_candidates,
                 indirect=indirect,
-                looked_up_at=looked_up_at,
                 classify=classify,
                 checkout=checkout,
             )

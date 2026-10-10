@@ -419,3 +419,63 @@ def test_locked_entries_say_why_the_scan_lists_them(record):
     assert "| golang.org/x/text | v0.3.7 | locked, added for an advisory | go |" in rendered
     assert "2 resolved in a lock file (1 lock drift: " in rendered
     assert "1 added because an advisory concerns a package" in rendered
+
+
+def test_a_candidate_from_an_advisory_reads_as_its_fix_not_as_a_lookups_find(record):
+    entry = {
+        "id": "locked:proxy/go.mod:golang.org/x/text",
+        "ecosystem": "go",
+        "name": "golang.org/x/text",
+        "current": "v0.3.7",
+        "origin": "locked",
+        "locked_because": "vulnerability",
+        "location": {"file": "proxy/go.mod", "line": 12},
+        "lookup": {
+            "state": "outdated",
+            "basis": "advisory_fix",
+            "reason": "Not looked up in a registry.",
+            "datasource": "go",
+        },
+    }
+    record["inventory"].append(entry)
+    record["candidates"].append(
+        {
+            "dependency": entry["id"],
+            "update_type": "patch",
+            "version": "v0.3.8",
+            "classification": "in_scope",
+            "basis": "advisory_fix",
+        }
+    )
+    record["vulnerabilities"].append(
+        {
+            "advisory": "GO-2022-1059",
+            "dependency": entry["id"],
+            "affected_version": "v0.3.7",
+            "fixed_version": "v0.3.8",
+            "fix_reached_by_candidate": True,
+            "source": "osv",
+            "reachability": "unknown",
+        }
+    )
+    record["parity"]["scan_only"].append(entry["id"])
+    assert validate_record(record) == []
+    rendered = render(record)
+    assert "| golang.org/x/text | proxy/go.mod:12 | v0.3.7 | patch | v0.3.8 (advisory's fix) |" in (
+        rendered
+    )
+    assert "1 candidate is marked advisory's fix: the fixed version an advisory names" in rendered
+    assert (
+        "| outdated, from advisories | golang.org/x/text | proxy/go.mod:12 | v0.3.7 | "
+        "Not looked up in a registry. |"
+    ) in rendered
+    assert (
+        "| locked, added for an advisory | go | outdated, from advisories | "
+        "v0.3.8 (advisory's fix) |"
+    ) in rendered
+    assert "(1 outdated by their advisories alone)" in rendered
+    assert (
+        "whether newer versions exist for 1 dependency not looked up, whose only candidates "
+        "are their advisories' fixes"
+    ) in rendered
+    assert "| v0.3.7 | v0.3.8 (advisory's fix) |" in rendered  # scan only
