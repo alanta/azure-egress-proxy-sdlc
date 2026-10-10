@@ -351,10 +351,26 @@ def _rule_holds(
     candidate: dict[str, Any], dependencies: dict[str, dict[str, Any]], policy: Policy
 ) -> list[str]:
     """The rules holding a candidate Renovate never saw, evaluated by the scan alone."""
-    dep = {**dependencies[candidate["dependency"]], "updateType": candidate["update_type"]}
+    return holds(
+        dependencies[candidate["dependency"]],
+        candidate["update_type"],
+        candidate["version"],
+        policy,
+    )
+
+
+def holds(
+    fields: dict[str, Any], update_type: str | None, version: str, policy: Policy
+) -> list[str]:
+    """The rules that hold this version of a dependency, evaluated by the scan alone.
+
+    `fields` are the ones Renovate matches on (depName, packageName, datasource, manager).
+    An `allowedVersions` the scan can't evaluate for the version raises PolicyError.
+    """
+    dep = {**fields, "updateType": update_type}
     holding = _disabling(dep, policy)
     for hold in _limits(dep, policy):
-        if not allowed(candidate["version"], hold.rule["allowedVersions"]):
+        if not allowed(version, hold.rule["allowedVersions"]):
             holding.append(hold.name)
     return holding
 

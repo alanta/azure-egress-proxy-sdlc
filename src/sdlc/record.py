@@ -39,8 +39,9 @@ def _consistency_problems(record: dict[str, Any]) -> list[str]:
         for i, d in enumerate(record["inventory"])
         if "looked_up_at" in d["lookup"]
     ]
-    if "captured_at" in record["parity"]:
-        timestamps.append(("$.parity.captured_at", record["parity"]["captured_at"]))
+    for key in ("captured_at", "looked_up_at"):
+        if key in record["parity"]:
+            timestamps.append((f"$.parity.{key}", record["parity"][key]))
     timestamps += [
         (f"$.tools[{i}].fetched_at", t["fetched_at"])
         for i, t in enumerate(record["tools"])
@@ -77,6 +78,12 @@ def _consistency_problems(record: dict[str, Any]) -> list[str]:
         (f"$.parity.scan_only[{i}]", dep_id)
         for i, dep_id in enumerate(record["parity"]["scan_only"])
     ]
+    references += [
+        (f"$.parity.pull_requests[{i}].updates[{j}].dependencies[{k}]", dep_id)
+        for i, pr in enumerate(record["parity"]["pull_requests"])
+        for j, update in enumerate(pr["updates"])
+        for k, dep_id in enumerate(update.get("dependencies", []))
+    ]
     alerts = record.get("dependabot_alerts", {}).get("alerts", [])
     references += [
         (f"$.dependabot_alerts.alerts[{i}].dependency", a["dependency"])
@@ -103,10 +110,39 @@ def _consistency_problems(record: dict[str, Any]) -> list[str]:
     problems += _inconsistency_problems(record)
     problems += _lifecycle_problems(record)
 
-    pull_requests = record["parity"]["pull_requests"]
-    if any(pr["state"] == "unparseable" for pr in pull_requests) and record["parity"]["complete"]:
-        problems.append("$.parity.complete: true although a pull request is unparseable")
+    problems += _parity_problems(record)
 
+    return problems
+
+
+def _parity_problems(record: dict[str, Any]) -> list[str]:
+    """Incomplete exactly when a reason says why; unread PRs are never an empty list."""
+    problems = []
+    parity = record["parity"]
+    pull_requests = parity["pull_requests"]
+    if any(pr["state"] == "unparseable" for pr in pull_requests) and parity["complete"]:
+        problems.append("$.parity.complete: true although a pull request is unparseable")
+    if parity["complete"] == ("reasons" in parity):
+        problems.append("$.parity.reasons: must be given exactly when the comparison is incomplete")
+    unread = any(
+        g["kind"] == "unavailable_source" and g["subject"] == "dependabot-prs"
+        for g in record["gaps"]
+    )
+    if unread and (parity["complete"] or pull_requests or parity["scan_only"]):
+        problems.append(
+            "$.parity: a gap says the PRs weren't read, yet it compares or lists something"
+        )
+    for i, pr in enumerate(pull_requests):
+        if pr["state"] in ("not_compared", "unparseable") and (pr["updates"] or "reason" not in pr):
+            problems.append(
+                f"$.parity.pull_requests[{i}]: {pr['state']} needs a reason and no updates"
+            )
+        for j, update in enumerate(pr["updates"]):
+            path = f"$.parity.pull_requests[{i}].updates[{j}]"
+            if (update["result"] == "held_by_policy") != ("held_by" in update):
+                problems.append(f"{path}: held_by must be given exactly when held by policy")
+            if (update["result"] == "matched") != ("candidate" in update):
+                problems.append(f"{path}: candidate must be given exactly when matched")
     return problems
 
 

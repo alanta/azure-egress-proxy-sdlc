@@ -17,10 +17,11 @@ from sdlc import (
     lifecycle,
     native,
     osv,
+    parity,
     policy,
     renovate,
 )
-from sdlc.subject import Revision, SubjectError, checkout, resolve
+from sdlc.subject import Revision, SubjectError, checkout, default_branch, resolve
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -142,8 +143,23 @@ def scan(repository: str, ref: str, trial_policy: Path | None = None) -> int:
                 revision, token, reached.vulnerabilities, inventory.dependencies, gaps
             )
             # Read in the same run as the lookups: parity holds only at a point in time.
-            # Task 5.2 classifies them against the candidates; until then they stay here.
             pulls = read_pull_requests(revision, token, gaps)
+            # Renovate's own fields for its entries; the scan's locked entries by their name.
+            fields = osv.match_fields(inventory.dependencies) | renovate.match_fields(baseline)
+            compared = parity.compare(
+                pulls,
+                inventory.dependencies,
+                inventory.candidates,
+                fields,
+                subject_policy,
+                looked_up_at=looked_up_at,
+                # PRs for another branch propose changes to another revision.
+                branch=revision.branch or default_branch(revision.repository),
+                checkout=path,
+                unavailable=next(
+                    (g["reason"] for g in gaps if g["subject"] == dependabot_prs.SUBJECT), None
+                ),
+            )
             declared = consistency.check(baseline, inventory.dependencies)
             gaps += declared.gaps
             lifecycles = lifecycle.check(
@@ -193,9 +209,9 @@ def scan(repository: str, ref: str, trial_policy: Path | None = None) -> int:
     print_alerts(alerts, vulnerabilities, revision.commit)
     print_consistency(declared, inventory.dependencies)
     print_lifecycle(lifecycles)
-    print_pull_requests(pulls)
-    # Parity's classification arrives with task 5.2; a record without it
-    # would claim there was nothing to find.
+    print_pull_requests(pulls, compared)
+    print_scan_only(compared, inventory.dependencies, fields)
+    # The record and its report arrive with task 6.1.
     print("error: the scan stops here for now; no record written", file=sys.stderr)
     return 1
 
@@ -276,21 +292,51 @@ def read_pull_requests(
         return None
 
 
-def print_pull_requests(pulls: dependabot_prs.PullRequests | None) -> None:
+RESULTS = {
+    "matched": "matched",
+    "held_by_policy": "held by policy",
+    "missed": "missed",
+    "stale": "stale",
+}
+
+
+def print_pull_requests(pulls: dependabot_prs.PullRequests | None, compared: dict) -> None:
     if pulls is None:
-        print("Dependabot PRs: unavailable (see its gap), so nothing is known about them")
+        print(
+            "Dependabot PRs: unavailable (see its gap), so nothing is known about them, "
+            "and nothing is compared with them"
+        )
         return
-    parsed = [p for p in pulls.pull_requests if p.state == "parsed"]
-    unparseable = [p for p in pulls.pull_requests if p.state == "unparseable"]
+    states = Counter(p["state"] for p in compared["pull_requests"])
+    parsed = [
+        p
+        for p, r in zip(pulls.pull_requests, compared["pull_requests"], strict=True)
+        if r["state"] in ("current", "stale")
+    ]
+    other = f"; {states['not_compared']} for another branch" if states["not_compared"] else ""
     print(
-        f"Dependabot PRs: {len(pulls.pull_requests)} open (read at {pulls.read_at}); "
+        f"Dependabot PRs: {len(pulls.pull_requests)} open (read at {pulls.read_at}){other}; "
         f"{len(parsed)} parsed, proposing {sum(len(p.updates) for p in parsed)} updates; "
-        f"{len(unparseable)} unparseable"
-        + (", so the comparison with them is incomplete" if unparseable else "")
+        f"{states['unparseable']} unparseable"
+        + (", so the comparison with them is incomplete" if states["unparseable"] else "")
     )
-    for pull in parsed:
-        print(f"  #{pull.number} at {pull.head[:7]} on {pull.base}: {pull.title}")
-        for u in pull.updates:
+    results = Counter(u["result"] for p in compared["pull_requests"] for u in p["updates"])
+    print(
+        f"parity with Dependabot (lookups at {compared['looked_up_at']}): "
+        + ", ".join(f"{results[r]} {label}" for r, label in RESULTS.items())
+        + ("" if compared["complete"] else "; incomplete")
+    )
+    for pull, result in zip(pulls.pull_requests, compared["pull_requests"], strict=True):
+        if result["state"] == "not_compared":
+            print(f"  not compared #{pull.number} at {pull.head[:7]}: {result['reason']}")
+            continue
+        if pull.state == "unparseable":
+            print(f"  unparseable #{pull.number} at {pull.head[:7]}: {pull.reason}")
+            continue
+        print(
+            f"  #{pull.number} at {pull.head[:7]} on {pull.base}, {result['state']}: {pull.title}"
+        )
+        for u, r in zip(pull.updates, result["updates"], strict=True):
             kind = u.update_type or "unknown type"
             if u.update_type_derived:
                 kind += ", derived"
@@ -300,9 +346,44 @@ def print_pull_requests(pulls: dependabot_prs.PullRequests | None) -> None:
             old = u.from_version or " or ".join(sorted({f.version for f in u.from_versions}))
             if u.from_source == "diff":
                 old += f" (from the diff of {len(u.from_versions)} files)"
-            print(f"    {u.name} {old} -> {u.to_version} ({kind}) {where}")
-    for pull in unparseable:
-        print(f"  unparseable #{pull.number} at {pull.head[:7]}: {pull.reason}")
+            detail = {
+                "matched": f"scan has {r.get('candidate')}",
+                "held_by_policy": r.get("held_by"),
+            }.get(r["result"])
+            detail = "; ".join(d for d in (detail, r.get("reason")) if d)
+            print(
+                f"    {RESULTS[r['result']]}: {u.name} {old} -> {u.to_version} ({kind}) {where}"
+                + (f": {detail}" if detail else "")
+            )
+    for reason in compared.get("reasons", []):
+        print(f"  incomplete: {reason}")
+
+
+def print_scan_only(compared: dict, dependencies: list[dict], fields: dict) -> None:
+    """Scan-only entries by manager, with their distinct names: the list itself is long."""
+    if "captured_at" not in compared:  # the PRs weren't read
+        print("scan only: unknown, without Dependabot's PRs")
+        return
+    entries = {d["id"]: d for d in dependencies}
+    groups: dict[str, list[str]] = {}
+    for dep_id in compared["scan_only"]:
+        dep = entries[dep_id]
+        group = fields[dep_id]["manager"] + (" lock files" if dep["origin"] == "locked" else "")
+        groups.setdefault(group, []).append(dep["name"])
+    print(
+        f"scan only: {entries_count(len(compared['scan_only']))} with in-scope candidates that "
+        "no open Dependabot PR proposes"
+    )
+    for group, names in sorted(groups.items()):
+        distinct = list(dict.fromkeys(names))
+        shown = ", ".join(distinct[:5]) + (
+            f" and {len(distinct) - 5} more" if len(distinct) > 5 else ""
+        )
+        print(f"  {group}: {entries_count(len(names))}: {shown}")
+
+
+def entries_count(count: int) -> str:
+    return f"{count} {'entry' if count == 1 else 'entries'}"
 
 
 def print_consistency(result: consistency.Result, dependencies: list[dict]) -> None:

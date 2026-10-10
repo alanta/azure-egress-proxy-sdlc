@@ -162,6 +162,7 @@
   "parity": {
     "baseline": "dependabot",
     "captured_at": "2026-10-08T09:00:05+00:00",
+    "looked_up_at": "2026-10-08T09:00:00+00:00",
     "complete": true,
     "pull_requests": [
       {
@@ -173,7 +174,7 @@
             "from": "10.0.11",
             "to": "10.0.12",
             "result": "missed",
-            "reason": "The lock file resolves 10.0.11 through the Aspire SDK; the scan reads declared versions only."
+            "reason": "the scan has no candidate in src/AppHost/packages.lock.json"
           }
         ]
       }

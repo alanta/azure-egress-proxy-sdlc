@@ -48,7 +48,7 @@ def offline_scan(monkeypatch, tmp_path):
 
     @contextmanager
     def fake_checkout(revision):
-        (tmp_path / "checkout").mkdir()
+        (tmp_path / "checkout").mkdir(exist_ok=True)
         yield tmp_path / "checkout"
 
     def nuget(*updates):
@@ -68,7 +68,7 @@ def offline_scan(monkeypatch, tmp_path):
         runs.append(policy)
         return nuget(("10.0.13", "patch"), ("11.0.1", "major"))
 
-    monkeypatch.setattr(cli, "resolve", lambda repo, ref: Revision(repo, ref, "a" * 40))
+    monkeypatch.setattr(cli, "resolve", lambda repo, ref: Revision(repo, ref, "a" * 40, branch=ref))
     monkeypatch.setattr(cli, "checkout", fake_checkout)
     monkeypatch.setattr(renovate, "run", fake_run)
     monkeypatch.setattr(renovate, "validate", lambda text: [])
@@ -381,15 +381,16 @@ def test_scan_without_a_token_says_nothing_is_known_about_dependabot_s_prs(offli
     out = capsys.readouterr().out
     assert "gap: dependabot-prs: No token in SDLC_GITHUB_TOKEN" in out
     assert "Dependabot PRs: unavailable (see its gap), so nothing is known about them" in out
+    assert "scan only: unknown, without Dependabot's PRs" in out
 
 
-def test_scan_lists_dependabot_s_proposed_updates_and_unparseable_prs(
-    offline_scan, monkeypatch, capsys
+def test_scan_compares_dependabot_s_updates_and_lists_unparseable_prs(
+    offline_scan, monkeypatch, capsys, tmp_path
 ):
     import json
     from pathlib import Path
 
-    from sdlc import dependabot_prs
+    from sdlc import dependabot_prs, renovate
 
     prs = Path(__file__).parents[1] / "fixtures" / "azure-egress-proxy" / "prs"
 
@@ -401,26 +402,78 @@ def test_scan_lists_dependabot_s_proposed_updates_and_unparseable_prs(
             (lambda: files) if with_diff else None,
         )
 
-    found = [parsed(76), parsed(98), parsed(99, with_diff=False)]
+    def report(path, *, policy=None, token=None):
+        python = {
+            "depName": "python",
+            "datasource": "docker",
+            "currentValue": "3.12-alpine",
+            "updates": [{"updateType": "minor", "newValue": "3.14-alpine"}],
+        }
+        http = {
+            "depName": "Microsoft.Extensions.Http",
+            "datasource": "nuget",
+            "currentValue": "10.0.12",
+            "updates": [{"updateType": "patch", "newValue": "10.0.13"}],
+        }
+        files = {
+            "dockerfile": [{"packageFile": "mock-idp/Dockerfile", "deps": [python]}],
+            "nuget": [{"packageFile": "Directory.Packages.props", "deps": [http]}],
+        }
+        return {"repositories": {"local": {"packageFiles": files}}}
+
+    # AppHost's lock file resolves the declared 10.0.12 by now, not #77's 10.0.11.
+    lock = tmp_path / "checkout" / "src" / "AppHost" / "packages.lock.json"
+    lock.parent.mkdir(parents=True)
+    resolved = {"Microsoft.Extensions.Http": {"type": "Transitive", "resolved": "10.0.12"}}
+    lock.write_text(json.dumps({"version": 1, "dependencies": {"net10.0": resolved}}))
+    found = [parsed(76), parsed(77), parsed(99, with_diff=False)]
+    monkeypatch.setattr(renovate, "run", report)
     monkeypatch.setattr(
         dependabot_prs,
         "read",
         lambda repository, token: dependabot_prs.PullRequests("2026-10-09T09:00:00+00:00", found),
     )
     assert main(["scan", "--repo", "alanta/demo"]) == 1
-    captured = capsys.readouterr()
+    out, err = capsys.readouterr()
     assert (
-        "Dependabot PRs: 3 open (read at 2026-10-09T09:00:00+00:00); 2 parsed, proposing 5 "
+        "Dependabot PRs: 3 open (read at 2026-10-09T09:00:00+00:00); 2 parsed, proposing 3 "
         "updates; 1 unparseable, so the comparison with them is incomplete"
-    ) in captured.out
-    assert "  #76 at deddfe4 on main: docker: bump the docker-minor-patch group" in captured.out
+    ) in out
+    assert "): 1 matched, 0 held by policy, 1 missed, 1 stale; incomplete\n" in out
+    assert "  #76 at deddfe4 on main, current: docker: bump the docker-minor-patch group" in out
     assert (
-        "    library/golang 1.25-alpine -> 1.27-alpine (minor, derived) docker /proxy "
-        "group docker-minor-patch\n"
-    ) in captured.out
+        "    matched: python 3.12-alpine -> 3.14-alpine (minor, derived) docker /mock-idp "
+        "group docker-minor-patch: scan has 3.14-alpine\n"
+    ) in out
     assert (
-        "    Azure.Core 1.53.0 or 1.55.0 or 1.62.0 (from the diff of 11 files) -> 1.63.0 (minor) "
-        "nuget group nuget-minor-patch\n"
-    ) in captured.out
-    assert "  unparseable #99 at 7aea495: its diff wasn't read\n" in captured.out
-    assert "no record written" in captured.err
+        "    missed: library/golang 1.25-alpine -> 1.27-alpine (minor, derived) docker /proxy "
+        "group docker-minor-patch: library/golang is not in the inventory in proxy/Dockerfile\n"
+    ) in out
+    assert "  #77 at cc93b67 on main, stale: nuget: Bump Microsoft.Extensions.Http" in out
+    assert (
+        "    stale: Microsoft.Extensions.Http 10.0.11 -> 10.0.12 (patch) nuget group microsoft: "
+        "src/AppHost/packages.lock.json has 10.0.12, not 10.0.11\n"
+    ) in out
+    assert "  unparseable #99 at 7aea495: its diff wasn't read\n" in out
+    assert "  incomplete: #99 is unparseable: its diff wasn't read\n" in out
+    # #77 changes only the lock file, so the central 10.0.13 is the scan's alone; the
+    # Dockerfile's python is matched.
+    assert "scan only: 1 entry with in-scope candidates" in out
+    assert "  nuget: 1 entry: Microsoft.Extensions.Http\n" in out
+    assert "no record written" in err
+
+
+def test_scan_lists_what_only_the_scan_proposes(offline_scan, monkeypatch, capsys):
+    from sdlc import dependabot_prs
+
+    monkeypatch.setattr(
+        dependabot_prs,
+        "read",
+        lambda repository, token: dependabot_prs.PullRequests("2026-10-09T09:00:00+00:00", []),
+    )
+    main(["scan", "--repo", "alanta/demo"])
+    out = capsys.readouterr().out
+    assert "Dependabot PRs: 0 open (read at 2026-10-09T09:00:00+00:00)" in out
+    assert "): 0 matched, 0 held by policy, 0 missed, 0 stale\n" in out
+    assert "scan only: 1 entry with in-scope candidates that no open Dependabot PR proposes" in out
+    assert "  nuget: 1 entry: Microsoft.Extensions.Http\n" in out
