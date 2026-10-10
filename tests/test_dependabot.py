@@ -439,6 +439,7 @@ def nuget_entry(dep_id, file):
         "name": "Some.Package",
         "current": "1.0.0",
         "origin": "locked" if dep_id.startswith("locked:") else "declared",
+        **({"locked_because": "drift"} if dep_id.startswith("locked:") else {}),
         "location": {"file": file},
         "lookup": {"state": "skipped", "reason": "Not looked up in this test."},
     }

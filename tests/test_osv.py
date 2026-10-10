@@ -196,6 +196,7 @@ def test_an_undeclared_transitive_package_gets_one_locked_entry_per_lock_file(in
     found = find(output, inventory, report)
     (entry,) = found.dependencies
     assert entry["id"] == "locked:src/Portal/packages.lock.json:Some.Transitive"
+    assert entry["locked_because"] == "vulnerability"
     assert found.candidates == [
         {
             "dependency": entry["id"],
@@ -254,18 +255,20 @@ def test_a_held_renovate_candidate_does_not_reach_the_fix(inventory, report):
     )
 
 
-def test_the_cli_says_when_only_held_candidates_reach_the_fix(
-    scanned, inventory, report, tmp_path, capsys
+def test_the_report_says_when_only_held_candidates_reach_the_fix(
+    scanned, inventory, report, tmp_path, record_from
 ):
-    from sdlc.cli import print_vulnerabilities
+    from sdlc.report import render
 
     found = find(scanned, inventory, report, classify=holding_x_minors(tmp_path))
-    print_vulnerabilities(found.vulnerabilities, merged(inventory, found), found)
-    out = capsys.readouterr().out
+    record = record_from(merged(inventory, found))
+    record["vulnerabilities"] = found.vulnerabilities
+    record["gaps"] += found.gaps
+    assert validate_record(record) == []
     assert (
-        "GO-2026-6354 (osv, unknown): fixed in v0.56.0, an in-scope candidate reaches it: no, "
-        "only held candidates do (x/ modules wait)" in out
-    )
+        "| GO-2026-6354 (CVE-2026-78662) | golang.org/x/crypto v0.55.0 | proxy/go.mod | unknown "
+        "| fixed in v0.56.0 | no, only candidates held by x/ modules wait | osv |"
+    ) in render(record)
 
 
 def go_entry(lookup, *candidate_versions):

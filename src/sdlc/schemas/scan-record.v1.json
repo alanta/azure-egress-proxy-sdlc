@@ -267,6 +267,13 @@
           ],
           "description": "declared: written in a manifest; locked: resolved in a lock file."
         },
+        "locked_because": {
+          "enum": [
+            "drift",
+            "vulnerability"
+          ],
+          "description": "Why the scan lists a locked entry, given exactly for those: drift, the lock file resolves an older version than the repository declares (design decision 3a); vulnerability, an advisory concerns a package only a lock file or an indirect module has."
+        },
         "location": {
           "$ref": "#/$defs/location"
         },
@@ -313,6 +320,25 @@
               "reason"
             ]
           }
+        }
+      },
+      "if": {
+        "properties": {
+          "origin": {
+            "const": "locked"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "locked_because"
+        ]
+      },
+      "else": {
+        "not": {
+          "required": [
+            "locked_because"
+          ]
         }
       }
     },
@@ -864,6 +890,35 @@
                       "type": "string",
                       "minLength": 1,
                       "description": "Dependabot's package-ecosystem."
+                    },
+                    "directory": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The directory as Dependabot writes it, such as /proxy."
+                    },
+                    "group": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The dependabot.yml group the update came in."
+                    },
+                    "update_type": {
+                      "enum": [
+                        "major",
+                        "minor",
+                        "patch"
+                      ],
+                      "description": "Absent when neither the PR nor the versions tell."
+                    },
+                    "update_type_derived": {
+                      "type": "boolean",
+                      "description": "Whether the update type was derived from the versions, because the PR didn't state it."
+                    },
+                    "from_source": {
+                      "enum": [
+                        "text",
+                        "diff"
+                      ],
+                      "description": "Where the from-version came from: the PR's text, or its diff when no line of the text gave it."
                     },
                     "from": {
                       "type": "string",

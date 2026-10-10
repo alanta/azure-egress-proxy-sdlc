@@ -87,6 +87,21 @@ def test_valid_record_passes(record):
             "'dependencies' is a required property",
         ),
         (
+            "locked entry without why the scan lists it",
+            lambda r: r["inventory"][2].update(origin="locked"),
+            "'locked_because' is a required property",
+        ),
+        (
+            "declared entry saying why it is locked",
+            lambda r: r["inventory"][2].update(locked_because="drift"),
+            "should not be valid",
+        ),
+        (
+            "unknown reason for a locked entry",
+            lambda r: r["inventory"][2].update(origin="locked", locked_because="habit"),
+            "is not one of",
+        ),
+        (
             "wrong schema version",
             lambda r: r.update(schema_version="2"),
             "'1' was expected",

@@ -28,9 +28,13 @@ Staleness is checked per file, because a dependency can have several versions at
 Azure.Core is 1.62.0 centrally, while some lock files resolve 1.53.0 or 1.55.0. Each file's
 from-version is compared with what the revision has in that same file: its inventory entries,
 or, for a lock file, the version it resolves in the scanned checkout (a transitive can resolve
-above the declared version), else its locked entry. When neither tells, the file is unknown,
-which is not the same as differing. A per-dependency comparison would call a PR current when
-the version it replaces survives in some other file. The update is stale when every file
+above the declared version), else its locked entry. A file the revision doesn't have at all
+differs too: the PR was made for a revision that has it, as #75 later was for a workflow added
+after 064aa09. A file that exists without the entry is the scan's blind spot, not a
+difference. When nothing tells, such as without a checkout, for a path in a submodule or
+when only the directory says where, the file is unknown, which is not the same as
+differing. A per-dependency comparison would call a PR current when the version it replaces
+survives in some other file. The update is stale when every file
 the scan knows differs. When only some do, the revision still has what the PR replaces, so
 the update isn't stale; those files are left out of the comparison, and the reason names them.
 
@@ -231,6 +235,7 @@ class _File:
     have: set[str] | None  # the versions the revision has there; None when unknown
     entries: list[dict[str, Any]] = field(default_factory=list)
     governing: dict[str, Any] | None = None  # for a lock file, the entry it follows
+    absent: bool = False  # the scanned revision doesn't have the file at all
 
 
 def _compare(
@@ -241,6 +246,14 @@ def _compare(
     result: dict[str, Any] = {"name": update.name}
     if update.ecosystem:
         result["ecosystem"] = update.ecosystem
+    if update.directory:
+        result["directory"] = update.directory
+    if update.group:
+        result["group"] = update.group
+    if update.update_type:
+        result["update_type"] = update.update_type
+        result["update_type_derived"] = update.update_type_derived
+    result["from_source"] = update.from_source
     if update.from_version:
         result["from"] = update.from_version
     if update.from_versions:
@@ -378,6 +391,10 @@ def _locate(update: Update, index: _Index) -> list[_File]:
 
     files = []
     for changed in update.from_versions:
+        if present(index.checkout, changed.file) is False:
+            # The PR changes a file the revision doesn't have, so it was made for another one.
+            files.append(_File(changed.file, changed.version, set(), absent=True))
+            continue
         here = _one_registry(update, [d for d in named if d["location"]["file"] == changed.file])
         have = {bare(d["current"]) for d in here if d["current"]} or None
         governing = None
@@ -416,6 +433,35 @@ def _governing(lock_file: str, named: list[dict[str, Any]]) -> dict[str, Any] | 
             if dep["location"]["file"] == props:
                 return dep
     return None
+
+
+def present(checkout: Path | None, file: str) -> bool | None:
+    """Whether the scanned revision has a file a PR's diff names; None when that can't be
+    known: no checkout, a path outside it, or a path in a submodule, whose files a checkout
+    may not have."""
+    if checkout is None:
+        return None
+    root = checkout.resolve()
+    path = (root / file).resolve()
+    if not path.is_relative_to(root):  # the name comes from the PR's diff
+        return None
+    if path.exists():
+        return True
+    for submodule in _submodules(root):
+        if PurePosixPath(file).is_relative_to(submodule):
+            return None
+    return False
+
+
+_SUBMODULE_PATH = re.compile(r"^\s*path\s*=\s*(.+?)\s*$", re.MULTILINE)
+
+
+def _submodules(root: Path) -> list[PurePosixPath]:
+    try:
+        text = (root / ".gitmodules").read_text(encoding="utf-8")
+    except OSError:
+        return []
+    return [PurePosixPath(p.strip("/")) for p in _SUBMODULE_PATH.findall(text)]
 
 
 def lock_versions(checkout: Path | None, file: str, name: str) -> set[str] | None:
@@ -504,7 +550,9 @@ def _reaching(update: Update, dep: dict[str, Any], index: _Index) -> list[dict[s
 
 def _differences(differing: list[_File]) -> str:
     return "; ".join(
-        f"{f.file or 'the revision'} has {' or '.join(sorted(f.have or ()))}, not {f.old}"
+        f"{f.file} is absent from the scanned revision"
+        if f.absent
+        else f"{f.file or 'the revision'} has {' or '.join(sorted(f.have or ()))}, not {f.old}"
         for f in differing
     )
 

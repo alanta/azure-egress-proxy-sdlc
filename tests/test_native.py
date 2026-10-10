@@ -107,6 +107,8 @@ def test_lock_drift_lists_locked_entries_older_than_declared(dotnet, scanned):
         ),
     }
     assert all(e["origin"] == "locked" for e in entries)
+    # Listed because the lock file lags behind, not because of an advisory.
+    assert all(e["locked_because"] == "drift" for e in entries)
 
 
 def test_lock_drift_entries_make_a_valid_record(dotnet, scanned, record_from):

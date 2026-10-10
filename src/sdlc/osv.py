@@ -419,6 +419,7 @@ def _locked(
         "name": name,
         "current": _display(datasource, version),
         "origin": "locked",
+        "locked_because": "vulnerability",
         "location": location,
         # The lookup follows once the entry's advisories, and so its fixes, are known.
     }

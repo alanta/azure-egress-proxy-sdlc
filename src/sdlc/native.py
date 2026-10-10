@@ -293,6 +293,7 @@ def lock_drift(
                 "name": update.name,
                 "current": update.current,
                 "origin": "locked",
+                "locked_because": "drift",
                 "location": location,
                 "lookup": {
                     "state": "outdated",
