@@ -6,6 +6,20 @@
   // patches into the minor candidate: the scan records a candidate per update type.
   separateMinorPatch: true,
 
+  packageRules: [
+    {
+      // go.mod's `go 1.25.14` is a minimum: Renovate's go-mod-directive versioning reads it
+      // as `^1.25.14`, which every newer 1.x already satisfies. Under the default range
+      // strategy (replace) it then proposes nothing and the directive looks current while
+      // newer Go releases exist. Bump proposes the newer versions as patch and minor
+      // candidates. The `toolchain` directive is an exact version and needs no rule.
+      description: "Propose newer Go versions for the go directive",
+      matchManagers: ["gomod"],
+      matchDepTypes: ["golang"],
+      rangeStrategy: "bump",
+    },
+  ],
+
   customManagers: [
     {
       // `pip install "pkg[extra]==1.2.3"` inside a Dockerfile, with no requirements file.

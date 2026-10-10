@@ -1,12 +1,14 @@
 import json
 from pathlib import Path
 
+import json5
 import pytest
 
 from sdlc.record import validate_record
-from sdlc.renovate import RenovateError, normalize
+from sdlc.renovate import RenovateError, normalize, scan_config
 
 REPORTS = Path(__file__).parents[1] / "fixtures" / "azure-egress-proxy" / "renovate" / "064aa09"
+GO_DIRECTIVES = Path(__file__).parents[1] / "fixtures" / "renovate-go-directive"
 AT = "2026-10-08T09:00:00+00:00"
 
 
@@ -251,3 +253,30 @@ def test_declarations_without_replace_text_get_the_line_that_declares_them(tmp_p
         "nuget:global.json:dotnet-sdk": 3,
         "nuget:AppHost.csproj:Aspire.AppHost.Sdk": 3,
     }
+
+
+def test_scan_config_bumps_the_go_directive():
+    # go-mod-directive versioning reads `go 1.25.14` as a minimum every newer Go satisfies,
+    # so without bump Renovate proposes nothing and the directive looks current.
+    config = json5.loads(scan_config().read_text())
+    assert {
+        "matchManagers": ["gomod"],
+        "matchDepTypes": ["golang"],
+        "rangeStrategy": "bump",
+    }.items() <= next(r for r in config["packageRules"] if "rangeStrategy" in r).items()
+
+
+def test_go_directives_get_newer_go_releases_as_candidates(record_from):
+    report = json.loads((GO_DIRECTIVES / "report.json").read_text())
+    inventory = normalize(report, looked_up_at=AT)
+    lookups = {d["id"]: (d["current"], d["lookup"]["state"]) for d in inventory.dependencies}
+    assert lookups == {
+        "gomod:a/go.mod:go": ("1.25.14", "outdated"),
+        "gomod:b/go.mod:go": ("1.25.0", "outdated"),
+        "gomod:b/go.mod:go#2": ("1.25.14", "outdated"),  # the toolchain directive
+    }
+    # 1.25.14 is the newest 1.25, so its only candidate is the newest minor.
+    assert candidates_for(inventory, "gomod:a/go.mod:go") == {"minor": "1.27.2"}
+    assert candidates_for(inventory, "gomod:b/go.mod:go") == {"patch": "1.25.14", "minor": "1.27.2"}
+    assert candidates_for(inventory, "gomod:b/go.mod:go#2") == {"minor": "1.27.2"}
+    assert validate_record(record_from(inventory)) == []

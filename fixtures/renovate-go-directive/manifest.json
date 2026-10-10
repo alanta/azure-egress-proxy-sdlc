@@ -1,0 +1,15 @@
+{
+  "subject": "a minimal repository made for this fixture",
+  "files": {
+    "a/go.mod": "module example.com/a\n\ngo 1.25.14\n",
+    "b/go.mod": "module example.com/b\n\ngo 1.25.0\n\ntoolchain go1.25.14\n"
+  },
+  "captured_at": "2026-10-10",
+  "renovate": {
+    "version": "44.145.1",
+    "image": "docker.io/renovate/renovate:44.145.1@sha256:6f1f3e2d9d0c3f99aa1f61f7509d302185de7deb173ac8c5ff88a5ce283ec435"
+  },
+  "mode": "sdlc.renovate.run(): --platform=local --dry-run=lookup --report-type=file, with src/sdlc/config/scan.renovate.json5 as global config and no policy",
+  "token": "fine-grained, read-only (GITHUB_COM_TOKEN)",
+  "notes": "Go 1.27.2 was the newest release. Without the scan config's rangeStrategy bump rule for the go directive, the same run proposed nothing for either `go` directive, and only the toolchain directive got its 1.27.2 minor."
+}
