@@ -255,6 +255,52 @@ def test_declarations_without_replace_text_get_the_line_that_declares_them(tmp_p
     }
 
 
+def test_go_mod_requirements_get_the_line_that_requires_them(tmp_path):
+    (tmp_path / "go.mod").write_text(
+        "module m\n"
+        "\n"
+        "go 1.25.0\n"
+        "\n"
+        "replace (\n"
+        "\tgolang.org/x/net v0.58.0 => ./net\n"
+        ")\n"
+        "\n"
+        "require github.com/stripe/smokescreen v0.1.0\n"
+        "\n"
+        "require (\n"
+        "\tgithub.com/Azure/azure-sdk-for-go/sdk/azcore v1.23.1\n"
+        "\tgolang.org/x/net v0.58.0 // indirect\n"
+        ")\n"
+        "\n"
+        "require(\n"
+        '\t"golang.org/x/text" v0.3.8\n'
+        ")\n"
+        "\n"
+        'require "golang.org/x/sync" v0.10.0\n'
+    )
+    module = {"datasource": "go"}
+    report = report_with(
+        ("gomod", "go.mod", module | {"depName": "github.com/stripe/smokescreen",
+                                      "depType": "require", "currentValue": "v0.1.0"}),
+        ("gomod", "go.mod", module | {"depName": "github.com/Azure/azure-sdk-for-go/sdk/azcore",
+                                      "depType": "require", "currentValue": "v1.23.1"}),
+        ("gomod", "go.mod", module | {"depName": "golang.org/x/net", "depType": "indirect",
+                                      "currentValue": "v0.58.0"}),
+        ("gomod", "go.mod", module | {"depName": "golang.org/x/text", "depType": "require",
+                                      "currentValue": "v0.3.8"}),
+        ("gomod", "go.mod", module | {"depName": "golang.org/x/sync", "depType": "require",
+                                      "currentValue": "v0.10.0"}),
+    )  # fmt: skip
+    inventory = normalize(report, looked_up_at=AT, checkout=tmp_path)
+    assert [d["location"].get("line") for d in inventory.dependencies] == [
+        9,  # the single-line form
+        12,  # in the require block
+        13,  # not the replace block's line
+        17,  # a quoted path in a `require(` block
+        20,  # a quoted path on its own line
+    ]
+
+
 def test_scan_config_bumps_the_go_directive():
     # go-mod-directive versioning reads `go 1.25.14` as a minimum every newer Go satisfies,
     # so without bump Renovate proposes nothing and the directive looks current.

@@ -17,6 +17,8 @@ from importlib.resources import files
 from pathlib import Path
 from typing import Any
 
+from sdlc.native import go_require_line
+
 VERSION = "44.145.1"
 IMAGE = (
     f"docker.io/renovate/renovate:{VERSION}"
@@ -244,7 +246,10 @@ def normalize(report: dict, *, looked_up_at: str, checkout: Path | None = None) 
     """Turn a Renovate report into inventory entries and candidates for the scan record.
 
     `looked_up_at` is when Renovate ran: its report doesn't time individual lookups. With a
-    checkout, each entry also gets the line it is declared on.
+    checkout, each entry also gets the line it is declared on. A go.mod requirement is found
+    by its module path, since Renovate gives no text for it. An OS package an install line
+    names without a version, such as apt's `curl`, gets none: Renovate gives no text for it
+    either, and its name alone, like `git`, can appear on lines that don't install it.
     """
     dependencies: list[dict[str, Any]] = []
     candidates: list[dict[str, Any]] = []
@@ -254,9 +259,12 @@ def normalize(report: dict, *, looked_up_at: str, checkout: Path | None = None) 
         name = _name(dep)
         location: dict[str, Any] = {"file": file}
         pattern = declaration_line(manager, dep)
-        line = lines.find(file, dep.get("replaceString")) or (
-            lines.find_pattern(file, pattern) if pattern else lines.find_unique(file, name)
-        )
+        if manager == "gomod" and dep.get("depType") in ("require", "indirect"):
+            line = go_require_line(checkout, file, name)
+        else:
+            line = lines.find(file, dep.get("replaceString")) or (
+                lines.find_pattern(file, pattern) if pattern else lines.find_unique(file, name)
+            )
         if line:
             location["line"] = line
 

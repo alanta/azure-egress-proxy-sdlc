@@ -1,9 +1,11 @@
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
 
 from sdlc.cli import main
+from sdlc.coverage import gaps as coverage_gaps
 from sdlc.record import validate_record
 from sdlc.report import text
 
@@ -77,6 +79,7 @@ def offline_scan(monkeypatch, tmp_path):
     monkeypatch.setattr(cli, "checkout", fake_checkout)
     monkeypatch.setattr(renovate, "run", fake_run)
     monkeypatch.setattr(renovate, "validate", lambda text: [])
+    # The fake checkout isn't a git repository, and coverage lists the files git tracks.
     monkeypatch.setattr(coverage, "gaps", lambda path, report: [])
     monkeypatch.setattr(native, "dotnet_updates", lambda path: [])
     monkeypatch.setattr(native, "go_updates", lambda path: [])
@@ -205,6 +208,39 @@ def test_scan_without_osv_scanner_reports_vulnerabilities_as_unknown(
     assert "- **Reachable vulnerabilities:** unknown, OSV-Scanner didn't run" in report
     assert "vulnerabilities unknown" in report
     assert "0 advisories" not in report
+
+
+def test_a_malformed_lock_file_is_unparseable_and_the_scan_carries_on(
+    offline_scan, monkeypatch, tmp_path, capsys
+):
+    from sdlc import coverage
+
+    checkout = tmp_path / "checkout"
+    lock = checkout / "src" / "A" / "packages.lock.json"
+    lock.parent.mkdir(parents=True)
+    malformed = '{"version": 1, "dependencies": {'
+    lock.write_text(malformed)
+    # A git repository, so the real coverage check can list the files the checkout tracks.
+    subprocess.run(["git", "init", "--quiet"], cwd=checkout, check=True)
+    subprocess.run(["git", "add", "."], cwd=checkout, check=True)
+    monkeypatch.setattr(coverage, "gaps", coverage_gaps)
+
+    assert main(["scan", "--repo", "alanta/demo"]) == 0
+    assert "2 update candidates (2 in scope, 0 held by policy)" in capsys.readouterr().out
+    record, report = written(tmp_path)
+    with pytest.raises(json.JSONDecodeError) as error:
+        json.loads(malformed)
+    reason = f"Not valid JSON: {error.value}."
+    assert {
+        "kind": "unparseable_source",
+        "subject": "src/A/packages.lock.json",
+        "reason": reason,
+    } in record["gaps"]
+    assert f"| unparseable source | src/A/packages.lock.json | {text(reason)} |" in report
+    # The rest of the scan went on: Renovate's entry, its candidates and the other sections.
+    assert [d["name"] for d in record["inventory"]] == ["Microsoft.Extensions.Http"]
+    assert len(record["candidates"]) == 2
+    assert all(heading in report for heading in ("## Vulnerabilities", "## Parity with Dependabot"))
 
 
 def test_scan_without_govulncheck_reports_a_gap_and_carries_on(offline_scan, monkeypatch, tmp_path):

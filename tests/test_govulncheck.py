@@ -34,7 +34,6 @@ def scanned(report):
         inventory.dependencies,
         inventory.candidates,
         indirect=indirect(report),
-        looked_up_at=AT,
     )
     updated = {d["id"]: d for d in found.updated}
     merged = Inventory(
@@ -59,7 +58,6 @@ def apply(runs, vulnerabilities, inventory, report, **options):
         inventory.candidates,
         toolchains=go_toolchains(report),
         indirect=indirect(report),
-        looked_up_at=AT,
         **options,
     )
 

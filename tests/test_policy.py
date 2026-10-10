@@ -618,9 +618,7 @@ def test_a_fix_is_not_judged_on_candidates_that_were_dropped(tmp_path, checkout,
             }
         ]
     }
-    found = osv.findings(
-        output, inventory.dependencies, inventory.candidates, indirect=set(), looked_up_at=AT
-    )
+    found = osv.findings(output, inventory.dependencies, inventory.candidates, indirect=set())
     (vulnerability,) = found.vulnerabilities
     # Without its candidates, nothing says whether an update reaches the fix: unknown, not no.
     assert vulnerability["fix_reached_by_candidate"] == reached

@@ -245,7 +245,18 @@ def test_an_update_none_of_whose_files_has_its_from_version_is_stale(scanned, tm
     assert update["result"] == "stale"
     assert "Directory.Packages.props has 1.63.0, not 1.62.0" in update["reason"]
     assert "src/EgressProxy.Client/packages.lock.json has 1.63.0, not 1.53.0" in update["reason"]
-    assert section["pull_requests"][0]["state"] == "stale"
+    # Its other updates still count: staleness is judged per update.
+    (pr,) = section["pull_requests"]
+    assert pr["state"] == "partly_stale"
+    assert pr["reason"] == (
+        "the revision no longer has what it updates for Azure.Core; its other updates are "
+        "compared on their own"
+    )
+    assert {u["name"]: u["result"] for u in pr["updates"]} == {
+        "Azure.Core": "stale",
+        "coverlet.collector": "matched",
+        "Scalar.AspNetCore": "matched",
+    }
 
 
 def test_a_pr_made_for_an_older_revision_is_stale(scanned, record_from):
@@ -297,8 +308,73 @@ def test_an_update_to_a_file_the_revision_lacks_is_stale_not_missed(scanned, tmp
     update = results(section)[75, BUILDX]
     assert update["result"] == "stale"
     assert update["reason"] == ".github/workflows/images.yml is absent from the scanned revision"
-    assert section["pull_requests"][0]["state"] == "stale"
+    # One stale update doesn't hide the group's others.
+    (pr,) = section["pull_requests"]
+    assert pr["state"] == "partly_stale"
+    assert [u["result"] for u in pr["updates"]] == ["matched", "stale", "matched"]
     assert section["complete"] is True
+
+
+def test_a_pr_is_stale_only_when_every_update_is(record_from):
+    old = entry("Old", "Directory.Packages.props", "2.0.0", lookup={"state": "current"})
+    new = entry("New", "Directory.Packages.props", "1.0.0")
+    candidates = [candidate(new, "1.1.0")]
+    pulls = PullRequests(
+        READ,
+        [
+            PullRequest(
+                number=1,
+                title="bump",
+                url="https://github.com/alanta/demo/pull/1",
+                head="b" * 40,
+                base="main",
+                state="parsed",
+                updates=(
+                    proposed("Old", "1.0.0", "2.0.0", ("Directory.Packages.props", "1.0.0")),
+                    proposed("New", "1.0.0", "1.1.0", ("Directory.Packages.props", "1.0.0")),
+                ),
+            ),
+            PullRequest(
+                number=2,
+                title="bump old",
+                url="https://github.com/alanta/demo/pull/2",
+                head="c" * 40,
+                base="main",
+                state="parsed",
+                updates=(proposed("Old", "1.0.0", "2.0.0", ("Directory.Packages.props", "1.0.0")),),
+            ),
+        ],
+    )
+    fields = {
+        d["id"]: {
+            "depName": d["name"],
+            "packageName": d["name"],
+            "datasource": "nuget",
+            "manager": "nuget",
+        }
+        for d in (old, new)
+    }
+    section = compare(
+        pulls,
+        [old, new],
+        candidates,
+        fields,
+        policy.NO_POLICY,
+        looked_up_at=LOOKED_UP,
+        branch="main",
+    )
+    grouped, single = section["pull_requests"]
+    assert [u["result"] for u in grouped["updates"]] == ["stale", "matched"]
+    assert grouped["state"] == "partly_stale"
+    assert single["state"] == "stale"
+    record = as_record(record_from, renovate.Inventory([old, new], candidates), section)
+    assert validate_record(record) == []
+    # The PR's state can't contradict its updates'.
+    grouped["state"] = "stale"
+    single["state"] = "current"
+    problems = validate_record(record)
+    assert "$.parity.pull_requests[0]: stale, yet 1 of its 2 updates are stale" in problems
+    assert "$.parity.pull_requests[1]: current, yet 1 of its 1 updates are stale" in problems
 
 
 def test_a_file_the_revision_lacks_beside_one_it_has_is_noted_not_stale(scanned, tmp_path):
@@ -859,3 +935,29 @@ def test_nuget_prerelease_labels_ignore_case():
     assert version_order("nuget", "1.0.0-RC.1", "1.0.0-beta.2") == 1
     assert same_version("nuget", "1.0.0-Preview.1", "1.0.0-preview.1")
     assert not same_version("docker", "1.27", "1.27.0")
+
+
+def test_a_miss_says_when_the_scan_only_has_an_advisory_s_fix():
+    lock = "src/A/packages.lock.json"
+    dep = entry(
+        "Some.Transitive",
+        lock,
+        "2.0.0",
+        origin="locked",
+        lookup={"state": "outdated", "basis": "advisory_fix", "reason": "Not looked up."},
+    )
+    fix = candidate(dep, "2.0.1", "patch") | {"basis": "advisory_fix"}
+    _, (update,) = own([dep], [fix], proposed("Some.Transitive", "2.0.0", "2.1.0", (lock, "2.0.0")))
+    assert update["result"] == "missed"
+    assert update["reason"] == (
+        "the scan's newest in-scope candidate in src/A/packages.lock.json is 2.0.1, older than "
+        "2.1.0 (it wasn't looked up; its candidates are its advisories' fixes)"
+    )
+
+
+def test_a_stale_update_leaves_its_entry_scan_only():
+    dep = entry("Pkg", "Directory.Packages.props", "2.0.0")
+    stale = proposed("Pkg", "1.0.0", "2.0.0", ("Directory.Packages.props", "1.0.0"))
+    section, (update,) = own([dep], [candidate(dep, "2.1.0")], stale)
+    assert update["result"] == "stale"
+    assert section["scan_only"] == [dep["id"]]

@@ -140,7 +140,6 @@ def scan(
                 inventory.candidates,
                 toolchains=renovate.go_toolchains(baseline),
                 indirect=renovate.indirect(baseline),
-                looked_up_at=datetime.now(UTC).isoformat(timespec="seconds"),
                 classify=lambda candidates, fields: policy.classify(
                     candidates, None, fields, subject_policy
                 ),
@@ -298,7 +297,6 @@ def find_vulnerabilities(
     No findings when OSV-Scanner fails: the failure is a gap, and the scan carries on
     without claiming anything about vulnerabilities.
     """
-    scanned_at = datetime.now(UTC).isoformat(timespec="seconds")
     files = osv.lock_files(path)
     try:
         output = osv.run(path, files)
@@ -310,7 +308,6 @@ def find_vulnerabilities(
         inventory.dependencies,
         inventory.candidates,
         indirect=indirect,
-        looked_up_at=scanned_at,
         scanned=files,
         classify=lambda candidates, fields: policy.classify(
             candidates, None, fields, subject_policy

@@ -44,7 +44,6 @@ def scanned():
         inventory.dependencies,
         inventory.candidates,
         indirect=indirect(report),
-        looked_up_at=AT,
     )
     updated = {d["id"]: d for d in found.updated}
     merged = Inventory(

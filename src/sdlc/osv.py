@@ -9,7 +9,8 @@ govulncheck supplies reachability for Go (see `sdlc.govulncheck`). Every finding
 
 An advisory on a dependency the inventory doesn't list, such as a transitive NuGet package or
 an indirect Go module, adds a locked entry for it, with the fixed version as its candidate
-(design decision 3a).
+(design decision 3a). No registry is asked about such an entry, so its lookup and candidate
+say they come from the advisory (`ADVISORY_FIX`): the fixed version need not be the newest.
 """
 
 import json
@@ -22,7 +23,7 @@ from pathlib import Path
 from typing import Any
 
 from sdlc.coverage import tracked_files
-from sdlc.native import line_naming
+from sdlc.native import go_require_line, line_naming
 
 VERSION = "2.6.0"
 IMAGE = (
@@ -31,6 +32,9 @@ IMAGE = (
 )
 
 SOURCE = "osv"
+# The basis of a lookup and candidate that come from an advisory's fixed version rather than
+# from a registry.
+ADVISORY_FIX = "advisory_fix"
 LOCK_FILES = ("packages.lock.json", "go.mod")
 
 # OSV's ecosystem names, mapped to the inventory's ecosystem (Renovate's datasource) and the
@@ -124,7 +128,6 @@ def findings(
     candidates: list[dict[str, Any]],
     *,
     indirect: set[str],
-    looked_up_at: str,
     scanned: Sequence[str] = (),
     classify: Callable[[list[dict], dict[str, dict]], list[dict]] = lambda c, fields: c,
     checkout: Path | None = None,
@@ -138,9 +141,10 @@ def findings(
     `indirect` holds the ids of indirect Go requirements. Renovate lists them, so an advisory
     on one refers to that entry rather than to a second one for the same go.mod line. When
     Renovate skipped it, as it does by default, the entry gets the fixed version as its
-    candidate and a lookup that says so, returned in `updated`. When the policy had Renovate
-    look it up, its lookup and candidates stay, and the fixed version is added only if no
-    candidate reaches that far.
+    candidate and a lookup that says it came from the advisory, returned in `updated`. When
+    the policy had Renovate look it up, its lookup and candidates stay, and the fixed version
+    is added only if no candidate reaches that far. A candidate added here is marked as the
+    advisory's fix, never as the newest version a registry has.
 
     `scanned` lists the lock files OSV-Scanner was given: one missing from its output is a gap,
     not a clean file. `classify` applies the policy to the candidates added here, given the
@@ -239,10 +243,15 @@ def findings(
             }
             continue
         else:
+            # No registry was asked, so there is no lookup time, and the candidate is what
+            # the advisories name as fixed, not necessarily the newest version.
             entry["lookup"] = {
                 "state": "outdated",
+                "basis": ADVISORY_FIX,
+                "reason": "Not looked up in a registry: lock-file-only dependencies and "
+                "indirect modules aren't. Its candidate is the fixed version its advisories "
+                "name, which may not be the newest.",
                 "datasource": datasource,
-                "looked_up_at": looked_up_at,
             }
         new_candidates.append(
             {
@@ -250,6 +259,7 @@ def findings(
                 "update_type": _update_type(entry["current"], target),
                 "version": _display(datasource, target),
                 "classification": "in_scope",
+                "basis": ADVISORY_FIX,
             }
         )
     # Like lock-file drift, these candidates come from the advisories, not from Renovate, so
@@ -408,7 +418,7 @@ def _locked(
 
     location: dict[str, Any] = {"file": file}
     if datasource == "go":
-        line = _go_line(checkout, file, name)
+        line = go_require_line(checkout, file, name)
     else:
         line = line_naming(checkout, file, name)
     if line:
@@ -443,17 +453,6 @@ def _projects(checkout: Path | None, file: str) -> set[str]:
         for name, package in packages.items()
         if isinstance(package, dict) and package.get("type") == "Project"
     }
-
-
-def _go_line(checkout: Path | None, file: str, name: str) -> int | None:
-    """The go.mod line requiring the module, inside a require block or not."""
-    if checkout is None or not (checkout / file).exists():
-        return None
-    for number, line in enumerate((checkout / file).read_text().splitlines(), 1):
-        words = line.split()
-        if name in words[:2] and words[0] in (name, "require"):
-            return number
-    return None
 
 
 def affected(version: str, records: list[dict[str, Any]], ecosystem: str, name: str) -> bool | None:

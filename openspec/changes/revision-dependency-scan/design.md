@@ -48,9 +48,14 @@ The gaps get Renovate `customManagers` in the scan's own configuration, not new 
 - `br/public:avm/...` module tags → regex manager with the Docker datasource on `mcr.microsoft.com/bicep/avm/...`, where the public Bicep registry publishes its modules;
 - devcontainer tool versions such as the Aspire CLI → regex manager with the matching datasource.
 
+The scan's configuration also changes how Renovate reports:
+- `rangeStrategy: bump` for the `go` directive, because Renovate reads `go 1.25.14` as a minimum every newer Go satisfies, and would otherwise propose nothing;
+- `separateMinorPatch`, so the newest patch is reported apart from the newest minor, one candidate per update type;
+- a `go install module@vX.Y.Z` custom manager, because nothing else tracks tools pinned that way in workflows and scripts, such as govulncheck.
+
 Managers that apply to any repository live in this repository's scan configuration. Managers that describe one subject's own files, such as the Aspire CLI `ARG` in the devcontainer, live in that subject's policy file (decision 4), next to the code they describe. Renovate combines both.
 
-Task 1.3 verifies the report-file output, and task 1.4 the custom managers. If the report file proves incomplete, the fallback is Renovate's JSON logs (`LOG_FORMAT=json`), parsed by message type. A custom manager that can't be made to work leaves its source reported as unsupported.
+Task 1.3 verified the report-file output, and task 1.4 the custom managers. The report file proved complete, so the fallback planned for it, Renovate's JSON logs, was never needed. A custom manager that can't be made to work leaves its source reported as unsupported.
 
 **Alternatives:**
 - **Dependabot CLI:** the same engine as Dependabot, so parity would come by construction, but so would Dependabot's gaps (Bicep modules, inline pip, the Go directive).
@@ -68,9 +73,11 @@ So a dependency that only appears in a lock file is listed in two cases:
 - **Drift:** its locked version is older than the version the repository declares for it elsewhere. The .NET query finds these by comparing each project's transitive packages with the central versions. That's PR #77: AppHost locks `Microsoft.Extensions.Http` at 10.0.11 while 10.0.12 is declared.
 - **Vulnerability:** an advisory concerns it (task 4.1), such as `golang.org/x/crypto` v0.55.0 as an indirect Go module.
 
-On `064aa09` there are seven such entries, in four projects. For example, `EgressProxy.Client` resolves Azure.Core 1.53.0 while 1.62.0 is declared. They all have one cause: central versions don't apply to transitive packages unless `CentralPackageTransitivePinningEnabled` is on, and it isn't. The lock files still record each central version as the requested range, which is why Dependabot's NuGet PRs fail with NU1004 when they change it.
+On `064aa09` there are seven such entries, in five projects' lock files. For example, `EgressProxy.Client` resolves Azure.Core 1.53.0 while 1.62.0 is declared. They all have one cause: central versions don't apply to transitive packages unless `CentralPackageTransitivePinningEnabled` is on, and it isn't. The lock files still record each central version as the requested range, which is why Dependabot's NuGet PRs fail with NU1004 when they change it.
 
 The candidate is the declared version, not the newest one: the drift is fixed by resolving what the repository already declares.
+
+An entry listed for a vulnerability isn't looked up, so its candidate is the fixed version its advisories name. The record marks that candidate and the entry's lookup as coming from the advisory (`advisory_fix`), with no lookup time: no registry was asked, and a newer version may exist.
 
 Go has no drift of this kind: `go.mod` holds one version per module.
 
@@ -98,7 +105,7 @@ The autonomy and merge policy of slice 3 is a separate concern, and gets its own
 
 ### 5. Advisories come from OSV-Scanner, govulncheck and Dependabot alerts
 
-- **OSV-Scanner,** pinned, scans the lockfiles: `packages.lock.json` and `go.sum`. Packages without a resolved version are reported as unknown, which the spike already saw.
+- **OSV-Scanner,** pinned, scans `packages.lock.json` and `go.mod`, which lists every module a Go build resolves. It has no extractor for `go.sum`. Packages without a resolved version are reported as unknown, which the spike already saw.
 - **govulncheck** runs with the toolchain `go.mod` declares and supplies reachability for Go. Every other ecosystem's reachability is `unknown`.
 - **Dependabot alerts** are read through the API when the credential has `Dependabot alerts: read`. Otherwise they are listed as an unavailable source. They are a comparison source, the same way open PRs are.
 
@@ -120,7 +127,13 @@ Logical dependencies declared through different ecosystems are listed in a table
 - **.NET SDK and runtime:** `global.json`, `setup-dotnet` `dotnet-version`, `mcr.microsoft.com/dotnet/*` tags, and the .NET line in the devcontainer image's tag.
 - **Aspire:** the AppHost SDK version and the CLI version in the devcontainer.
 
-Versions are compared at the precision each declares: `1.25` agrees with `1.25.14`, and `1.25` disagrees with `1.27`. The table is extended when a missed inconsistency is found.
+Versions are compared at the precision each declares: `1.25` agrees with `1.25.14`, and `1.25` disagrees with `1.27`. Some declarations need more care:
+- SDK declarations compare among themselves by feature band: `10.0.401` agrees with `10.0.4xx`, not with `10.0.100`.
+- An SDK and a runtime compare at major.minor only, because a runtime's third part is a patch.
+- Of go.mod's directives, only the one that sets the Go toolchain counts: `go 1.25.0` beside `toolchain go1.25.14` is a minimum, not a disagreement.
+- A Go or .NET version without a minor, such as `1.x` or `golang:1-alpine`, floats to the newest release, so it is a gap, never a declaration that agrees.
+
+The table is extended when a missed inconsistency is found.
 
 **Alternative:** inferring aliases automatically produces false matches across unrelated packages, and there are only a few of these.
 
@@ -129,11 +142,13 @@ Versions are compared at the precision each declares: `1.25` agrees with `1.25.1
 Open PRs by `dependabot[bot]` are read with the read-only credential:
 
 - **Names, target versions and groups** come from the `updated-dependencies` YAML block Dependabot writes in its commit messages. The block doesn't always carry an update type (the grouped Docker PR #76 has none), so the update type is derived from the from- and to-versions.
-- **From-versions** come from the `Updates <name> from A to B` lines in the PR body, or the title for a single update, matched with fixed patterns only. PR text is never interpreted beyond that.
+- **From-versions** come from the `… from A to B` lines in the PR's title, commit message and body, matched with fixed patterns only. A grouped PR's commit message has every line, where its body has some only below an earlier update's release notes. PR text is never interpreted beyond that.
 - **The PR's diff is always read**: its removed version lines give each file's from-version. Some NuGet PRs, like #98, state only the to-version, because the dependency has a central version and older locked ones. Dependabot writes the diff's version lines mechanically, so fixed patterns per file type read them reliably, and the diff is matched like the text, never interpreted. A from-version the text states must be among the diff's, so text alone can't set one.
 - **Unparseable PRs** are reported as such.
 
-A PR is current for the revision when its from-versions equal the versions declared in the scanned revision or resolved in its lock files; otherwise it is stale. Lock files count because Dependabot also updates transitive versions: #77 moves AppHost's locked `Microsoft.Extensions.Http` from 10.0.11 to the 10.0.12 already declared centrally.
+Only PRs that target the scanned revision's branch are compared. A PR on another base branch proposes changes to another revision, so it is listed as `not_compared`.
+
+Staleness is judged per proposed update. An update is current for the revision when its from-versions equal the versions declared in the scanned revision or resolved in its lock files; otherwise it is stale, and counts neither as matched nor as missed. Lock files count because Dependabot also updates transitive versions: #77 moves AppHost's locked `Microsoft.Extensions.Http` from 10.0.11 to the 10.0.12 already declared centrally. A grouped PR's other updates are still compared, because one stale update shouldn't hide them: the PR is stale only when all its updates are, and partly stale when some are.
 
 Parity holds only at a point in time, because registries move. So the PR list and the lookups are captured in the same run, and both times are recorded.
 
@@ -142,6 +157,7 @@ Parity holds only at a point in time, because registries move. So the PR list an
 - The record is JSON and validated against a versioned JSON Schema in this repository.
 - The Markdown report is rendered only from the record.
 - Runs write to a run directory outside the subject repository, by default `runs/<repo>/<commit>/<timestamp>/`, which is git-ignored.
+- A record that fails its schema, or whose report can't be rendered, is still kept, as `<time>.invalid.json` or `<time>.unrendered.json` next to where the run directory would be. A scan takes minutes, and a run directory only ever holds a valid record with its report.
 - Runs chosen as evidence are copied under `fixtures/` and committed.
 
 ### 9. Untrusted text is data
@@ -150,9 +166,9 @@ Release notes, PR bodies and changelogs come from upstream authors, not the main
 
 ## Risks / Trade-offs
 
-- **Renovate's local platform is experimental** → pinned by digest, native cross-checks (decision 3), and the JSON-log fallback. An upgrade is a reviewed change with a parity run.
+- **Renovate's local platform is experimental** → pinned by digest, with native cross-checks (decision 3). The JSON-log fallback was never needed: the report file was complete. An upgrade is a reviewed change with a parity run.
 - **Lookups hit rate limits** → a read-only token. Failed lookups are `unknown`, so the record shows the damage instead of reporting "up to date".
-- **The AVM regex manager doesn't resolve through MCR** → AVM tags stay reported as unsupported. A small adapter that queries the registry's tag list can follow.
+- **The AVM regex manager might not resolve through MCR** → it does: all 32 AVM module tags at `064aa09` are looked up and `current`, so no adapter was needed.
 - **Dependabot's PR format changes** → affected PRs become `unparseable`, and the parity result says it is incomplete.
 - **`dependabot.yml` and the trial policy disagree while both exist** → disagreements show up as `held by policy` or scan-only entries, which is useful evidence for retiring Dependabot.
 - **A tool reports nothing for a source it doesn't understand** → the scan detects dependency-bearing files by pattern itself (task 2.3), so silence from a tool doesn't hide a file.
