@@ -1,0 +1,16 @@
+# Functional workflow
+
+What the system should do for each update, from discovery to release advice. This describes desired behaviour, not architecture. It is the input for designing slices 2 and 3; slice 1, the [dependency scan](../openspec/specs/dependency-scan/spec.md), covers steps 1 and 2.
+
+1. **Maintain a dependency inventory.** Know every dependency and update mechanism: direct and transitive packages, container base images, OS packages in build and development environments, the VM scale set's Marketplace base image, build toolchains, Bicep modules and CI actions. Slice 1 does this, with its gaps listed in [scan-coverage.md](scan-coverage.md).
+2. **Discover and prioritise updates.** Find newer versions and relevant advisories. Put urgent security fixes first and avoid noisy or redundant work. Decide which related updates to group and which to keep apart, so that a failure can still be traced to one update.
+3. **Assess impact and propose a plan.** Summarise the relevant release notes and advisories, find how the dependency is used, estimate which components and outputs it affects, and state risks, evidence and uncertainty. Major, security-sensitive or behaviour-changing updates get extra scrutiny.
+4. **Prepare the change.** Make the update in an isolated, reviewable change that keeps enough context to explain what changed and why.
+5. **Validate every affected output.** Run the required checks for each output the update touches: binaries and container images, plus the infrastructure and deployment checks for the VM scale set and its Marketplace base image. Once the image build exists, that includes the image build, its SBOMs and a VM booted from the candidate image before promotion. Report each check and artifact separately. One green CI check is not enough when other affected outputs weren't validated.
+6. **Diagnose and attempt bounded repairs.** Tell a likely regression apart from a flaky check or an unrelated failure. Make safe, limited fixes and rerun validation. Stop and explain when the evidence is inconclusive, repairs fail, or the decision needs security or design judgement.
+7. **Decide whether to merge.** Merge automatically only when the update falls in an explicitly approved low-risk category and every deterministic policy and validation requirement passes. Hold everything else for review, saying which question is unresolved or which evidence is missing.
+8. **Check the result after merge.** Confirm the merged change stays healthy under the relevant checks, and report regressions for investigation or a revert.
+9. **Recommend release readiness.** Summarise validated, unreleased changes and their security and user impact, name the remaining validation gaps, and recommend whether to cut a release.
+10. **Keep image release gates explicit.** In the planned image design, Compute Gallery publication sits behind a protected GitHub environment with required reviewers. An image version is promoted to `latest` only after the smoke tests and SBOM publication pass. Partner Center offer publication stays a separate, human-approved action unless that policy is changed explicitly.
+
+Steps 3 to 6 belong to slice 2, steps 7 to 9 to slice 3. Step 10 applies once the subject's image build is implemented (see the Marketplace VM image section of the [README](../README.md)).
