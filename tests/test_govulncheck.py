@@ -131,8 +131,9 @@ def test_standard_library_advisories_refer_to_the_go_directive(scanned, run_064a
     assert len(stdlib) == 13
     assert {v["dependency"] for v in stdlib.values()} == {GO_DIRECTIVE}
     assert {v["affected_version"] for v in stdlib.values()} == {"1.25.14"}
-    # Go 1.25 gets no more fixes, so the fix is on the next line. Renovate proposes no newer
-    # go directive, so nothing reaches it.
+    # Go 1.25 gets no more fixes, so the fix is on the next line. This report predates the
+    # scan config's bump rule for the go directive: Renovate proposed no newer one, so nothing
+    # reaches it.
     assert {v["fixed_version"] for v in stdlib.values()} == {"1.26.9"}
     assert {v["fix_reached_by_candidate"] for v in stdlib.values()} == {False}
     # Module level only, or an imported package without a call to the vulnerable function.
@@ -144,6 +145,30 @@ def test_standard_library_advisories_refer_to_the_go_directive(scanned, run_064a
     # The x/net advisories that also cover the standard library are recorded on both.
     assert "GO-2026-6603" in stdlib
     assert stdlib["GO-2026-6603"]["aliases"] == ["CVE-2026-78659"]
+
+
+def test_a_newer_go_directive_reaches_the_standard_library_fixes(scanned, run_064aa09, report):
+    # What the bump rule makes Renovate propose for `go 1.25.14`
+    # (fixtures/renovate-go-directive): the newest minor, past the 1.26.9 fix.
+    found, inventory = scanned
+    outdated = {"state": "outdated", "datasource": "golang-version", "looked_up_at": AT}
+    candidate = {
+        "dependency": GO_DIRECTIVE,
+        "update_type": "minor",
+        "version": "1.27.2",
+        "classification": "in_scope",
+    }
+    bumped = Inventory(
+        [
+            d | {"lookup": outdated} if d["id"] == GO_DIRECTIVE else d
+            for d in inventory.dependencies
+        ],
+        [*inventory.candidates, candidate],
+    )
+    result = apply([run_064aa09], found.vulnerabilities, bumped, report)
+    stdlib = [v for v in result.vulnerabilities if v["source"] == "govulncheck"]
+    assert len(stdlib) == 13
+    assert {v["fix_reached_by_candidate"] for v in stdlib} == {True}
 
 
 def test_the_result_makes_a_valid_record(scanned, run_064aa09, report, record_from):

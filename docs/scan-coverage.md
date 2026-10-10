@@ -7,7 +7,7 @@ What `sdlc scan` reads, where its versions come from, and what it knowingly leav
 | Source | Read by | Files | Entries | Notes |
 |---|---|---:|---:|---|
 | NuGet central versions and project files | Renovate `nuget` | 11 | 66 | Includes the Aspire SDK in `AppHost.csproj`'s `Sdk` attribute. A `PackageReference` without its own version is listed but skipped: its central version governs it. |
-| Go modules | Renovate `gomod` | 1 | 47 | Includes the `go` directive. Indirect modules are listed but skipped, which is Renovate's default. |
+| Go modules | Renovate `gomod` | 1 | 47 | Includes the `go` directive, with newer Go releases as its candidates (see below). Indirect modules are listed but skipped, which is Renovate's default. |
 | Dockerfile base images and OS packages | Renovate `dockerfile` | 6 | 21 | `apt-get`/`apk add` packages without a version are listed but skipped. |
 | GitHub Actions | Renovate `github-actions` | 4 | 38 | Action pins, `setup-go`/`setup-dotnet` versions, and `runs-on` labels (skipped). |
 | Devcontainer features | Renovate `devcontainer` | 2 | 2 | |
@@ -19,6 +19,8 @@ What `sdlc scan` reads, where its versions come from, and what it knowingly leav
 | Lock files lagging behind a declared version | `dotnet list package --include-transitive` | 7 lock files | 7 | See [Locked entries](#locked-entries). |
 
 **"Scan rule"** means a Renovate custom manager in `src/sdlc/config/scan.renovate.json5`, applied to every subject. Rules that describe one subject's own files belong in that subject's policy instead.
+
+The same file has one package rule: the `go` directive gets `rangeStrategy: "bump"`. Renovate's `go-mod-directive` versioning reads `go 1.25.14` as a minimum that every newer Go release satisfies, so under the default strategy it proposes nothing and the directive would look current while Go 1.26 and 1.27 exist. With bump, newer releases are its patch and minor candidates. The `toolchain` directive is an exact version and needs no rule.
 
 ## Lookup states
 
@@ -70,7 +72,7 @@ It analyses the module's packages without tests, with cgo off, for linux/amd64 a
 
 The reachability sits next to OSV-Scanner's version match and doesn't change it. OSV-Scanner doesn't check the Go standard library, so govulncheck's standard library advisories are added with source `govulncheck`, against the `go.mod` directive that sets the toolchain, with the fixed version from the advisory. An advisory govulncheck finds on another module that OSV-Scanner didn't report is added with source `govulncheck` the way OSV-Scanner's are, with a locked entry when the inventory has none for the module.
 
-At `064aa09`, the five `golang.org/x/net` advisories are reachable and the three `golang.org/x/crypto` ones are not: no package of it is imported. Go 1.25.14 has 13 standard library advisories, all fixed in 1.26.9: 9 reachable, 4 not. Both platforms give the same answers. Renovate proposes no newer `go` directive, so no candidate reaches those fixes.
+At `064aa09`, the five `golang.org/x/net` advisories are reachable and the three `golang.org/x/crypto` ones are not: no package of it is imported. Go 1.25.14 has 13 standard library advisories, all fixed in 1.26.9: 9 reachable, 4 not. Both platforms give the same answers. That scan's Renovate proposed no newer `go` directive, so no candidate reached those fixes; with the bump rule above, the directive's minor candidate (1.27.2 on `main` at `e93d706`) reaches all 13.
 
 ### Dependabot alerts
 

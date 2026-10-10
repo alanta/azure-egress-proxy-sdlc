@@ -1,0 +1,179 @@
+{
+  "problems": [],
+  "repositories": {
+    "local": {
+      "problems": [],
+      "branches": [],
+      "packageFiles": {
+        "gomod": [
+          {
+            "deps": [
+              {
+                "datasource": "golang-version",
+                "versioning": "go-mod-directive",
+                "depType": "golang",
+                "depName": "go",
+                "currentValue": "1.25.14",
+                "commitMessageTopic": "go module directive",
+                "managerData": {
+                  "lineNumber": 2
+                },
+                "packageName": "go",
+                "updates": [
+                  {
+                    "bucket": "minor",
+                    "newVersion": "1.27.2",
+                    "newValue": "1.27.2",
+                    "releaseTimestamp": "2026-10-08T00:00:00.000Z",
+                    "newVersionAgeInDays": 2,
+                    "newMajor": 1,
+                    "newMinor": 27,
+                    "newPatch": 2,
+                    "updateType": "minor",
+                    "isBreaking": false,
+                    "isBump": true,
+                    "libYears": 0.136986301369863,
+                    "branchName": "renovate/go-1.x"
+                  }
+                ],
+                "warnings": [],
+                "sourceUrl": "https://github.com/golang/go",
+                "registryUrl": "https://raw.githubusercontent.com/golang/website",
+                "homepage": "https://go.dev/",
+                "mostRecentTimestamp": "2026-10-08T00:00:00.000Z",
+                "currentVersion": "1.25.14",
+                "currentVersionTimestamp": "2026-08-19T00:00:00.000Z",
+                "currentVersionAgeInDays": 52,
+                "isSingleVersion": true,
+                "fixedVersion": "1.25.14"
+              }
+            ],
+            "extractedConstraints": {
+              "%goMod": "~1.25.x"
+            },
+            "constraintsVersioning": {
+              "%goMod": "semver-coerced"
+            },
+            "packageFile": "a/go.mod"
+          },
+          {
+            "deps": [
+              {
+                "datasource": "golang-version",
+                "versioning": "go-mod-directive",
+                "depType": "golang",
+                "depName": "go",
+                "currentValue": "1.25.0",
+                "commitMessageTopic": "go module directive",
+                "managerData": {
+                  "lineNumber": 2
+                },
+                "packageName": "go",
+                "updates": [
+                  {
+                    "bucket": "patch",
+                    "newVersion": "1.25.14",
+                    "newValue": "1.25.14",
+                    "releaseTimestamp": "2026-08-19T00:00:00.000Z",
+                    "newVersionAgeInDays": 52,
+                    "newMajor": 1,
+                    "newMinor": 25,
+                    "newPatch": 14,
+                    "updateType": "patch",
+                    "isBreaking": false,
+                    "isBump": true,
+                    "libYears": 1.0191780821917809,
+                    "branchName": "renovate/go-1.25.x"
+                  },
+                  {
+                    "bucket": "minor",
+                    "newVersion": "1.27.2",
+                    "newValue": "1.27.2",
+                    "releaseTimestamp": "2026-10-08T00:00:00.000Z",
+                    "newVersionAgeInDays": 2,
+                    "newMajor": 1,
+                    "newMinor": 27,
+                    "newPatch": 2,
+                    "updateType": "minor",
+                    "isBreaking": false,
+                    "isBump": true,
+                    "libYears": 1.1561643835616437,
+                    "branchName": "renovate/go-1.x"
+                  }
+                ],
+                "warnings": [],
+                "sourceUrl": "https://github.com/golang/go",
+                "registryUrl": "https://raw.githubusercontent.com/golang/website",
+                "homepage": "https://go.dev/",
+                "mostRecentTimestamp": "2026-10-08T00:00:00.000Z",
+                "currentVersion": "1.25.0",
+                "currentVersionTimestamp": "2025-08-12T00:00:00.000Z",
+                "currentVersionAgeInDays": 424,
+                "isSingleVersion": true,
+                "fixedVersion": "1.25.0"
+              },
+              {
+                "datasource": "golang-version",
+                "depType": "toolchain",
+                "depName": "go",
+                "currentValue": "1.25.14",
+                "commitMessageTopic": "go toolchain directive",
+                "managerData": {
+                  "lineNumber": 4
+                },
+                "packageName": "go",
+                "updates": [
+                  {
+                    "bucket": "minor",
+                    "newVersion": "1.27.2",
+                    "newValue": "1.27.2",
+                    "releaseTimestamp": "2026-10-08T00:00:00.000Z",
+                    "newVersionAgeInDays": 2,
+                    "newMajor": 1,
+                    "newMinor": 27,
+                    "newPatch": 2,
+                    "updateType": "minor",
+                    "isBreaking": false,
+                    "libYears": 0.136986301369863,
+                    "branchName": "renovate/go-1.x"
+                  }
+                ],
+                "versioning": "semver",
+                "warnings": [],
+                "sourceUrl": "https://github.com/golang/go",
+                "registryUrl": "https://raw.githubusercontent.com/golang/website",
+                "homepage": "https://go.dev/",
+                "mostRecentTimestamp": "2026-10-08T00:00:00.000Z",
+                "currentVersion": "1.25.14",
+                "currentVersionTimestamp": "2026-08-19T00:00:00.000Z",
+                "currentVersionAgeInDays": 52,
+                "isSingleVersion": true,
+                "fixedVersion": "1.25.14"
+              }
+            ],
+            "extractedConstraints": {
+              "%goMod": "~1.25.x",
+              "golang": "1.25.14"
+            },
+            "constraintsVersioning": {
+              "%goMod": "semver-coerced"
+            },
+            "packageFile": "b/go.mod"
+          }
+        ]
+      },
+      "libYearsWithStatus": {
+        "libYears": {
+          "managers": {
+            "gomod": 1.2931506849315069
+          },
+          "total": 1.2931506849315069
+        },
+        "dependencyStatus": {
+          "outdated": 2,
+          "total": 2
+        }
+      }
+    }
+  }
+}
