@@ -38,6 +38,6 @@
 
 ## 6. Reports and end-to-end runs
 
-- [ ] 6.1 Render the Markdown report from the record only, and fail without a report when the record fails its schema; verify a test that every record section appears in the report, and that an invalid record produces no report
+- [x] 6.1 Render the Markdown report from the record only, and fail without a report when the record fails its schema; verify a test that every record section appears in the report, and that an invalid record produces no report
 - [ ] 6.2 Run a live end-to-end scan of the subject's current `main` with the trial policy; verify every in-scope update from open Dependabot PRs is `matched` or explained, the known gaps (PyJWT, AVM tags, the Go directive) appear as candidates or gaps, and the subject's branches, PRs and runs are unchanged; commit the run under `fixtures/` and record mismatches in `docs/`
 - [ ] 6.3 Write the runbook in `docs/running-a-scan.md`: inputs, the read-only credential and its permissions, the trial-policy option, outputs and how to read them; verify a fresh scan following only the runbook succeeds

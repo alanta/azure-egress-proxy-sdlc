@@ -2,6 +2,7 @@
 Renovate report and .NET listing."""
 
 import copy
+import dataclasses
 import json
 from pathlib import Path
 
@@ -9,7 +10,14 @@ import pytest
 
 from sdlc import native, osv, policy, renovate
 from sdlc.dependabot_prs import PullRequest, PullRequests, Update, parse
-from sdlc.parity import compare, lock_versions, name_key, same_version, version_order
+from sdlc.parity import (
+    compare,
+    lock_versions,
+    name_key,
+    present,
+    same_version,
+    version_order,
+)
 from sdlc.pr_diff import FileVersion, bare, removed_versions
 from sdlc.record import validate_record
 
@@ -154,6 +162,11 @@ def test_a_patch_is_matched_by_a_newer_candidate_with_both_versions(scanned):
     assert update == {
         "name": "github.com/Azure/azure-sdk-for-go/sdk/azcore",
         "ecosystem": "gomod",
+        "directory": "/proxy",
+        "group": "gomod-minor-patch",
+        "update_type": "patch",
+        "update_type_derived": False,
+        "from_source": "text",
         "from": "1.23.1",
         "from_versions": [{"file": "proxy/go.mod", "version": "1.23.1"}],
         "to": "1.23.2",
@@ -226,6 +239,7 @@ def test_an_update_none_of_whose_files_has_its_from_version_is_stale(scanned, tm
             inventory = without(inventory, dependency=dep)
     locks = {f.file for f in pull(98).updates[0].from_versions if f.file.endswith(".json")}
     checkout = lock_files(tmp_path, {file: {"Azure.Core": "1.63.0"} for file in locks})
+    (checkout / "Directory.Packages.props").write_text("<Project />")
     section = compared(scanned, 98, inventory=inventory, checkout=checkout)
     update = results(section)[98, "Azure.Core"]
     assert update["result"] == "stale"
@@ -249,6 +263,80 @@ def test_a_pr_made_for_an_older_revision_is_stale(scanned, record_from):
     # A stale PR is neither matched nor missed, and the comparison is still complete.
     assert section["complete"] is True
     assert validate_record(as_record(record_from, scanned[0], section)) == []
+
+
+BUILDX = "docker/setup-buildx-action"
+
+
+def moved(files):
+    """#75 with its buildx update changing these files, as it did once rebased onto a later
+    main that has a workflow 064aa09 doesn't: .github/workflows/images.yml."""
+    pr = pull(75)
+    updates = tuple(
+        dataclasses.replace(
+            u, from_versions=tuple(FileVersion(f, "4.3.0", "v4.3.0") for f in files)
+        )
+        if u.name == BUILDX
+        else u
+        for u in pr.updates
+    )
+    return PullRequests(READ, [dataclasses.replace(pr, updates=updates)])
+
+
+def workflows(root, *names):
+    for name in names:
+        path = root / ".github" / "workflows" / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("on: push\n")
+    return root
+
+
+def test_an_update_to_a_file_the_revision_lacks_is_stale_not_missed(scanned, tmp_path):
+    checkout = workflows(tmp_path, "allowlist.yml", "deploy.yml", "release.yml")
+    section = compared(scanned, pulls=moved([".github/workflows/images.yml"]), checkout=checkout)
+    update = results(section)[75, BUILDX]
+    assert update["result"] == "stale"
+    assert update["reason"] == ".github/workflows/images.yml is absent from the scanned revision"
+    assert section["pull_requests"][0]["state"] == "stale"
+    assert section["complete"] is True
+
+
+def test_a_file_the_revision_lacks_beside_one_it_has_is_noted_not_stale(scanned, tmp_path):
+    checkout = workflows(tmp_path, "allowlist.yml", "deploy.yml", "release.yml")
+    files = [".github/workflows/release.yml", ".github/workflows/images.yml"]
+    update = results(compared(scanned, pulls=moved(files), checkout=checkout))[75, BUILDX]
+    assert update["result"] == "matched"
+    assert update["reason"] == (
+        "not stale, but .github/workflows/images.yml is absent from the scanned revision"
+    )
+
+
+def test_a_file_the_revision_has_without_the_entry_is_missed(scanned, tmp_path):
+    checkout = workflows(tmp_path, "release.yml", "images.yml")
+    update = results(
+        compared(scanned, pulls=moved([".github/workflows/images.yml"]), checkout=checkout)
+    )[75, BUILDX]
+    assert update["result"] == "missed"
+    assert "not in the inventory in .github/workflows/images.yml" in update["reason"]
+
+
+@pytest.mark.parametrize("with_checkout", [False, True])
+def test_a_file_the_scan_cant_see_is_unknown_not_absent(scanned, tmp_path, with_checkout):
+    # Without a checkout, or inside a submodule a checkout may lack, nothing says it's absent.
+    checkout = None
+    if with_checkout:
+        checkout = workflows(tmp_path, "release.yml")
+        (tmp_path / ".gitmodules").write_text('[submodule "ci"]\n\tpath = vendor/ci\n')
+    files = ["vendor/ci/.github/workflows/images.yml"]
+    update = results(compared(scanned, pulls=moved(files), checkout=checkout))[75, BUILDX]
+    assert update["result"] == "missed"
+
+
+def test_presence_is_unknown_outside_the_checkout(tmp_path):
+    assert present(None, "x") is None
+    assert present(tmp_path, "../x") is None
+    assert present(workflows(tmp_path, "ci.yml"), ".github/workflows/ci.yml") is True
+    assert present(tmp_path, ".github/workflows/images.yml") is False
 
 
 def classified(scanned, subject_policy):
@@ -558,6 +646,7 @@ def entry(name, file, current, *, ecosystem="nuget", origin="declared", lookup=N
         "name": name,
         "current": current,
         "origin": origin,
+        **({"locked_because": "drift"} if origin == "locked" else {}),
         "location": {"file": file},
         "lookup": lookup or {"state": "outdated", "datasource": ecosystem},
     }
