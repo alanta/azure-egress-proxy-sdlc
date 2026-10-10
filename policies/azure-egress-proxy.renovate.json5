@@ -1,6 +1,6 @@
 // Trial update policy for alanta/azure-egress-proxy, in Renovate's format. It stands in
 // for .github/renovate.json5 in the subject until the maintainer adopts one there (see
-// openspec/changes/revision-dependency-scan, design decision 4). It carries over the
+// openspec/changes/archive/2026-10-10-revision-dependency-scan, design decision 4). It carries over the
 // intent of the subject's .github/dependabot.yml and adds the .NET runtime hold.
 {
   // dependabot.yml checks every ecosystem weekly on Monday, so that minor and patch
