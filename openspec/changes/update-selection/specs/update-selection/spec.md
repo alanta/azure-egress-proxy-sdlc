@@ -94,6 +94,15 @@ Only when the scan's date falls in the batch window, by default the first seven 
 - **WHEN** a dependency has a security unit and a newer in-scope candidate
 - **THEN** it is not in the batch
 
+### Requirement: Put each dependency in one unit
+
+A dependency SHALL be in at most one unit. When a dependency on a lifecycle unit's line also has a security reason, the lifecycle unit SHALL carry both reasons, with the higher of the two targets, and no separate security unit SHALL be selected.
+
+#### Scenario: Go is end of life and has standard library vulnerabilities
+
+- **WHEN** Go 1.25 is past its end of life, and govulncheck reports standard library vulnerabilities on the `go` directive
+- **THEN** one lifecycle unit covers the directive, lists both the lifecycle and the security reason, and its target reaches both the supported line and the fix
+
 ### Requirement: Group batch updates by the policy
 
 Selection SHALL put batch updates into units by the update policy's group rules. Updates that the same group rule matches SHALL form one unit, named after the group. An update that no group rule matches SHALL form a unit of its own. Security and lifecycle units SHALL NOT be grouped.

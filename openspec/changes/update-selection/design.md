@@ -53,6 +53,8 @@ Several advisories on one dependency give one security unit, with the highest of
 
 A line in state `nearing_end_of_life` or `end_of_life` gives one unit, named after the product and line, for example `lifecycle-go-1.25`. For each dependency on the line, the target is its in-scope candidate of the lowest update type whose version falls on one of the line's supported lines. The line is computed with the same mapping from versions to lines that the lifecycle check already uses. A dependency without such a candidate becomes an early warning, and the unit keeps the others.
 
+A dependency on the line that also has a security reason doesn't get its own security unit. The lifecycle unit carries the security reason as well, and takes the higher of the two targets, so that one change resolves both. The scan of `main` has this case: Go 1.25 is past its end of life, and govulncheck's standard library findings are on the `go` directive.
+
 Moving a whole line in one unit keeps declarations that belong together, such as the `go` directive, the Go version in the workflows and the Go base image, in one change, which the consistency check would otherwise flag halfway.
 
 ### 5. Batch window and minimum age are constants, measured against the scan's date

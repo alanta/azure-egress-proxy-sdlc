@@ -20,7 +20,7 @@ Removing the comparison now, before `update-selection`, means that change can bu
 None.
 
 ### Modified Capabilities
-- `dependency-scan`: removes the requirement "Compare with open Dependabot PRs" and its six scenarios. No other requirement changes. The requirement on unreadable advisory sources still covers Dependabot alerts.
+- `dependency-scan`: removes the requirement "Compare with open Dependabot PRs" and its six scenarios, and drops the parity result from what the report contains. The requirement on unreadable advisory sources still covers Dependabot alerts.
 
 ## Impact
 
