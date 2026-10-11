@@ -24,7 +24,7 @@ None.
 
 ## Impact
 
-- **Code:** removes `src/sdlc/parity.py`, `src/sdlc/pr_diff.py` and `src/sdlc/dependabot_prs.py`, along with their parts in `cli.py`, `record.py` and `report.py`, and their tests and fixtures (`tests/test_parity.py`, `tests/test_dependabot_prs.py`, `fixtures/azure-egress-proxy/prs`). `src/sdlc/dependabot.py`, which reads the alerts, stays.
+- **Code:** removes `src/sdlc/parity.py`, `src/sdlc/pr_diff.py` and `src/sdlc/dependabot_prs.py`, along with their parts in `cli.py`, `record.py` and `report.py`, and their tests and fixtures (`tests/test_parity.py`, `tests/test_dependabot_prs.py`, and the captured PRs in `fixtures/azure-egress-proxy/prs` apart from #76's diff, which the consistency tests use). `src/sdlc/dependabot.py`, which reads the alerts, stays.
 - **Schema:** a new record schema version without `parity`. Version 1 records in `runs/` and in the docs stay valid under the version 1 schema, which is kept.
 - **Token:** the scan no longer needs `Pull requests: read`. [running-a-scan.md](../../../docs/running-a-scan.md) drops it from the scan's permissions. `fork-mode-delivery` will need read access to PRs again, to read the system's own PRs and their checks, so the token can only be narrowed once that change has settled its credentials.
 - **Docs:** [running-a-scan.md](../../../docs/running-a-scan.md) and [scan-coverage.md](../../../docs/scan-coverage.md) lose their sections on the comparison with PRs. The README already records the decision.
