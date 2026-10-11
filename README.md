@@ -27,7 +27,7 @@ This system lives in this repository, separate from the code it maintains.
 ## Delivery slices
 
 1. **Scan a revision** (read only, no LLM). Produce an inventory, update candidates, a policy classification, vulnerability matches and cross-file version consistency for a pinned commit, with every gap made visible. Slice 1 showed that it finds at least what the open Dependabot PRs proposed.
-2. **Apply and validate.** Self-hosted Renovate applies the selected updates on a fork and opens draft PRs, and the subject's CI builds and tests every affected output. A coding agent later adds release-note summaries and bounded repair attempts (any file, including minor code and pipeline changes) where deterministic tools fall short.
+2. **Apply and validate.** The system selects updates, then applies routine ones with deterministic tools and breaking ones with a coding agent. It checks every result deterministically, then opens a draft PR from a fork, and the subject's CI builds and tests every affected output. The agent also makes bounded repair attempts (any file, including minor code and pipeline changes) and drafts release-note summaries.
 3. **Decide.** A merge policy (deterministic gates plus scores per risk dimension), automatic merge for the low-risk category, checks after merge, and release-readiness advice.
 
 What each step should do, from discovery to release advice, is described in [docs/functional-workflow.md](docs/functional-workflow.md).
@@ -36,15 +36,16 @@ In parallel: a research change on **where the system runs**. GitHub Actions, a c
 
 ## Decisions so far
 
-- **Deterministic tools first.** An agent is only brought in where a deterministic tool can't do the job. Where slices 2 and 3 need an LLM, a coding agent does the work, not a single structured LLM call.
+- **Deterministic code decides and checks; an agent may do the work** ([ADR-0002](docs/adr/ADR-0002-deterministic-decisions-agent-work.md)). Routine updates are applied deterministically. Breaking updates and repairs go to a coding agent, not to a single structured LLM call. Every result passes the same deterministic check, whoever made it.
 - **The first slice scans a whole revision,** not individual Dependabot PRs.
 - **The update policy stays with the code.** No cross-tool standard exists, so it uses Renovate's config format in the subject repository (`.github/renovate.json5`). Until the maintainer merges one, a trial policy kept here stands in for it.
 - **Dependabot's version-update PRs are retired once slice 2 runs.** Slice 1 showed that the scan finds what they propose, so the scan no longer compares with them. Dependabot alerts stay as a second source for vulnerabilities.
-- **Updates are applied by self-hosted Renovate in fork mode, as draft PRs** ([ADR-0001](docs/adr/ADR-0001-how-updates-are-applied.md)). The subject's CI validates them. The only write credential is scoped to the fork and to opening PRs. An agent may get write access to the fork later, given guardrails against prompt injection.
-- **Updates are prepared for a reason, not on a weekly schedule.** Renovate decides most of it from the subject's policy, and the scan adds what Renovate can't know:
-  - security fixes are prepared right away, reachable or not, at the smallest fixing version (Renovate's `vulnerabilityAlerts`);
-  - everything else is batched in a monthly window and left unchanged between windows, which keeps churn down (Renovate's `schedule`, with `updateNotScheduled: false`);
-  - a version line nearing end of life, according to the scan's lifecycle data, gets a PR when the policy allows the move, and an early warning otherwise.
+- **Updates reach the subject as draft PRs from a fork** ([ADR-0001](docs/adr/ADR-0001-how-updates-are-applied.md)). The subject's CI validates them. A deterministic step pushes, and the only write credential is scoped to the fork and to opening PRs. An agent may get write access to the fork later, given guardrails against prompt injection.
+- **Renovate is used for discovery and lookups.** Selection, applying and delivery are the system's own code, so the policy doesn't depend on Renovate's semantics.
+- **Updates are prepared for a reason, not on a weekly schedule.** Each run depends only on the state of `main`, the date and the policy:
+  - security fixes are prepared right away, reachable or not, at the smallest fixing version. This includes the Go standard library;
+  - a version line nearing end of life gets a PR when the policy allows the move, and an early warning otherwise;
+  - everything else is batched in a monthly window and left unchanged between windows, which keeps churn down.
 - **A security fix doesn't override a policy hold.** It is reported to the maintainer instead.
 - **Platform migrations are out of scope for now.** Moving .NET from 10 to 11 brings many NuGet majors with it. The policy holds those until the platform moves, and that move stays a human decision.
 - **Slice 2 relies on the subject's CI.** It builds every output, including the app images and `mock-idp`, and runs govulncheck with the Go version the PR builds with.
@@ -52,8 +53,8 @@ In parallel: a research change on **where the system runs**. GitHub Actions, a c
 
 ## Division of responsibilities
 
-- **Deterministic tools and policy** establish versions, resolve dependencies, apply updates, run scanners, builds and tests, enforce merge eligibility, and report pass or fail. They are the authority for hard gates.
-- **The coding agent** interprets release notes and advisories, maps changes to project context, diagnoses failures, makes bounded fixes and drafts summaries. Its assessments cite evidence and state uncertainty. It cannot override a failed check or grant itself permission to merge.
+- **Deterministic tools and policy** establish versions, resolve dependencies, select updates, apply routine updates, check every result, run scanners, builds and tests, enforce merge eligibility, and report pass or fail. They are the authority for hard gates.
+- **The coding agent** applies breaking updates, interprets release notes and advisories, maps changes to project context, diagnoses failures, makes bounded fixes and drafts summaries. Its assessments cite evidence and state uncertainty. It cannot override a failed check or grant itself permission to merge.
 - **The maintainer** sets policy, resolves exceptions and novel risks, reviews what falls outside the automatic path, and approves Marketplace publication.
 
 **Untrusted input.** Release notes, changelogs and PR bodies are written by upstream authors and are treated as data. Nothing read from them can lower a risk score or relax a gate. The agent's sandbox doesn't hold the credential that writes to the subject repository.

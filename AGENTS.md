@@ -12,10 +12,16 @@ This repository holds an SDLC system that keeps [`alanta/azure-egress-proxy`](ht
 
 ## Design principles
 
-- **Deterministic tools first.** An agent or LLM is brought in only where a deterministic tool can't do the job. Deterministic tools are the authority for every gate. An agent's output cites evidence and can never lower a risk score or relax a gate.
+- **Deterministic code decides and checks; an agent may do the work** ([ADR-0002](docs/adr/ADR-0002-deterministic-decisions-agent-work.md)).
+  - What to update, why, and to which version is always decided deterministically, and every gate is deterministic.
+  - An agent does the work where doing it deterministically costs more than checking the agent's result deterministically.
+  - An agent's output cites evidence and can never lower a risk score or relax a gate.
 - **Upstream text is untrusted data.** That includes release notes, changelogs, PR bodies and advisories.
 - **Unknown is reported as unknown.** A source that was missing, skipped or unavailable is reported as such, never as success or as "nothing found".
-- **Reuse tools before writing code.** Renovate is the engine for discovery and updates. Steer it through configuration (custom managers, package rules, presets, a config generated per run) before adding code of our own.
+- **Reuse tools before writing code.**
+  - Renovate is the engine for discovery and lookups. Extend it through configuration (custom managers, presets) before adding code of our own.
+  - To apply an update, use the ecosystem's own CLI where there is one.
+  - Keep decisions out of tool-specific semantics, so that a tool can be replaced.
 - **Pin and record every tool.** External tools run in containers pinned by digest, and the record names each version.
 
 ## Tech and commands
