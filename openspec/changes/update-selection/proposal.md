@@ -2,7 +2,7 @@
 
 ## Why
 
-Slice 1 lists every update candidate for a revision, but it doesn't say which of them are worth preparing. Updating everything every week, as Dependabot does, causes churn without reducing risk. Slice 2 prepares updates as draft PRs from a fork. Deterministic code decides what to prepare, and an agent does the work only where judgement is needed ([ADR-0002](../../../docs/adr/ADR-0002-deterministic-decisions-agent-work.md)). So slice 2 first needs a deterministic answer to three questions: which units, why, to which version, and whether each one is breaking.
+Slice 1 lists every update candidate for a revision, but it doesn't say which of them are worth preparing. Updating everything every week, as Dependabot does, causes churn without reducing risk. Slice 2 prepares updates as draft PRs from a fork. Deterministic code decides what to prepare, and an agent does the work only where judgement is needed ([ADR-0002](../../../docs/adr/ADR-0002-deterministic-decisions-agent-work.md)). So slice 2 first needs a deterministic answer to four questions: which units, why, to which version, and whether each one is breaking.
 
 This change defines that answer and shows it in the scan report, without writing anything. The selection can be checked against real scans before the follow-up change, `fork-mode-delivery`, acts on it.
 
