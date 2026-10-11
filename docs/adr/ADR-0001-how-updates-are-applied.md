@@ -1,7 +1,7 @@
 # How updates are applied
 
 ## Status
-Accepted
+Accepted. Partly superseded by [ADR-0002](ADR-0002-deterministic-decisions-agent-work.md): our own code, not Renovate, selects, applies and delivers updates. The fork, the draft PRs, the credentials and the validation by the subject's CI still stand.
 
 ## Created / Updated
 10-Oct-2026
