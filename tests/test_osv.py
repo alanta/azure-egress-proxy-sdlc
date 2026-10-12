@@ -344,6 +344,9 @@ def test_a_candidate_from_an_advisory_must_be_a_fixed_version_it_names(
     assert validate_record(record) == []
     (candidate,) = [c for c in record["candidates"] if c["dependency"] == CRYPTO]
     candidate["version"] = "v0.57.0"
+    for vulnerability in record["vulnerabilities"]:
+        if vulnerability.get("fix_reached_by") == ["v0.56.0"]:
+            vulnerability["fix_reached_by"] = ["v0.57.0"]
     assert validate_record(record) == [
         f"$.candidates[{record['candidates'].index(candidate)}]: no advisory on {CRYPTO!r} "
         "names 'v0.57.0' as fixed"
@@ -556,6 +559,84 @@ def test_a_last_affected_version_is_judged_against_candidates(record_from):
     record = record_from(Inventory([entry], [candidate]))
     record["vulnerabilities"] = found.vulnerabilities
     assert validate_record(record) == []
+
+
+def test_a_higher_version_affected_again_doesnt_reach_the_fix(record_from):
+    entry = {
+        "id": "nuget:Directory.Packages.props:Pkg",
+        "ecosystem": "nuget",
+        "name": "Pkg",
+        "current": "6.0.1",
+        "origin": "declared",
+        "location": {"file": "Directory.Packages.props"},
+        "lookup": {"state": "outdated", "datasource": "nuget", "looked_up_at": AT},
+    }
+    candidates = [
+        {"dependency": entry["id"], "update_type": t, "version": v, "classification": "in_scope"}
+        for t, v in (("major", "7.0.0"), ("minor", "6.1.1"))
+    ]
+    output = output_for(
+        "src/A/packages.lock.json",
+        "Pkg",
+        "6.0.1",
+        advisory(
+            "GHSA-r",
+            "Pkg",
+            "NuGet",
+            [{"introduced": "0"}, {"fixed": "6.0.5"}],
+            [{"introduced": "6.1.0"}, {"fixed": "6.1.2"}],
+        ),
+    )
+    found = osv.findings(output, [entry], candidates, indirect=set())
+    (vulnerability,) = found.vulnerabilities
+    assert vulnerability["fixed_version"] == "6.0.5"
+    assert vulnerability["fix_reached_by_candidate"] is True
+    # 6.1.1 is past the fixed version, but in the second range.
+    assert vulnerability["fix_reached_by"] == ["7.0.0"]
+    record = record_from(Inventory([entry], candidates))
+    record["vulnerabilities"] = found.vulnerabilities
+    assert validate_record(record) == []
+
+
+@pytest.mark.parametrize(
+    ("reached", "reached_by", "expected"),
+    [
+        (True, [], "should be non-empty"),
+        (False, ["7.0.0"], "is expected to be empty"),
+        (True, ["7.0.1"], "'7.0.1' isn't an in-scope candidate"),
+    ],
+)
+def test_the_candidates_said_to_reach_a_fix_are_checked(record_from, reached, reached_by, expected):
+    entry = {
+        "id": "nuget:Directory.Packages.props:Pkg",
+        "ecosystem": "nuget",
+        "name": "Pkg",
+        "current": "6.0.1",
+        "origin": "declared",
+        "location": {"file": "Directory.Packages.props"},
+        "lookup": {"state": "outdated", "datasource": "nuget", "looked_up_at": AT},
+    }
+    candidate = {
+        "dependency": entry["id"],
+        "update_type": "major",
+        "version": "7.0.0",
+        "classification": "in_scope",
+    }
+    record = record_from(Inventory([entry], [candidate]))
+    record["vulnerabilities"] = [
+        {
+            "advisory": "GHSA-r",
+            "dependency": entry["id"],
+            "affected_version": "6.0.1",
+            "fixed_version": "6.0.5",
+            "fix_reached_by_candidate": reached,
+            "fix_reached_by": reached_by,
+            "source": "osv",
+            "reachability": "unknown",
+        }
+    ]
+    problems = validate_record(record)
+    assert any(expected in p for p in problems), problems
 
 
 class FakeRun:

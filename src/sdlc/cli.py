@@ -20,8 +20,10 @@ from sdlc import (
     outputs,
     policy,
     renovate,
+    selection,
 )
-from sdlc.record import SCHEMA_VERSION
+from sdlc.record import SCHEMA_VERSION, assembled_problems
+from sdlc.report import count
 from sdlc.subject import Revision, SubjectError, checkout, resolve
 
 
@@ -96,8 +98,8 @@ def scan(
             gaps = coverage.gaps(path, baseline)
             native_updates = []
             for query, label in (
-                (native.dotnet_updates, "dotnet list package"),
-                (native.go_updates, "go list -m -u"),
+                (native.dotnet_updates, native.LABELS["dotnet"]),
+                (native.go_updates, native.LABELS["go"]),
             ):
                 try:
                     native_updates += query(path)
@@ -188,7 +190,21 @@ def scan(
         "gaps": gaps,
     }
     directory = outputs.run_directory(out, repository, revision.commit, looked_up_at)
+    # The selection is only made from a record that holds together; if making it fails, the
+    # record is kept without one, with the reason, like any record that fails validation.
+    problems = assembled_problems(record)
+    if not problems:
+        try:
+            record["selection"] = selection.select(
+                record,
+                subject_policy,
+                datetime.fromisoformat(looked_up_at).astimezone(UTC).date(),
+            )
+        except Exception as error:  # a bug in the selection must not lose the scan
+            problems = [f"$.selection: it couldn't be made: {error!r}"]
     try:
+        if problems:
+            outputs.reject(record, directory, problems)
         record_path, report_path = outputs.write(record, directory)
     except outputs.InvalidRecord as error:
         print("error: the record fails its schema, so no report was written:", file=sys.stderr)
@@ -247,6 +263,12 @@ def summary(record: dict) -> list[str]:
         f"{reach['unknown']} with reachability unknown"
     )
     lines.append(f"inconsistent declarations: {len(record['inconsistencies'])}")
+    units = record["selection"]["units"]
+    lines.append(
+        f"would prepare: {count(len(units), 'unit')} "
+        f"({sum(u['breaking'] for u in units)} breaking), "
+        f"{count(len(record['selection']['not_prepared']), 'reason')} not prepared"
+    )
     return lines
 
 

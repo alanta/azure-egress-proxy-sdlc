@@ -20,7 +20,7 @@ from typing import Any
 OSV_SCANNER = "osv-scanner"
 DEPENDABOT_ALERTS = "dependabot-alerts"
 ENDOFLIFE = "endoflife.date"
-NATIVE = {"dotnet": "dotnet list package", "go": "go list -m -u"}
+NATIVE = {"dotnet": "dotnet list package", "go": "go list -m -u"}  # as native.LABELS
 # Unavailable sources that say nothing about vulnerabilities. Any other unavailable source,
 # including one added later, may hide an advisory, so the report never claims there are none.
 NOT_ABOUT_VULNERABILITIES = {DEPENDABOT_ALERTS, ENDOFLIFE, *NATIVE.values()}
@@ -37,6 +37,7 @@ SECTIONS = {
     "candidates": "## Update candidates",
     "vulnerabilities": "## Vulnerabilities",
     "dependabot_alerts": "### Dependabot alerts",
+    "selection": "## Would prepare",
     "lifecycle": "## Lifecycle",
     "consistency": "### What was compared",
     "inconsistencies": "## Declared versions",
@@ -82,6 +83,7 @@ def render(record: dict[str, Any]) -> str:
     for part in (
         _header,
         _summary,
+        _would_prepare,
         _lifecycle,
         _vulnerabilities,
         _declared,
@@ -253,6 +255,17 @@ def _summary(view: _View) -> list[str]:
         )
         lines += [f"  - {line}" for line in _per_dependency(view, unfixed)]
 
+    selection = record["selection"]
+    units = selection["units"]
+    window = selection["batch_window"]
+    lines.append(
+        f"- **Would prepare:** {count(len(units), 'unit')} "
+        f"({sum(u['breaking'] for u in units)} breaking), "
+        f"{count(len(selection['not_prepared']), 'reason')} not prepared, listed under Would "
+        f"prepare; the batch window is {'open' if window['open'] else 'closed'} on "
+        f"{text(selection['date'])}, the next one opens {text(window['next_opens'])}"
+    )
+
     inconsistencies = record["inconsistencies"]
     names = ", ".join(text(i["dependency"]) for i in inconsistencies)
     lines.append(
@@ -284,6 +297,168 @@ def _summary(view: _View) -> list[str]:
         )
     )
     return lines
+
+
+NOT_PREPARED = {
+    "fix_held": "Vulnerable, fix held by policy",
+    "no_route": "Vulnerable, no fixed version recorded",
+    "no_candidate": "Vulnerable, no candidate reaches the fix",
+    "early_warning": "Early warning: line ending, no candidate leaves it",
+    "not_evaluated": "Not evaluated: data is missing",
+    "waiting": "Too young to batch yet",
+}
+
+
+def _days(n: int) -> str:
+    return count(n, "day")
+
+
+def _age(target: dict[str, Any]) -> str:
+    age = target["age_days"]
+    if age == "unknown":
+        return "age unknown"
+    if age < 0:
+        return f"released {_days(-age)} after the scan"
+    return f"{_days(age)} old"
+
+
+def _window(window: dict[str, Any]) -> str:
+    return f"days {window['first_day']} to {window['last_day']} of every month"
+
+
+def _would_prepare(view: _View) -> list[str]:
+    """What the scan would prepare, and what it could not, as the record's selection says."""
+    selection = view.record["selection"]
+    defaults = selection["defaults"]
+    window = selection["batch_window"]
+    lines = [
+        "## Would prepare",
+        "",
+        f"Decided from this record on {text(selection['date'])} (UTC). Nothing is prepared by "
+        "the scan itself.",
+        "",
+        f"- **Batch window:** {_window(defaults['batch_window'])}; "
+        f"{'open' if window['open'] else 'closed'} on {text(selection['date'])}; the next one "
+        f"opens {text(window['next_opens'])}",
+        "- **Minimum release age for batch updates:** "
+        f"{_days(defaults['minimum_release_age_days'])}",
+        "",
+    ]
+    units = selection["units"]
+    if not units:
+        lines += ["No unit would be prepared.", ""]
+    for unit in units:
+        lines += _unit(view, unit)
+    lines += ["### Not prepared", ""]
+    reports = selection["not_prepared"]
+    if not reports:
+        lines.append("Nothing that would have been prepared was left out.")
+    for kind, title in NOT_PREPARED.items():
+        found = [r for r in reports if r["kind"] == kind]
+        if found:
+            lines += [f"#### {title}", ""]
+            lines += [_not_prepared(view, r) for r in found]
+            lines.append("")
+    return lines[:-1] if lines[-1] == "" else lines
+
+
+def _unit(view: _View, unit: dict[str, Any]) -> list[str]:
+    reasons = ", ".join(unit["reasons"])
+    lines = [
+        f"### {text(unit['name'])}",
+        "",
+        f"- **Reason:** {reasons}",
+        f"- **Breaking:** {'yes' if unit['breaking'] else 'no'}",
+    ]
+    if unit.get("name_collision"):
+        lines.append("- **Name:** changed to tell it apart from another unit with the same name")
+    rows = []
+    for t in unit["targets"]:
+        entry = view.entries[t["dependency"]]
+        rows.append(
+            [
+                text(entry["name"]),
+                view.where(t["dependency"]),
+                version(t["current"]),
+                t["update_type"],
+                text(t["version"]),
+                _age(t),
+            ]
+        )
+    lines += [
+        "",
+        *table(["Dependency", "File", "Current", "Update", "Target", "Release age"], rows),
+    ]
+    evidence = unit["evidence"]
+    lines += ["", "Evidence:", ""]
+    for a in evidence.get("advisories", []):
+        fix = _fix(a | {"fix_reached_by_candidate": True})[0]
+        extra = [f"reachability {label(a['reachability'])}", f"from {text(a['source'])}"]
+        if a.get("aliases"):
+            extra.insert(0, "also " + ", ".join(text(x) for x in a["aliases"]))
+        if a.get("dependabot_alerts"):
+            extra.append("Dependabot alerts " + ", ".join(f"#{n}" for n in a["dependabot_alerts"]))
+        lines.append(
+            f"- Advisory {text(a['advisory'])} on {view.entry(a['dependency'])} "
+            f"({view.where(a['dependency'])}): {fix}; " + "; ".join(extra)
+        )
+    for e in evidence.get("lifecycle", []):
+        ends = f", {text(e['end_of_life'])}" if "end_of_life" in e else ""
+        lines.append(
+            f"- Lifecycle: {text(e['product'])} {text(e['line'])} is {label(e['state'])}{ends}; "
+            f"still supported: {_supported(e)}"
+        )
+    if "batch_window" in evidence:
+        lines.append(
+            f"- Batch window: {_window(evidence['batch_window'])}; minimum release age "
+            f"{_days(evidence['minimum_release_age_days'])}"
+        )
+    for r in evidence.get("open_security_reports", []):
+        about = [r["advisory"]] if "advisory" in r else list(r.get("advisories", []))
+        if "alert" in r:
+            about.append(f"Dependabot alert {r['alert']}")
+        held = f"; held by: {text(r['held_by'])}" if "held_by" in r else ""
+        lines.append(
+            f"- Open security report, not prepared: {NOT_PREPARED[r['kind']]}: "
+            f"{', '.join(text(a) for a in about)} on {view.entry(r['dependency'])} "
+            f"({view.where(r['dependency'])}){held}"
+        )
+    lines.append("")
+    return lines
+
+
+def _not_prepared(view: _View, report: dict[str, Any]) -> str:
+    line = f"- {_subject(view, report)}{text(report['detail'])}"
+    if report["kind"] == "fix_held":
+        line += f" Held by: {text(report['held_by'])}."
+    return line
+
+
+def _subject(view: _View, report: dict[str, Any]) -> str:
+    """What a report of something not prepared is about, ending in a colon and a space."""
+    parts = []
+    if "dependency" in report:
+        parts.append(f"{view.entry(report['dependency'])} ({view.where(report['dependency'])})")
+    for dep_id in report.get("dependencies", []):
+        parts.append(f"{view.entry(dep_id)} ({view.where(dep_id)})")
+    if "product" in report:
+        parts.append(f"{text(report['product'])} {text(report['line'])}")
+    for line in report.get("lines", []):
+        parts.append(f"{text(line['product'])} {text(line['line'])}")
+    if "advisory" in report:
+        parts.append(text(report["advisory"]))
+    for advisory in report.get("advisories", []):
+        parts.append(text(advisory))
+    if "alert" in report:
+        parts.append(f"Dependabot alert {report['alert']} on {text(report['package'])}")
+    if "source" in report:
+        parts.append(f"source {text(report['source'])}")
+    if "version" in report:
+        parts.append(
+            f"{text(report['version'])} ({report['update_type']}, "
+            f"{_age(report)}, old enough on {text(report['old_enough_on'])})"
+        )
+    return f"**{'; '.join(dict.fromkeys(parts))}:** " if parts else ""
 
 
 def _unknowns(view: _View) -> list[str]:

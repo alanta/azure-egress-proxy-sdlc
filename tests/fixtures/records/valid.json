@@ -1,11 +1,11 @@
 {
-  "schema_version": "2",
+  "schema_version": "3",
   "subject": {
     "repository": "alanta/azure-egress-proxy",
     "ref": "main",
     "commit": "064aa099ecf7ffea9664b89df29f7d89d6859358"
   },
-  "scanned_at": "2026-10-08T09:00:00+00:00",
+  "scanned_at": "2026-10-05T09:00:00+00:00",
   "tools": [
     {
       "name": "renovate",
@@ -16,7 +16,7 @@
       "name": "endoflife.date",
       "version": "v1",
       "url": "https://endoflife.date/api/v1",
-      "fetched_at": "2026-10-08T09:00:20+00:00"
+      "fetched_at": "2026-10-05T09:00:20+00:00"
     }
   ],
   "policy": {
@@ -37,7 +37,7 @@
       "lookup": {
         "state": "outdated",
         "datasource": "nuget",
-        "looked_up_at": "2026-10-08T09:00:10+00:00"
+        "looked_up_at": "2026-10-05T09:00:10+00:00"
       }
     },
     {
@@ -52,7 +52,7 @@
       "lookup": {
         "state": "outdated",
         "datasource": "nuget",
-        "looked_up_at": "2026-10-08T09:00:10+00:00"
+        "looked_up_at": "2026-10-05T09:00:10+00:00"
       }
     },
     {
@@ -67,7 +67,7 @@
       "lookup": {
         "state": "current",
         "datasource": "go",
-        "looked_up_at": "2026-10-08T09:00:12+00:00"
+        "looked_up_at": "2026-10-05T09:00:12+00:00"
       }
     },
     {
@@ -96,9 +96,39 @@
         "line": 3
       },
       "lookup": {
-        "state": "current",
+        "state": "outdated",
         "datasource": "golang-version",
-        "looked_up_at": "2026-10-08T09:00:10+00:00"
+        "looked_up_at": "2026-10-05T09:00:10+00:00"
+      }
+    },
+    {
+      "id": "nuget:Directory.Packages.props:Azure.Core",
+      "ecosystem": "nuget",
+      "name": "Azure.Core",
+      "current": "1.62.0",
+      "origin": "declared",
+      "location": {
+        "file": "Directory.Packages.props"
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "nuget",
+        "looked_up_at": "2026-10-05T09:00:10+00:00"
+      }
+    },
+    {
+      "id": "gomod:proxy/go.mod:golang.org/x/net",
+      "ecosystem": "gomod",
+      "name": "golang.org/x/net",
+      "current": "v0.40.0",
+      "origin": "declared",
+      "location": {
+        "file": "proxy/go.mod"
+      },
+      "lookup": {
+        "state": "outdated",
+        "datasource": "go",
+        "looked_up_at": "2026-10-05T09:00:10+00:00"
       }
     }
   ],
@@ -107,7 +137,9 @@
       "dependency": "nuget:src/AppHost/AppHost.csproj:Aspire.AppHost.Sdk",
       "update_type": "minor",
       "version": "13.6.1",
-      "classification": "in_scope"
+      "classification": "in_scope",
+      "group": "microsoft",
+      "released_at": "2026-09-10T03:16:59+00:00"
     },
     {
       "dependency": "nuget:Directory.Packages.props:Microsoft.OpenApi",
@@ -115,6 +147,29 @@
       "version": "3.10.2",
       "classification": "held_by_policy",
       "held_by": "Microsoft.OpenApi stays on 2.x until the 3.x migration is planned"
+    },
+    {
+      "dependency": "gomod:proxy/go.mod:go",
+      "update_type": "minor",
+      "version": "1.27.2",
+      "classification": "in_scope",
+      "group": "gomod-minor-patch",
+      "released_at": "2026-09-02T17:00:00+00:00"
+    },
+    {
+      "dependency": "nuget:Directory.Packages.props:Azure.Core",
+      "update_type": "minor",
+      "version": "1.63.0",
+      "classification": "in_scope",
+      "group": "nuget-minor-patch",
+      "released_at": "2026-10-03T08:00:00+00:00"
+    },
+    {
+      "dependency": "gomod:proxy/go.mod:golang.org/x/net",
+      "update_type": "minor",
+      "version": "v0.45.0",
+      "classification": "in_scope",
+      "group": "gomod-minor-patch"
     }
   ],
   "vulnerabilities": [
@@ -125,6 +180,21 @@
       "fixed_version": null,
       "source": "osv",
       "reachability": "not_reachable"
+    },
+    {
+      "advisory": "GO-2026-6100",
+      "aliases": [
+        "GHSA-xxxx-yyyy-zzzz"
+      ],
+      "dependency": "gomod:proxy/go.mod:golang.org/x/net",
+      "affected_version": "v0.40.0",
+      "fixed_version": "v0.41.0",
+      "fix_reached_by_candidate": true,
+      "fix_reached_by": [
+        "v0.45.0"
+      ],
+      "source": "govulncheck",
+      "reachability": "reachable"
     }
   ],
   "lifecycle": [
@@ -165,5 +235,144 @@
       "subject": "dependabot-alerts",
       "reason": "The credential has no Dependabot alerts permission."
     }
-  ]
+  ],
+  "selection": {
+    "date": "2026-10-05",
+    "defaults": {
+      "batch_window": {
+        "first_day": 1,
+        "last_day": 7
+      },
+      "minimum_release_age_days": 7
+    },
+    "batch_window": {
+      "open": true,
+      "next_opens": "2026-11-01"
+    },
+    "units": [
+      {
+        "name": "security-gomod-golang.org-x-net",
+        "reasons": [
+          "security"
+        ],
+        "subject": {
+          "ecosystem": "gomod",
+          "name": "golang.org/x/net"
+        },
+        "breaking": false,
+        "targets": [
+          {
+            "dependency": "gomod:proxy/go.mod:golang.org/x/net",
+            "current": "v0.40.0",
+            "version": "v0.45.0",
+            "update_type": "minor",
+            "age_days": "unknown"
+          }
+        ],
+        "evidence": {
+          "advisories": [
+            {
+              "advisory": "GO-2026-6100",
+              "aliases": [
+                "GHSA-xxxx-yyyy-zzzz"
+              ],
+              "dependency": "gomod:proxy/go.mod:golang.org/x/net",
+              "fixed_version": "v0.41.0",
+              "reachability": "reachable",
+              "source": "govulncheck"
+            }
+          ]
+        }
+      },
+      {
+        "name": "lifecycle-go-1.25",
+        "reasons": [
+          "lifecycle"
+        ],
+        "subject": {
+          "product": "go",
+          "line": "1.25"
+        },
+        "breaking": true,
+        "targets": [
+          {
+            "dependency": "gomod:proxy/go.mod:go",
+            "current": "1.25.14",
+            "version": "1.27.2",
+            "update_type": "minor",
+            "released_at": "2026-09-02T17:00:00+00:00",
+            "age_days": 33
+          }
+        ],
+        "evidence": {
+          "lifecycle": [
+            {
+              "product": "go",
+              "line": "1.25",
+              "state": "end_of_life",
+              "end_of_life": "2026-08-19",
+              "supported_lines": [
+                "1.26",
+                "1.27"
+              ],
+              "source": "https://endoflife.date/api/v1/products/go"
+            }
+          ]
+        }
+      },
+      {
+        "name": "microsoft",
+        "reasons": [
+          "batch"
+        ],
+        "subject": {
+          "group": "microsoft"
+        },
+        "breaking": false,
+        "targets": [
+          {
+            "dependency": "nuget:src/AppHost/AppHost.csproj:Aspire.AppHost.Sdk",
+            "current": "13.5.4",
+            "version": "13.6.1",
+            "update_type": "minor",
+            "released_at": "2026-09-10T03:16:59+00:00",
+            "age_days": 25
+          }
+        ],
+        "evidence": {
+          "batch_window": {
+            "first_day": 1,
+            "last_day": 7
+          },
+          "minimum_release_age_days": 7
+        }
+      }
+    ],
+    "not_prepared": [
+      {
+        "reason": "security",
+        "dependency": "gomod:proxy/go.mod:golang.org/x/crypto",
+        "advisory": "GO-2026-5932",
+        "kind": "no_route",
+        "detail": "The record gives no fixed version for the advisory: it names none, or the scan couldn't read one from its ranges."
+      },
+      {
+        "kind": "not_evaluated",
+        "reason": "security",
+        "source": "dependabot-alerts",
+        "detail": "The credential has no Dependabot alerts permission."
+      },
+      {
+        "kind": "waiting",
+        "reason": "batch",
+        "dependency": "nuget:Directory.Packages.props:Azure.Core",
+        "version": "1.63.0",
+        "update_type": "minor",
+        "released_at": "2026-10-03T08:00:00+00:00",
+        "age_days": 2,
+        "old_enough_on": "2026-10-10",
+        "detail": "1.63.0 is 2 days old, younger than the minimum of 7 days, so it waits for the next window, which opens on 2026-11-01."
+      }
+    ]
+  }
 }

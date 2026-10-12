@@ -1,14 +1,14 @@
 """The scan record: its JSON Schema and the checks a schema can't express."""
 
 import json
-from datetime import datetime
+from datetime import UTC, datetime
 from functools import cache
 from importlib.resources import files
 from typing import Any
 
 from jsonschema import Draft202012Validator
 
-SCHEMA_VERSION = "2"
+SCHEMA_VERSION = "3"
 
 
 @cache
@@ -49,6 +49,23 @@ def _consistency_problems(record: dict[str, Any]) -> list[str]:
         (f"$.tools[{i}].fetched_at", t["fetched_at"])
         for i, t in enumerate(record["tools"])
         if "fetched_at" in t
+    ]
+    timestamps += [
+        (f"$.candidates[{i}].released_at", c["released_at"])
+        for i, c in enumerate(record["candidates"])
+        if "released_at" in c
+    ]
+    selection = record.get("selection", {"units": [], "not_prepared": []})  # none before 3
+    timestamps += [
+        (f"$.selection.units[{i}].targets[{j}].released_at", t["released_at"])
+        for i, unit in enumerate(selection["units"])
+        for j, t in enumerate(unit["targets"])
+        if "released_at" in t
+    ]
+    timestamps += [
+        (f"$.selection.not_prepared[{i}].released_at", r["released_at"])
+        for i, r in enumerate(selection["not_prepared"])
+        if "released_at" in r
     ]
     if "dependabot_alerts" in record:
         timestamps.append(("$.dependabot_alerts.read_at", record["dependabot_alerts"]["read_at"]))
@@ -100,9 +117,11 @@ def _consistency_problems(record: dict[str, Any]) -> list[str]:
             problems.append(f"$.candidates: {dep_id!r} has candidates but its lookup is {state!r}")
 
     problems += _advisory_fix_problems(record)
+    problems += _reached_by_problems(record)
     problems += _alert_problems(record)
     problems += _inconsistency_problems(record)
     problems += _lifecycle_problems(record)
+    problems += _selection_problems(record)
 
     return problems
 
@@ -132,6 +151,22 @@ def _advisory_fix_problems(record: dict[str, Any]) -> list[str]:
                 "advisories, yet this one doesn't say so"
             )
     return problems
+
+
+def _reached_by_problems(record: dict[str, Any]) -> list[str]:
+    """The candidates said to reach a fix are in-scope candidates of the same dependency."""
+    in_scope = {
+        (c["dependency"], c["version"])
+        for c in record["candidates"]
+        if c["classification"] == "in_scope" and c["update_type"] != "digest"
+    }
+    return [
+        f"$.vulnerabilities[{i}].fix_reached_by: {version!r} isn't an in-scope candidate of "
+        f"{v['dependency']!r}"
+        for i, v in enumerate(record["vulnerabilities"])
+        for version in v.get("fix_reached_by", [])
+        if (v["dependency"], version) not in in_scope
+    ]
 
 
 def _inconsistency_problems(record: dict[str, Any]) -> list[str]:
@@ -168,6 +203,142 @@ def _lifecycle_problems(record: dict[str, Any]) -> list[str]:
                 problems.append(f"{path}.dependencies[{j}]: unknown dependency id {dep_id!r}")
             elif location != entries[dep_id]["location"]:
                 problems.append(f"{path}.locations[{j}]: not the location of {dep_id!r}")
+    return problems
+
+
+def _selection_problems(record: dict[str, Any]) -> list[str]:
+    """The selection only names dependencies of the inventory and in-scope candidates of them,
+    on the scan's own date, and gives every unit a name of its own."""
+    selection = record.get("selection")
+    if selection is None:  # versions 1 and 2 have none
+        return []
+    problems = []
+    entries = {d["id"]: d for d in record["inventory"]}
+    in_scope = {
+        (c["dependency"], c["version"]): c["update_type"]
+        for c in record["candidates"]
+        if c["classification"] == "in_scope"
+    }
+    try:
+        scanned = datetime.fromisoformat(record["scanned_at"]).astimezone(UTC).date().isoformat()
+    except ValueError:
+        scanned = None  # reported with the timestamps
+    if scanned is not None and selection["date"] != scanned:
+        problems.append(f"$.selection.date: {selection['date']!r} isn't the scan's date {scanned}")
+
+    names: set[str] = set()
+    targeted: dict[str, int] = {}
+    fixes = {
+        (v["dependency"], v["advisory"]): v.get("fix_reached_by", [])
+        for v in record["vulnerabilities"]
+    }
+    for i, unit in enumerate(selection["units"]):
+        path = f"$.selection.units[{i}]"
+        breaking = "lifecycle" in unit["reasons"] or any(
+            t["update_type"] == "major" for t in unit["targets"]
+        )
+        if unit["breaking"] != breaking:
+            problems.append(
+                f"{path}.breaking: {unit['breaking']}, but a unit is breaking exactly when it has "
+                "a lifecycle reason or a major target"
+            )
+        for target in unit["targets"]:
+            if target["dependency"] in targeted:
+                problems.append(
+                    f"{path}.targets: {target['dependency']!r} is already a target of "
+                    f"$.selection.units[{targeted[target['dependency']]}]"
+                )
+            targeted.setdefault(target["dependency"], i)
+        reached = {t["dependency"]: t["version"] for t in unit["targets"]}
+        if unit["name"] in names:
+            problems.append(f"{path}.name: duplicate unit name {unit['name']!r}")
+        names.add(unit["name"])
+        for j, target in enumerate(unit["targets"]):
+            where = f"{path}.targets[{j}]"
+            dep_id = target["dependency"]
+            if dep_id not in entries:
+                problems.append(f"{where}.dependency: unknown dependency id {dep_id!r}")
+                continue
+            if target["current"] != entries[dep_id]["current"]:
+                problems.append(f"{where}.current: not the current version of {dep_id!r}")
+            update_type = in_scope.get((dep_id, target["version"]))
+            if update_type is None:
+                problems.append(
+                    f"{where}.version: {target['version']!r} isn't an in-scope candidate of "
+                    f"{dep_id!r}"
+                )
+            elif update_type != target["update_type"]:
+                problems.append(f"{where}.update_type: not the update type of the candidate")
+        problems += _open_report_problems(unit, path, selection["not_prepared"])
+        for j, advisory in enumerate(unit["evidence"].get("advisories", [])):
+            where = f"{path}.evidence.advisories[{j}]"
+            key = (advisory["dependency"], advisory["advisory"])
+            if advisory["dependency"] not in entries:
+                problems.append(
+                    f"{where}.dependency: unknown dependency id {advisory['dependency']!r}"
+                )
+            elif key not in fixes:
+                problems.append(f"{where}: no such advisory on {advisory['dependency']!r}")
+            elif reached.get(advisory["dependency"]) not in fixes[key]:
+                problems.append(
+                    f"{where}: the unit's target for {advisory['dependency']!r} isn't among the "
+                    "candidates that reach the advisory's fix"
+                )
+
+    for i, report in enumerate(selection["not_prepared"]):
+        for dep_id in [report.get("dependency"), *report.get("dependencies", [])]:
+            if dep_id is not None and dep_id not in entries:
+                problems.append(f"$.selection.not_prepared[{i}]: unknown dependency id {dep_id!r}")
+    return problems
+
+
+def assembled_problems(record: dict[str, Any]) -> list[str]:
+    """The problems of a record that is assembled but has no selection yet: the whole schema
+    and every check, with an empty selection in its place, so the selection is only made from
+    a record that holds together."""
+    try:
+        today = datetime.fromisoformat(record["scanned_at"]).astimezone(UTC).date().isoformat()
+    except (KeyError, TypeError, ValueError):
+        today = "1970-01-01"  # the timestamp is reported either way
+    placeholder = {
+        "date": today,
+        "defaults": {
+            "batch_window": {"first_day": 1, "last_day": 7},
+            "minimum_release_age_days": 0,
+        },
+        "batch_window": {"open": False, "next_opens": today},
+        "units": [],
+        "not_prepared": [],
+    }
+    return validate_record({**record, "selection": placeholder})
+
+
+def _open_report_problems(
+    unit: dict[str, Any], path: str, not_prepared: list[dict[str, Any]]
+) -> list[str]:
+    """A batch unit names exactly the open security reports of its dependencies."""
+    if "batch" not in unit["reasons"]:
+        return []
+    batched = {t["dependency"] for t in unit["targets"]}
+    named = unit["evidence"].get("open_security_reports", [])
+    problems = [
+        f"{path}.evidence.open_security_reports[{j}]: no security report in not_prepared is "
+        "about a dependency of the unit and says this"
+        for j, reference in enumerate(named)
+        if reference["dependency"] not in batched
+        or not any(
+            r["reason"] == "security" and all(r.get(k) == v for k, v in reference.items())
+            for r in not_prepared
+        )
+    ]
+    for i, report in enumerate(not_prepared):
+        if report["reason"] != "security" or report.get("dependency") not in batched:
+            continue
+        if not any(all(report.get(k) == v for k, v in ref.items()) for ref in named):
+            problems.append(
+                f"{path}.evidence.open_security_reports: doesn't name $.selection."
+                f"not_prepared[{i}] about {report['dependency']!r}"
+            )
     return problems
 
 

@@ -9,15 +9,17 @@ from sdlc.policy import (
     PolicyError,
     allowed,
     classify,
+    group_of,
     load,
     match_list,
     matches,
     reconcile,
 )
 from sdlc.record import validate_record
-from sdlc.renovate import Inventory, match_fields, normalize
+from sdlc.renovate import Inventory, entries, match_fields, normalize
 
 REPORTS = Path(__file__).parents[1] / "fixtures" / "azure-egress-proxy" / "renovate" / "064aa09"
+TRIAL_POLICY = Path(__file__).parents[1] / "policies" / "azure-egress-proxy.renovate.json5"
 AT = "2026-10-08T09:00:00+00:00"
 
 RUNTIME_MAJORS = """
@@ -312,6 +314,72 @@ def test_a_policy_without_holds_needs_one_run(tmp_path, checkout):
             '{packageRules: [{description: "x", matchUpdateTypes: ["!major"], enabled: false}]}',
             "can't evaluate '!major'",
         ),
+        # Group rules may only match with what the scan evaluates, and name the rule.
+        (
+            '{packageRules: [{matchFileNames: ["a"], matchUpdateTypes: ["minor"], '
+            'groupName: "g"}]}',
+            r"packageRules\[0\] \(group g\) groups updates with matchFileNames",
+        ),
+        (
+            '{packageRules: [{excludePackageNames: ["a"], matchUpdateTypes: ["minor"], '
+            'groupName: "g"}]}',
+            r"\(group g\) groups updates with excludePackageNames",
+        ),
+        (
+            '{packageRules: [{matchPackageNames: ["+(a|b)"], matchUpdateTypes: ["minor"], '
+            'groupName: "g"}]}',
+            r"\(group g\) matchPackageNames: extended glob",
+        ),
+        (
+            '{packageRules: [{matchUpdateTypes: ["!major"], groupName: "g"}]}',
+            r"\(group g\) matchUpdateTypes: the scan can't evaluate '!major'",
+        ),
+        (
+            '{packageRules: [{matchUpdateTypes: ["minor"], groupName: ""}]}',
+            "groupName must be a non-empty string",
+        ),
+        (
+            '{packageRules: [{matchUpdateTypes: ["minor"], groupName: ["g"]}]}',
+            "groupName must be a non-empty string",
+        ),
+        # Renovate compiles groupName as a template, so one rule can make several groups.
+        (
+            '{packageRules: [{matchUpdateTypes: ["minor"], groupName: "{{datasource}} updates"}]}',
+            r"\(group \{\{datasource\}\} updates\): groupName is a template",
+        ),
+        # Renovate names a group's branch after its lower-cased slug.
+        (
+            '{packageRules: [{matchManagers: ["gomod"], matchUpdateTypes: ["minor"], '
+            'groupName: "Go modules"}, {matchManagers: ["regex"], matchUpdateTypes: ["minor"], '
+            'groupName: "go-modules"}]}',
+            r"packageRules\[1\] names group 'go-modules', which Renovate can't tell apart from "
+            r"group 'Go modules' in .*packageRules\[0\]",
+        ),
+        # Renovate gives a group's majors a branch of their own.
+        ('{packageRules: [{matchDatasources: ["nuget"], groupName: "g"}]}', "can group major"),
+        (
+            '{packageRules: [{matchUpdateTypes: ["minor", "major"], groupName: "g"}]}',
+            "can group major",
+        ),
+        # Options that make Renovate split or merge groups across branches.
+        (
+            '{packageRules: [{matchUpdateTypes: ["minor"], groupName: "g", groupSlug: "s"}]}',
+            r"packageRules\[0\] sets groupSlug",
+        ),
+        (
+            '{packageRules: [{matchPackageNames: ["a"], additionalBranchPrefix: "x-"}]}',
+            "sets additionalBranchPrefix",
+        ),
+        # The scan sets separateMinorPatch itself; turning it off would drop patch candidates.
+        ("{separateMinorPatch: true}", "sets separateMinorPatch, which the scan sets itself"),
+        ("{separateMinorPatch: false}", "sets separateMinorPatch, which the scan sets itself"),
+        (
+            '{packageRules: [{matchUpdateTypes: ["minor"], groupName: "g", '
+            "separateMinorPatch: false}]}",
+            r"packageRules\[0\] sets separateMinorPatch",
+        ),
+        ("{separateMultipleMinor: true}", "sets separateMultipleMinor"),
+        ('{groupName: "everything"}', "sets groupName"),
     ],
 )
 def test_an_invalid_policy_fails(tmp_path, checkout, text, error):
@@ -632,3 +700,194 @@ def test_a_fix_is_not_judged_on_candidates_that_were_dropped(tmp_path, checkout,
         entry, inventory.candidates, advisory, "NuGet", "Humanizer.Core", "2.8.26"
     )
     assert judged["fix_reached_by_candidate"] == reached
+
+
+@pytest.fixture
+def trial(tmp_path, checkout):
+    return load(checkout, TRIAL_POLICY, validate=accept)
+
+
+def nuget(name, manager="nuget"):
+    return {"depName": name, "packageName": name, "datasource": "nuget", "manager": manager}
+
+
+def test_the_trial_policys_group_rules_are_read_in_order(trial):
+    assert [g.name for g in trial.groups] == [
+        "actions-minor-patch",
+        "gomod-minor-patch",
+        "nuget-minor-patch",
+        "microsoft",
+        "docker-minor-patch",
+    ]
+
+
+@pytest.mark.parametrize(
+    ("fields", "update_type", "group"),
+    [
+        # The microsoft rule comes after nuget-minor-patch, so it wins for what it matches.
+        (nuget("Microsoft.Extensions.Http"), "patch", "microsoft"),
+        (nuget("Microsoft.AspNetCore.OpenApi"), "minor", "microsoft"),
+        (nuget("Aspire.AppHost.Sdk"), "minor", "microsoft"),
+        # The devcontainer's Aspire CLI comes from a custom manager, on the nuget datasource.
+        (nuget("Aspire.Cli", manager="regex"), "minor", "microsoft"),
+        (nuget("Azure.Core"), "minor", "nuget-minor-patch"),
+        (nuget("Scalar.AspNetCore"), "patch", "nuget-minor-patch"),
+        # Majors are in no group, whatever else matches.
+        (nuget("Microsoft.OpenApi"), "major", None),
+        (nuget("Azure.Core"), "major", None),
+        (
+            {
+                "depName": "ghcr.io/devcontainers/features/docker-in-docker",
+                "packageName": "ghcr.io/devcontainers/features/docker-in-docker",
+                "datasource": "docker",
+                "manager": "devcontainer",
+            },
+            "major",
+            None,
+        ),
+        (
+            {
+                "depName": "python",
+                "packageName": "python",
+                "datasource": "docker",
+                "manager": "dockerfile",
+            },
+            "minor",
+            "docker-minor-patch",
+        ),
+        (
+            {
+                "depName": "actions/upload-artifact",
+                "packageName": "actions/upload-artifact",
+                "datasource": "github-tags",
+                "manager": "github-actions",
+            },
+            "digest",
+            "actions-minor-patch",
+        ),
+        (
+            {
+                "depName": "go",
+                "packageName": "go",
+                "datasource": "golang-version",
+                "manager": "gomod",
+            },
+            "minor",
+            "gomod-minor-patch",
+        ),
+        # A Go tool a custom manager finds is not a gomod dependency.
+        (
+            {
+                "depName": "golang.org/x/vuln/cmd/govulncheck",
+                "packageName": "golang.org/x/vuln",
+                "datasource": "go",
+                "manager": "regex",
+            },
+            "minor",
+            None,
+        ),
+        (
+            {"depName": "PyJWT", "packageName": "PyJWT", "datasource": "pypi", "manager": "regex"},
+            "patch",
+            None,
+        ),
+    ],
+)
+def test_the_trial_policy_groups_updates(trial, fields, update_type, group):
+    assert group_of(fields, update_type, trial) == group
+
+
+def test_the_last_matching_group_rule_wins(tmp_path, checkout):
+    active = policy_from(
+        tmp_path,
+        """{packageRules: [
+          {matchDatasources: ["nuget"], matchUpdateTypes: ["minor", "patch"], groupName: "a"},
+          {matchPackageNames: ["X.*"], matchUpdateTypes: ["minor"], groupName: "b"},
+          // A later rule without a groupName leaves the group as it is, as does a hold.
+          {matchPackageNames: ["X.*"], labels: ["x"]},
+          {description: "No X majors", matchPackageNames: ["X.*"], matchUpdateTypes: ["major"],
+           enabled: false},
+        ]}""",
+    )
+    assert group_of(nuget("X.Y"), "minor", active) == "b"
+    assert group_of(nuget("X.Y"), "patch", active) == "a"
+    assert group_of(nuget("Y"), "minor", active) == "a"
+    assert group_of(nuget("X.Y"), "major", active) is None
+
+
+def test_a_group_rule_may_carry_options_that_dont_change_the_group(tmp_path, checkout):
+    active = policy_from(
+        tmp_path,
+        """{separateMajorMinor: true, packageRules: [{
+          description: "Weekly", matchManagers: "gomod", matchUpdateTypes: ["minor", "patch"],
+          groupName: "go", schedule: ["on monday"], automerge: true, labels: ["deps"],
+          separateMultipleMinor: false, branchTopic: "{{{depNameSanitized}}}",
+        }, {
+          // The same group again: a second rule adds to it.
+          matchManagers: "custom.regex", matchDatasources: "go", matchUpdateTypes: ["minor"],
+          groupName: "go",
+        }]}""",
+    )
+    fields = {"depName": "m", "packageName": "m", "datasource": "go", "manager": "gomod"}
+    assert group_of(fields, "patch", active) == "go"
+    assert group_of({**fields, "manager": "regex"}, "minor", active) == "go"
+
+
+def test_without_a_policy_nothing_is_grouped():
+    assert group_of(nuget("Microsoft.Extensions.Http"), "patch", NO_POLICY) is None
+
+
+def test_groups_put_together_what_renovates_branches_do(trial):
+    """Our grouping against Renovate's branches for the same updates: `064aa09` under the
+    trial policy, where two updates share a group if and only if they share a branch.
+
+    Every update in the report is compared, held ones included, since grouping doesn't look
+    at holds. Renovate's report has no groupName, so its partition is by branchName. Two
+    narrowings, both about how Renovate names branches rather than about grouping:
+    - The scan's own config sets separateMinorPatch, to get a patch candidate as well as a
+      minor one. With it, Renovate puts a group's patches on `renovate/patch-<group>`. The
+      policy groups minor and patch together, as Renovate does without that option, so the
+      prefix is undone.
+    - An update in no group is on Renovate's branch for its package, which can span files
+      (docker-in-docker in two devcontainer files). Units of ungrouped updates are the
+      selection's business, so such an update is keyed by its own branch here. The partitions
+      still differ if it shares a branch with a grouped update.
+    """
+    report = json.loads((REPORTS / "report-with-trial-policy.json").read_text())
+    fields = match_fields(report)
+    branches = {
+        (dep_id, update["updateType"]): update["branchName"]
+        for dep_id, (_, dep) in entries(report).items()
+        for update in dep.get("updates") or []
+    }
+    candidates = normalize(report, looked_up_at=AT).candidates
+    assert len(candidates) == len(branches) == 34
+
+    ours, renovates, folded = {}, {}, set()
+    for candidate in candidates:
+        key = (candidate["dependency"], candidate["update_type"])
+        branch = branches[key]
+        if candidate["update_type"] == "patch" and branch.startswith("renovate/patch-"):
+            folded.add(branch)
+            branch = "renovate/" + branch.removeprefix("renovate/patch-")
+        group = group_of(fields[candidate["dependency"]], candidate["update_type"], trial)
+        if group:
+            # Renovate names a group's branch after its slug, which is the name itself here.
+            assert branch == f"renovate/{group}", key
+        else:
+            # An update Renovate put in a group, but we didn't, is on that group's branch.
+            assert branch not in {f"renovate/{g.name}" for g in trial.groups}, key
+        ours.setdefault(("group", group) if group else ("own", branch), set()).add(key)
+        renovates.setdefault(branch, set()).add(key)
+
+    assert {frozenset(v) for v in ours.values()} == {frozenset(v) for v in renovates.values()}
+    assert folded == {"renovate/patch-gomod-minor-patch", "renovate/patch-nuget-minor-patch"}
+    grouped = {k[1]: len(v) for k, v in ours.items() if k[0] == "group"}
+    assert grouped == {
+        "actions-minor-patch": 7,
+        "docker-minor-patch": 3,
+        "gomod-minor-patch": 3,
+        "nuget-minor-patch": 5,
+        "microsoft": 2,
+    }
+    assert len(renovates) == 14

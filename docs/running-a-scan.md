@@ -67,7 +67,7 @@ scripts/with-github-token.py uv run sdlc scan --repo alanta/azure-egress-proxy -
 
 ### The update policy
 
-The policy says which updates are in scope. It is Renovate configuration, read from `.github/renovate.json5` at the scanned revision. If the subject has none, every candidate is in scope. With `--trial-policy <file>` that file is used instead, and the subject's own is ignored; use it to try a policy before it is merged into the subject. The first line of output says which one applies, and the record and report name it.
+The policy says which updates are in scope, with holds, and how batch updates group. It says nothing about when: the selection decides that (see [Reading the selection](#reading-the-selection)). It is Renovate configuration, read from `.github/renovate.json5` at the scanned revision. If the subject has none, every candidate is in scope. With `--trial-policy <file>` that file is used instead, and the subject's own is ignored; use it to try a policy before it is merged into the subject. The first line of output says which one applies, and the record and report name it.
 
 The scan fails (exit 1, nothing written) when the policy:
 - doesn't exist, can't be parsed as JSON5, or isn't an object;
@@ -75,6 +75,10 @@ The scan fails (exit 1, nothing written) when the policy:
 - uses `extends`, or sets `major`, `minor`, `patch` and the like directly (use a package rule with `matchUpdateTypes`);
 - is not in `.github/renovate.json5` while the subject has Renovate configuration in another place (`renovate.json`, `.renovaterc`, a `renovate` key in `package.json`, and so on);
 - has a hold rule (`enabled: false` or `allowedVersions`) that has no `description`, uses a key other than `description`, `enabled`, `allowedVersions` or the matchers `matchPackageNames`, `matchDepNames`, `matchDatasources`, `matchManagers`, `matchUpdateTypes`, sets `enabled: true`, uses an `override*` option, or uses a `matchUpdateTypes` value the scan can't evaluate (such as `bump`);
+- has a group rule (`groupName`) whose `groupName` isn't a non-empty string or is a template (contains `{{`), that uses a `match*` or `exclude*` key other than those five matchers, or that can group majors because its `matchUpdateTypes` is missing or includes `major` (Renovate gives a group's majors a branch of their own);
+- has two group rules with different names that Renovate would put on one branch, because they differ only in case or punctuation (such as `Go modules` and `go-modules`); rules that repeat the same name add to one group;
+- sets an option that changes how Renovate puts grouped updates on branches: `groupSlug`, `group`, `branchName`, `branchPrefix` or `additionalBranchPrefix` in a package rule, `groupName`, `groupSlug`, `group` or `branchName` at the top level, or `separateMultipleMinor` anywhere unless it is `false`;
+- sets `separateMinorPatch` anywhere, to any value: the scan sets it itself, so that it finds patch candidates as well as minor ones;
 - has a hold that Renovate applies but the scan's matching can't explain.
 
 A hold rule's `description` is what the report shows as the reason an update is held. [policies/azure-egress-proxy.renovate.json5](../policies/azure-egress-proxy.renovate.json5) is a working example.
@@ -85,7 +89,7 @@ Each scan gets its own directory, and nothing is overwritten:
 
 ```
 <out>/<owner>/<name>/<commit>/<UTC time>/
-    record.json    the data, validated against the version 2 record schema (`src/sdlc/schemas/scan-record.v2.json`)
+    record.json    the data, validated against the version 3 record schema (`src/sdlc/schemas/scan-record.v3.json`)
     report.md      the report, rendered from record.json
 ```
 
@@ -121,19 +125,65 @@ The report starts with a table: repository, ref, commit, time, the policy used, 
 **Summary.** The place to start. Each bullet says what was found, or that nothing was and why you can trust that or not:
 - *End of life* and *Nearing end of life*: runtime and OS lines in use whose support has ended or ends soon. "None found, but N are unknown" means N lines couldn't be checked.
 - *Reachable vulnerabilities* and *Vulnerabilities no in-scope candidate is known to fix*: advisories per dependency, with the fixed version and whether an in-scope candidate reaches it.
+- *Would prepare*: how many updates the scan would prepare, how many are breaking, how many reasons stayed unprepared, and whether the batch window is open.
 - *Inconsistent declarations*: the same thing (such as the Go version) declared with different values in different files.
 - *Unknown*: dependencies not looked up, and lifecycle lines it couldn't determine. Deliberately skipped dependencies are counted here too.
 - *Coverage gaps* and the totals.
 
 **Sections after the summary:**
+- **Would prepare:** which updates the system would prepare, and which it can't. Nothing is prepared by the scan itself. See [Reading the selection](#reading-the-selection).
 - **Lifecycle:** one row per product line in use: `end of life`, `nearing end of life`, `supported` or `unknown` (with the reason, such as a tag that names no release), and where it is used.
-- **Vulnerabilities:** one row per advisory, with the source (`osv` or `govulncheck`). Reachability is `reachable`, `not reachable` or `unknown`; only govulncheck decides it, and only for Go. *In-scope candidate reaches fix* is `yes`, `no`, `no fix to reach` (no fixed version exists) or unknown. A sub-section compares with Dependabot alerts: alerts that match the scan's advisories, match them only in another file, or don't match. It is absent, with a gap, when the alerts couldn't be read.
+- **Vulnerabilities:** one row per advisory, with the source (`osv` or `govulncheck`). Reachability is `reachable`, `not reachable` or `unknown`; only govulncheck decides it, and only for Go. *In-scope candidate reaches fix* is `yes`, `no`, `no fix to reach` (no fixed version exists) or unknown. A sub-section compares with Dependabot alerts: alerts that match the scan's advisories, match them only in another file, or don't match. When the alerts couldn't be read, it says *Unavailable* with the reason, and the gap is listed under Coverage gaps.
 - **Declared versions:** the consistency check, and what was compared.
 - **Update candidates:** *Held by policy* (with the rule) and *In scope*, each with its current version, update type and candidate. A candidate marked *advisory's fix* is the fixed version an advisory names for a dependency nothing looked up, so a newer version may exist.
 - **Package manager cross-checks:** direct dependencies that `dotnet list package` or `go list -m -u` call outdated and the scan doesn't. These are a Renovate blind spot and should be none.
 - **Coverage gaps:** what the scan couldn't cover: files no adapter reads or that can't be parsed (unsupported or unparseable files), and every source it couldn't read (unavailable sources), with the reason. Nothing listed here is known to be up to date.
 - **Inventory:** every dependency with a lookup state. `current` and `outdated` were looked up. `unknown` means the lookup failed (no token, rate limit, unreachable registry); it is never shown as current. `skipped` was not attempted, and the reason is listed under *Not looked up*. `outdated, from advisories` wasn't looked up either: its candidates are its advisories' fixed versions, and it is listed under *Not looked up* too.
 - **Tools:** the pinned images and versions that produced the result.
+
+### Reading the selection
+
+The scan ends by selecting updates. The selection is decided by code from the record alone, the policy and the scan's date: no agent takes part. It keeps nothing between scans, so an update that hasn't been merged is selected again for as long as its reason holds. The date is the day of the scan in UTC, and the report names it.
+
+The selection is in `record.json` under `selection`, and the report shows it under *Would prepare*. That section has, in order:
+- The date, the batch window and the minimum release age in use, and whether the window is open.
+- **Units**, each with a name, a reason, a breaking mark, targets and evidence.
+- **Not prepared**: the reasons that did not become a unit, grouped by kind.
+
+#### Units
+
+A unit is one update to prepare. Its name is stable and safe as a git branch name (lower case, letters, digits, `.`, `_` and `-`). It comes from the reason and the group, package or line, never from versions, so the same unit keeps its name from scan to scan. Its targets are a table: the dependency, the file, the current version, the update type, the target version and the target's release age (*age unknown* when the registry gave no date). Its evidence says why.
+
+| Reason | Selected when | Unit and target |
+|---|---|---|
+| `security` | Every run, in or out of the batch window. A vulnerability has a fix, and an in-scope candidate reaches it. There is no minimum release age. | One unit per package, covering its declarations in every file, named `security-<ecosystem>-<package>`. The target is the smallest in-scope candidate the scan recorded as reaching the fix. When several advisories are on one declaration, the target reaches all of them. Evidence: the advisories, with fixed version, reachability and source. |
+| `lifecycle` | Every run. A product line in use is nearing its end of life (within 90 days) or past it. | One unit per line, named `lifecycle-<product>-<line>`. Each dependency on the line has as target its smallest in-scope candidate on another line that is still supported. A dependency on several ending lines is in one unit, and its target leaves all of them. A security fix on a dependency in the unit goes with it: the unit then has both reasons, and the target also reaches the fix. Evidence: the lines, with their end of life and the lines still supported. |
+| `batch` | Only inside the batch window: days 1 to 7 of every month. Every other dependency with an in-scope candidate is batched. | The newest in-scope candidate, if its release is at least 7 days old on the scan's date. A candidate with no release date counts as old enough, and its release age says *age unknown*. A dependency in one of the policy's groups goes in the unit named after the group; the unit's table lists each of them. A member whose newest candidate is too young waits on its own, and the rest of the group is still prepared. Any other dependency forms a unit of its own per package, across files, named `<ecosystem>-<package>`. Evidence: the window and minimum age. When the dependency also has a security report that is not prepared (see below), the evidence names it. |
+
+**Breaking.** A unit is marked breaking when it has the `lifecycle` reason, because a move to another line changes the platform under the code, or when any target is a major update. Every other unit is routine. The mark says who will do the work once the system applies updates: a deterministic tool for a routine unit, the coding agent for a breaking one, with review either way. It does not hold anything back.
+
+**Holds always win.** Only candidates the policy puts in scope can be targets, whatever the reason. A security fix that only a held candidate reaches is not prepared; it is reported as *fix held by policy*. A held candidate is never batched either; it shows only under *Update candidates*, *Held by policy*, with the rule that holds it.
+
+If two units end up with the same branch-safe name, each gets a suffix from its own reason and subject, and the report marks the name collision.
+
+#### Not prepared
+
+*Not prepared* lists every reason that did not become a unit, so that a missing unit is never read as "nothing to do". Each entry says what it is about and why. What to do:
+
+| Kind | Meaning | What to do |
+|---|---|---|
+| Vulnerable, fix held by policy | The fix is known, but only candidates a hold rule excludes reach it. The entry names the rule. | Decide whether the hold still stands. If not, change the rule in the policy; the next scan prepares the fix. |
+| Vulnerable, no fixed version recorded | The advisory names no fixed version, or the scan couldn't read one from its ranges. | Read the advisory. Without a fix, consider removing or replacing the dependency. |
+| Vulnerable, no candidate reaches the fix | A fix exists, but no in-scope candidate is at or past it (or no single candidate reaches the fix of all advisories on a declaration). | Look at what the registry offers. A fix may need a larger update than a candidate the scan found, or a manual change. |
+| Early warning: line ending, no candidate leaves it | A line is nearing or past its end of life, but no in-scope candidate moves a dependency to a supported line. The entry names a hold when one is why. | Plan the move by hand, or lift the hold. This is a warning, not a failure: other dependencies on the line are still in the unit. |
+| Not evaluated: data is missing | The decision needs data the record doesn't have: a failed or skipped lookup, an unread source such as OSV-Scanner or the Dependabot alerts, a Dependabot alert that matches none of the scan's advisories, or a line whose state is unknown. The entry gives the reason. | Fix the cause (see *When something goes wrong*) and scan again. Nothing is claimed about what the missing data would have said. |
+| Too young to batch yet | Batch only. The newest candidate is younger than the minimum release age. It waits for the next window, even when an older candidate would be old enough. The entry gives the date it is old enough on. | Nothing. It is selected in the first window after it is old enough, if it is still the newest. |
+
+Outside the batch window, *Not prepared* has no waiting entries and the batch units are absent. This is not a problem: the next window opens on the date the section gives.
+
+#### Defaults
+
+The batch window (days 1 to 7) and the minimum release age (7 days) are constants in `src/sdlc/selection.py`: `BATCH_WINDOW_FIRST_DAY`, `BATCH_WINDOW_LAST_DAY` and `MINIMUM_RELEASE_AGE_DAYS`. The record's `selection.defaults` says which values a scan used. The "nearing" distance of 90 days is the lifecycle check's. The policy supplies the holds and the groups; it has no schedule.
 
 ### Which unknowns are normal
 

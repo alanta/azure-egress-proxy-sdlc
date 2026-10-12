@@ -1,11 +1,13 @@
-"""The subject's update policy: load it, check it, and classify candidates by it.
+"""The subject's update policy: load it, check it, and classify and group candidates by it.
 
 The policy is Renovate configuration (design decision 4), but Renovate's report doesn't say
 which rule held an update: a held major still appears in it, and `allowedVersions` drops
 versions without a trace. So the scan runs Renovate twice, with and without the rules that
-hold updates, and evaluates those rules itself to name the one that applies. The scan only
-accepts hold rules it can evaluate the way Renovate does; anything else fails the scan
-instead of being classified by guesswork.
+hold updates, and evaluates those rules itself to name the one that applies. It evaluates
+the policy's group rules itself too, so that which updates go together is decided by our
+code, not read from Renovate's branch names (ADR-0002). The scan only accepts hold and group
+rules it can evaluate the way Renovate does; anything else fails the scan instead of being
+classified or grouped by guesswork.
 
 Everything here is pure, apart from reading the policy file, so it can be tested without
 containers.
@@ -57,6 +59,26 @@ UPDATE_TYPES = {
 # Rule options that change the names and datasource later rules match on.
 OVERRIDES = {"overrideDatasource", "overrideDepName", "overridePackageName"}
 
+GROUP_NAME = "groupName"
+
+# Options that change which updates of a group share a branch in Renovate
+# (workers/repository/updates/branch-name.ts): a slug or branch name of their own, a prefix
+# for part of a group, or a split of its minors by version. The scan only follows a group as
+# one branch per groupName, so it refuses them in any rule, and at the top level those that
+# would reach a group. `branchTopic` is not among them: a group's branch takes its topic from
+# `group.branchTopic`, so branchTopic only names the branches of updates in no group, and
+# how those are put together is the selection's business. Majors are kept out of groups by
+# the group rules themselves (see _group_rule), so separateMajorMinor and
+# separateMultipleMajor don't matter.
+BRANCH_OPTIONS = {"groupSlug", "group", "branchName", "branchPrefix", "additionalBranchPrefix"}
+TOP_LEVEL_BRANCH_OPTIONS = {GROUP_NAME, "groupSlug", "group", "branchName"}
+# Off by default; the scan follows only the default.
+SPLIT_OPTIONS = {"separateMultipleMinor"}
+# The scan's own Renovate configuration sets separateMinorPatch, to get a patch candidate as
+# well as a minor one. A policy that turned it off would drop the patch candidates security
+# fixes are targeted at, and one that turns it on changes nothing, so it is refused either way.
+SCAN_OPTIONS = {"separateMinorPatch"}
+
 
 class PolicyError(Exception):
     """The policy can't be read, or holds updates in a way the scan can't follow."""
@@ -73,12 +95,19 @@ class HoldRule:
 
 
 @dataclass(frozen=True)
+class GroupRule:
+    name: str  # the rule's groupName, which names the group
+    rule: dict[str, Any]
+
+
+@dataclass(frozen=True)
 class Policy:
     source: dict[str, str]  # the record's policy entry
     content: str | None  # the policy as Renovate reads it; None when there is none
     baseline: str | None  # the same without its holds, to see what they hold back
     holds: tuple[HoldRule, ...] = ()
     ignored: tuple[str, ...] = ()
+    groups: tuple[GroupRule, ...] = ()  # in policy order
 
 
 NO_POLICY = Policy({"source": "none"}, None, None)
@@ -124,13 +153,14 @@ def load(
     if problems:
         raise PolicyError(f"Renovate rejects policy {where}: " + "; ".join(problems))
 
-    holds, ignored, baseline = _split(config, where)
+    holds, groups, ignored, baseline = _split(config, where)
     return Policy(
         source,
         text,
         json.dumps(baseline, indent=2) if baseline != config else text,
         holds,
         ignored,
+        groups,
     )
 
 
@@ -152,18 +182,25 @@ def has_package_json_config(checkout: Path) -> bool:
 
 def _split(
     config: dict[str, Any], where: str
-) -> tuple[tuple[HoldRule, ...], tuple[str, ...], dict]:
-    """The hold rules and ignored dependencies, and the configuration without them.
+) -> tuple[tuple[HoldRule, ...], tuple[GroupRule, ...], tuple[str, ...], dict]:
+    """The hold rules, group rules and ignored dependencies, and the configuration without
+    the holds and ignored dependencies.
 
     A hold rule is a package rule with `enabled: false` or `allowedVersions`. It must name
-    itself with a description and use only the matchers in MATCHERS.
+    itself with a description and use only the matchers in MATCHERS. A group rule is a
+    package rule with a `groupName`. It may only use the matchers in MATCHERS too, and must
+    keep majors out with `matchUpdateTypes`. Group rules stay in the baseline: they don't
+    hold anything back.
     """
     _check_not_hidden(config, where)
+    _check_branches(config, where, TOP_LEVEL_BRANCH_OPTIONS)
     rules = config.get("packageRules") or []
-    holds, kept = [], []
+    holds, groups, kept = [], [], []
+    slugs: dict[str, tuple[str, str]] = {}  # each group's slug: its name and first rule
     for index, rule in enumerate(rules):
         label = f"{where}: packageRules[{index}]"
         _check_not_hidden(rule, label)
+        _check_branches(rule, label, BRANCH_OPTIONS)
         if rule.get("enabled") is True:
             # A later rule that re-enables updates would undo an earlier hold in Renovate's
             # rule order, which the scan doesn't follow.
@@ -176,6 +213,17 @@ def _split(
                 f"{label} uses {', '.join(overrides)}, which changes what hold rules match on"
             )
         if rule.get("enabled") is not False and "allowedVersions" not in rule:
+            if GROUP_NAME in rule:
+                group = _group_rule(rule, label)
+                name, first = slugs.setdefault(_slug(group.name), (group.name, label))
+                if name != group.name:
+                    # Renovate's branch for a group is named after its slug, so both groups
+                    # would end up on one branch.
+                    raise PolicyError(
+                        f"{label} names group {group.name!r}, which Renovate can't tell apart "
+                        f"from group {name!r} in {first}"
+                    )
+                groups.append(group)
             kept.append(rule)
             continue
 
@@ -191,24 +239,85 @@ def _split(
                 f"{label} holds updates with {', '.join(unsupported)}; hold rules can only "
                 f"use {', '.join(sorted(HOLD_RULE_KEYS))}"
             )
-        # Renovate accepts a single string where it expects a list (config/massage.js).
-        normalized = {k: _as_list(v) if k in MATCHERS else v for k, v in rule.items()}
-        for key in MATCHERS:
-            for pattern in normalized.get(key, []):
-                _check_pattern(pattern, f"{label} {key}")
-        for update_type in normalized.get("matchUpdateTypes", []):
-            if update_type not in UPDATE_TYPES:
-                # `bump` and negations match on a flag the report doesn't carry.
-                raise PolicyError(
-                    f"{label} matchUpdateTypes: the scan can't evaluate {update_type!r}"
-                )
-        holds.append(HoldRule(description.strip(), normalized))
+        holds.append(HoldRule(description.strip(), _normalized(rule, label)))
 
     ignored = tuple(_as_list(config.get(IGNORE_DEPS) or []))
     baseline = {k: v for k, v in config.items() if k != IGNORE_DEPS}
     if "packageRules" in config:
         baseline["packageRules"] = kept
-    return tuple(holds), ignored, baseline
+    return tuple(holds), tuple(groups), ignored, baseline
+
+
+def _group_rule(rule: dict[str, Any], label: str) -> GroupRule:
+    """A group rule the scan can evaluate the way Renovate groups updates into a branch.
+
+    Only the matchers count: options such as a schedule or automerge don't change which
+    updates go together, and the branch options that do are refused before this.
+    """
+    name = rule[GROUP_NAME]
+    if not isinstance(name, str) or not name.strip():
+        raise PolicyError(f"{label}: groupName must be a non-empty string")
+    label = f"{label} (group {name})"
+    if "{{" in name:
+        # Renovate compiles groupName as a template, such as `{{datasource}} updates`, so one
+        # rule can make several groups.
+        raise PolicyError(f"{label}: groupName is a template, which the scan doesn't follow")
+    unsupported = sorted(
+        k for k in rule if k.startswith(("match", "exclude")) and k not in MATCHERS
+    )
+    if unsupported:
+        raise PolicyError(
+            f"{label} groups updates with {', '.join(unsupported)}; group rules can only "
+            f"match with {', '.join(sorted(MATCHERS))}"
+        )
+    normalized = _normalized(rule, label)
+    update_types = normalized.get("matchUpdateTypes")
+    if not update_types or "major" in update_types:
+        # Renovate puts a group's majors on a branch of their own (separateMajorMinor), and
+        # can split them by major too; the scan doesn't follow that.
+        raise PolicyError(
+            f"{label} can group major updates; Renovate gives those a branch of their own, "
+            "which the scan doesn't follow. Keep majors out with matchUpdateTypes"
+        )
+    return GroupRule(name, normalized)
+
+
+def _normalized(rule: dict[str, Any], label: str) -> dict[str, Any]:
+    """The rule with its matchers as lists, once each pattern is known to be evaluable."""
+    # Renovate accepts a single string where it expects a list (config/massage.js).
+    normalized = {k: _as_list(v) if k in MATCHERS else v for k, v in rule.items()}
+    for key in MATCHERS:
+        for pattern in normalized.get(key, []):
+            _check_pattern(pattern, f"{label} {key}")
+    for update_type in normalized.get("matchUpdateTypes", []):
+        if update_type not in UPDATE_TYPES:
+            # `bump` and negations match on a flag the report doesn't carry.
+            raise PolicyError(f"{label} matchUpdateTypes: the scan can't evaluate {update_type!r}")
+    return normalized
+
+
+def _slug(name: str) -> str:
+    """A slug at least as coarse as Renovate's slugify(groupName, lower), so that two names
+    Renovate gives one branch always have the same slug here."""
+    return re.sub(r"[^a-z0-9]", "", name.lower())
+
+
+def _check_branches(config: dict[str, Any], where: str, options: set[str]) -> None:
+    """Fail on options that would split or merge groups in a way the scan doesn't follow,
+    or that the scan sets itself."""
+    own = sorted(SCAN_OPTIONS & config.keys())
+    if own:
+        raise PolicyError(
+            f"{where} sets {', '.join(own)}, which the scan sets itself to find patch "
+            "candidates as well as minor ones"
+        )
+    found = sorted(options & config.keys())
+    found += sorted(k for k in SPLIT_OPTIONS & config.keys() if config[k] is not False)
+    if found:
+        raise PolicyError(
+            f"{where} sets {', '.join(found)}, which changes how Renovate puts grouped "
+            "updates on branches; the scan only follows one branch per groupName"
+        )
 
 
 def _check_not_hidden(config: dict[str, Any], where: str) -> None:
@@ -287,7 +396,8 @@ def classify(
     dependencies: dict[str, dict[str, Any]],
     policy: Policy,
 ) -> list[dict[str, Any]]:
-    """Classify candidates as in scope or held by policy, naming the rules that hold them.
+    """Classify candidates as in scope or held by policy, naming the rules that hold them,
+    and put each in the group the policy's group rules give it, if any.
 
     `baseline` holds the candidates Renovate found without the policy's holds, `main` what
     it found with the whole policy. A candidate only the baseline has was dropped by an
@@ -297,7 +407,10 @@ def classify(
     packageName, datasource, manager.
     """
     if main is None:
-        return [_classified(c, _rule_holds(c, dependencies, policy)) for c in baseline]
+        return [
+            _classified(c, _rule_holds(c, dependencies, policy), dependencies, policy)
+            for c in baseline
+        ]
 
     kept = {(c["dependency"], c["version"]) for c in main.candidates}
     lookups = {d["id"]: d["lookup"] for d in main.dependencies}
@@ -328,7 +441,7 @@ def classify(
                 f"the policy disables {dep_id}, but Renovate still proposes {version}, so it "
                 "can't be classified"
             )
-        classified.append(_classified(candidate, holding))
+        classified.append(_classified(candidate, holding, dependencies, policy))
 
     # A version `allowedVersions` lets through where the newest one was dropped (Humanizer
     # 2.9.9 under "<2.10.0", where 2.14.1 was the minor) is a candidate of its own.
@@ -343,7 +456,7 @@ def classify(
                 "under the policy, so it can't be classified"
             )
         dep = {**dependencies[candidate["dependency"]], "updateType": candidate["update_type"]}
-        classified.append(_classified(candidate, _disabling(dep, policy)))
+        classified.append(_classified(candidate, _disabling(dep, policy), dependencies, policy))
     return classified
 
 
@@ -373,6 +486,23 @@ def holds(
         if not allowed(version, hold.rule["allowedVersions"]):
             holding.append(hold.name)
     return holding
+
+
+def group_of(fields: dict[str, Any], update_type: str, policy: Policy) -> str | None:
+    """The group an update of a dependency belongs to, or None when it's in no group.
+
+    `fields` are the ones Renovate matches on (depName, packageName, datasource, manager),
+    as for `holds`. Rules apply in policy order and a later one overrides an earlier one, as
+    in Renovate, so the last matching group rule names the group. A matching rule without a
+    groupName leaves it as it is. Whether the update is held is a separate question: this
+    doesn't look at holds.
+    """
+    dep = {**fields, "updateType": update_type}
+    group = None
+    for rule in policy.groups:
+        if matches(rule.rule, dep):
+            group = rule.name
+    return group
 
 
 def _limits(dep: dict[str, Any], policy: Policy) -> list[HoldRule]:
@@ -423,10 +553,27 @@ def _pad(version: tuple[int, ...], other: tuple[int, ...]) -> tuple[int, ...]:
     return version + (0,) * (len(other) - len(version))
 
 
-def _classified(candidate: dict[str, Any], holding: list[str]) -> dict[str, Any]:
+def _classified(
+    candidate: dict[str, Any],
+    holding: list[str],
+    dependencies: dict[str, dict[str, Any]],
+    policy: Policy,
+) -> dict[str, Any]:
+    """The candidate with its classification and, when it is in one, its group.
+
+    The group is recorded here, where Renovate's match fields are at hand, because the record
+    doesn't carry them: the selection reads it from the record instead of evaluating the
+    group rules again (design decision 2 of update-selection).
+    """
+    classified = {k: v for k, v in candidate.items() if k not in ("held_by", "group")}
     if holding:
-        return {**candidate, "classification": "held_by_policy", "held_by": "; ".join(holding)}
-    return {**candidate, "classification": "in_scope"}
+        classified |= {"classification": "held_by_policy", "held_by": "; ".join(holding)}
+    else:
+        classified["classification"] = "in_scope"
+    group = group_of(dependencies[candidate["dependency"]], candidate["update_type"], policy)
+    if group is not None:
+        classified["group"] = group
+    return classified
 
 
 def _disabling(dep: dict[str, Any], policy: Policy, *, dependency_level: bool = False) -> list[str]:

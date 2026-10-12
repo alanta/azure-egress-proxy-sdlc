@@ -2,32 +2,31 @@
 // for .github/renovate.json5 in the subject until the maintainer adopts one there (see
 // openspec/changes/archive/2026-10-10-revision-dependency-scan, design decision 4). It carries over the
 // intent of the subject's .github/dependabot.yml and adds the .NET runtime hold.
+//
+// The policy says which updates are in scope and how they group. It does not say when they
+// happen: the system selects updates itself, for security, for lifecycle and in a monthly
+// batch (docs/running-a-scan.md), so there is no schedule here. Security updates ignore the
+// groups below and arrive on their own, as dependabot.yml intends.
 {
-  // dependabot.yml checks every ecosystem weekly on Monday, so that minor and patch
-  // bumps arrive as one batch a week instead of one PR per package. Security updates
-  // ignore this schedule and the groups below: Renovate's vulnerabilityAlerts defaults
-  // clear both, as dependabot.yml intends.
-  schedule: ["on monday"],
-
   packageRules: [
-    // Weekly groups, as in dependabot.yml: one PR per ecosystem for minor and patch
-    // bumps. Majors stay out of every group, so each one still arrives on its own PR
+    // Groups, as in dependabot.yml: one batch unit per ecosystem for minor and patch
+    // bumps. Majors stay out of every group, so each one still arrives on its own
     // for a human to read the changelog. Digest-only bumps of SHA-pinned actions and
-    // images join the weekly group too, so they don't bring back one PR per pin.
+    // images join the group too, so they don't bring back one unit per pin.
     {
-      description: "GitHub Actions minor and patch bumps, weekly",
+      description: "GitHub Actions minor and patch bumps",
       matchManagers: ["github-actions"],
       matchUpdateTypes: ["minor", "patch", "digest"],
       groupName: "actions-minor-patch",
     },
     {
-      description: "Go module minor and patch bumps, weekly",
+      description: "Go module minor and patch bumps",
       matchManagers: ["gomod"],
       matchUpdateTypes: ["minor", "patch"],
       groupName: "gomod-minor-patch",
     },
     {
-      description: "NuGet minor and patch bumps, weekly",
+      description: "NuGet minor and patch bumps",
       matchDatasources: ["nuget"],
       matchUpdateTypes: ["minor", "patch"],
       groupName: "nuget-minor-patch",
@@ -35,14 +34,14 @@
     {
       // The Aspire, Extensions and AspNetCore packages version in lockstep, so they get
       // a group of their own; this rule comes after the one above to take precedence.
-      description: "Microsoft and Aspire NuGet minor and patch bumps, weekly",
+      description: "Microsoft and Aspire NuGet minor and patch bumps",
       matchDatasources: ["nuget"],
       matchPackageNames: ["Microsoft.*", "Aspire.*"],
       matchUpdateTypes: ["minor", "patch"],
       groupName: "microsoft",
     },
     {
-      description: "Container image minor and patch bumps, weekly",
+      description: "Container image minor and patch bumps",
       matchDatasources: ["docker"],
       matchUpdateTypes: ["minor", "patch", "digest"],
       groupName: "docker-minor-patch",

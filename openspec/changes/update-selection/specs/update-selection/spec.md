@@ -29,7 +29,7 @@ Every target of a unit SHALL be one of the scan's in-scope candidates. A candida
 
 ### Requirement: Select security fixes
 
-For each inventoried dependency with a known vulnerability that an in-scope candidate fixes, selection SHALL select a security unit for that dependency on every scan, whether the vulnerability is reachable or not. Its target SHALL be the smallest in-scope candidate that reaches the fix. No minimum release age applies.
+For each inventoried dependency with a known vulnerability that an in-scope candidate fixes, selection SHALL select a security unit for its package on every scan, whether the vulnerability is reachable or not. The unit SHALL cover every declaration of the package at a vulnerable version, in any file. Each declaration's target SHALL be the smallest in-scope candidate that the scan records as reaching the fix of every advisory on it. No minimum release age applies.
 
 #### Scenario: A reachable and an unreachable vulnerability
 
@@ -51,6 +51,11 @@ For each inventoried dependency with a known vulnerability that an in-scope cand
 - **WHEN** govulncheck reports a standard library vulnerability fixed in a newer Go release, and the `go` directive has an in-scope candidate that reaches it
 - **THEN** the directive gets a security unit
 
+#### Scenario: A vulnerable package declared in two files
+
+- **WHEN** the same package is declared at a vulnerable version in two files
+- **THEN** one security unit covers both declarations
+
 ### Requirement: Select end-of-life moves
 
 For each version line in use that the scan reports as nearing its end of life or past it, selection SHALL select one lifecycle unit on every scan, covering the dependencies on that line. Each dependency's target SHALL be its smallest in-scope candidate whose version is on a supported line.
@@ -65,9 +70,14 @@ For each version line in use that the scan reports as nearing its end of life or
 - **WHEN** one dependency on a line nearing its end of life has an in-scope candidate on a supported line, and another has none
 - **THEN** the unit covers the first, and the second is reported as an early warning
 
+#### Scenario: A dependency on two ending lines
+
+- **WHEN** a Go image's tag is on Go 1.25 and on Alpine 3.20, and both lines are past their end of life
+- **THEN** one lifecycle unit covers the image, with both lines as reasons, and the image's target is on a supported line of both
+
 ### Requirement: Batch the remaining updates monthly
 
-Only when the scan's date falls in the batch window, by default the first seven days of the month, SHALL selection select batch updates. A batch update is each dependency's newest in-scope candidate, if it is at least the minimum release age old (7 days by default). A candidate with no known release date counts as old enough. Dependencies with a security or lifecycle unit SHALL be left out of the batch.
+Only when the scan's date falls in the batch window, by default the first seven days of the month, SHALL selection select batch updates. A batch update is each dependency's newest in-scope candidate, if it is at least the minimum release age old (7 days by default). A candidate with no known release date counts as old enough. Dependencies with a security or lifecycle unit SHALL be left out of the batch. A dependency with a security reason that selection reports but doesn't prepare SHALL stay in the batch, and its batch unit SHALL name that report in its evidence.
 
 #### Scenario: A scan inside the window
 
@@ -94,9 +104,14 @@ Only when the scan's date falls in the batch window, by default the first seven 
 - **WHEN** a dependency has a security unit and a newer in-scope candidate
 - **THEN** it is not in the batch
 
+#### Scenario: The dependency's fix is held
+
+- **WHEN** a scan inside the window finds a dependency whose security fix is held by policy, and which has an older in-scope candidate
+- **THEN** that candidate is selected as a batch update, and its unit's evidence names the held fix
+
 ### Requirement: Put each dependency in one unit
 
-A dependency SHALL be in at most one unit. When a dependency on a lifecycle unit's line also has a security reason, the lifecycle unit SHALL carry both reasons, with the higher of the two targets, and no separate security unit SHALL be selected.
+A dependency SHALL be in at most one unit. When a dependency on a lifecycle unit's line also has a security reason, the lifecycle unit SHALL carry both reasons, with a target that is on a supported line and reaches every fix, and no separate security unit SHALL be selected. When no in-scope candidate does both, the dependency SHALL be an early warning for the line, and its security fix a unit of its own.
 
 #### Scenario: Go is end of life and has standard library vulnerabilities
 
@@ -105,7 +120,7 @@ A dependency SHALL be in at most one unit. When a dependency on a lifecycle unit
 
 ### Requirement: Group batch updates by the policy
 
-Selection SHALL put batch updates into units by the update policy's group rules. Updates that the same group rule matches SHALL form one unit, named after the group. An update that no group rule matches SHALL form a unit of its own. Security and lifecycle units SHALL NOT be grouped.
+Selection SHALL put batch updates into units by the group the scan recorded for each candidate from the update policy's group rules. Updates in the same group SHALL form one unit, named after the group. The updates of one package that no group rule matches SHALL form one unit, covering every file that declares the package. Security and lifecycle units SHALL NOT be grouped.
 
 #### Scenario: Two Go modules in one group
 
@@ -117,9 +132,14 @@ Selection SHALL put batch updates into units by the update policy's group rules.
 - **WHEN** the batch has a major update that no group rule matches
 - **THEN** it forms a unit of its own
 
+#### Scenario: An ungrouped package in two files
+
+- **WHEN** the batch has a major update of a devcontainer feature in two devcontainer files, and no group rule matches it
+- **THEN** one unit covers both files, named after the package
+
 ### Requirement: Name units stably
 
-Each unit SHALL have a name derived only from its reason and from its group, dependency or version line. The same unit SHALL keep its name across scans, even when its targets change.
+Each unit SHALL have a name derived only from its reason and from its group, package or version line. The same unit SHALL keep its name across scans, even when its targets change.
 
 #### Scenario: A newer target in a later scan
 

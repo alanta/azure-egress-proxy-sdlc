@@ -1,5 +1,6 @@
 import json
 import subprocess
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -517,31 +518,43 @@ def test_a_record_failing_its_schema_fails_the_scan_without_a_report(
     assert json.loads(kept.read_text())["cross_checks"] == [disagreement]
 
 
-def test_an_offline_scan_of_064aa09_writes_a_record_and_a_report_from_it(
-    offline_scan, monkeypatch, tmp_path, capsys
-):
-    """The whole scan on the evidence captured at 064aa09, with its tools and APIs faked."""
+TRIAL_POLICY = Path(__file__).parents[1] / "policies" / "azure-egress-proxy.renovate.json5"
+COMMIT_064AA09 = "064aa099ecf7ffea9664b89df29f7d89d6859358"
+
+
+@pytest.fixture
+def scan_064aa09(offline_scan, monkeypatch, tmp_path, capsys):
+    """The whole scan on the evidence captured at 064aa09, with its tools and APIs faked.
+
+    Returns a function that runs it with extra arguments, and gives the record, the report
+    and what the scan printed. With the trial policy, both of Renovate's runs answer with its
+    report under that policy: the report without it was captured on another day, when the
+    registries offered other versions.
+    """
     import gzip
 
     from sdlc import cli, dependabot, govulncheck, native, osv, renovate
     from sdlc.subject import Revision
 
     evidence = FIXTURES / "azure-egress-proxy"
-    commit = "064aa099ecf7ffea9664b89df29f7d89d6859358"
 
     def read(*path):
         return (evidence.joinpath(*path)).read_text()
 
     report = json.loads(read("renovate", "064aa09", "report-with-scan-config.json"))
+    with_trial = json.loads(read("renovate", "064aa09", "report-with-trial-policy.json"))
     scanned = json.loads(read("osv", "064aa09", "osv-scanner.json"))
     with gzip.open(evidence / "govulncheck" / "064aa09" / "govulncheck.json.gz") as f:
         run = govulncheck.Run(
             "proxy/go.mod", "go1.25.14", govulncheck.parse(f.read().decode(), "go1.25.14")
         )
 
+    def renovate_run(path, *, policy=None, token=None):
+        return report if policy is None else with_trial
+
     monkeypatch.setenv("SDLC_GITHUB_TOKEN", "a-token")
-    monkeypatch.setattr(cli, "resolve", lambda repo, ref: Revision(repo, ref, commit))
-    monkeypatch.setattr(renovate, "run", lambda path, *, policy=None, token=None: report)
+    monkeypatch.setattr(cli, "resolve", lambda repo, ref: Revision(repo, ref, COMMIT_064AA09))
+    monkeypatch.setattr(renovate, "run", renovate_run)
     monkeypatch.setattr(
         native,
         "dotnet_updates",
@@ -569,18 +582,26 @@ def test_an_offline_scan_of_064aa09_writes_a_record_and_a_report_from_it(
             "main", "e93d7062b075352f151f8e6b5a15f60913e7bd98", "2026-10-09T09:00:00+00:00", alerts
         ),
     )
-    assert main(["scan", "--repo", "alanta/azure-egress-proxy"]) == 0
-    out = capsys.readouterr().out
-    [directory] = (tmp_path / "runs").glob("*/*/*/*")
-    assert directory.relative_to(tmp_path / "runs").parts[:3] == (
-        "alanta",
-        "azure-egress-proxy",
-        commit,
-    )
-    assert f"record: runs/alanta/azure-egress-proxy/{commit}/" in out
-    record = json.loads((directory / "record.json").read_text())
-    assert validate_record(record) == []
-    rendered = (directory / "report.md").read_text()
+
+    def scan(*args):
+        assert main(["scan", "--repo", "alanta/azure-egress-proxy", *args]) == 0
+        out = capsys.readouterr().out
+        [directory] = (tmp_path / "runs").glob("*/*/*/*")
+        assert directory.relative_to(tmp_path / "runs").parts[:3] == (
+            "alanta",
+            "azure-egress-proxy",
+            COMMIT_064AA09,
+        )
+        assert f"record: runs/alanta/azure-egress-proxy/{COMMIT_064AA09}/" in out
+        record = json.loads((directory / "record.json").read_text())
+        assert validate_record(record) == []
+        return record, (directory / "report.md").read_text(), out
+
+    return scan
+
+
+def test_an_offline_scan_of_064aa09_writes_a_record_and_a_report_from_it(scan_064aa09):
+    record, rendered, _ = scan_064aa09()
 
     # Everything the record lists shows in the report.
     for dep in record["inventory"]:
@@ -601,6 +622,166 @@ def test_an_offline_scan_of_064aa09_writes_a_record_and_a_report_from_it(
     assert "main at e93d706, **not** the scanned commit 064aa09" in rendered
     assert "| govulncheck | v1.8.0 |" in rendered
     assert "| osv-scanner | 2.6.0 |" in rendered
+
+
+def test_a_scan_records_the_selection_it_made_on_its_own_date(scan_064aa09):
+    from sdlc import policy
+    from sdlc.selection import select
+
+    record, rendered, out = scan_064aa09("--trial-policy", str(TRIAL_POLICY))
+    selection = record["selection"]
+    trial = policy.load(Path("."), TRIAL_POLICY, validate=lambda text: [])
+    without = {k: v for k, v in record.items() if k != "selection"}
+    scanned = datetime.fromisoformat(record["scanned_at"]).astimezone(UTC).date()
+    assert selection["date"] == scanned.isoformat()
+    assert selection == select(without, trial, scanned)
+    assert selection["units"] and any(u["breaking"] for u in selection["units"])
+    assert "would prepare: " in out
+    assert "## Would prepare" in rendered
+
+
+def test_a_selection_failing_the_schema_fails_the_scan_without_a_report(
+    scan_064aa09, monkeypatch, tmp_path, capsys
+):
+    from sdlc import cli
+
+    real = cli.selection.select
+
+    def malformed(*args):
+        selection = real(*args)
+        selection["units"][0]["reasons"] = ["urgent"]
+        return selection
+
+    monkeypatch.setattr(cli.selection, "select", malformed)
+    assert main(["scan", "--repo", "alanta/azure-egress-proxy"]) == 1
+    err = capsys.readouterr().err
+    assert "error: the record fails its schema, so no report was written:" in err
+    assert "$.selection.units[0].reasons[0]: 'urgent' is not one of" in err
+    assert not list(tmp_path.rglob("report.md"))
+    [kept] = tmp_path.rglob("*.invalid.json")
+    assert json.loads(kept.read_text())["selection"]["units"][0]["reasons"] == ["urgent"]
+
+
+def test_an_inconsistent_record_is_kept_with_its_problems_and_never_selected_from(
+    scan_064aa09, monkeypatch, tmp_path, capsys
+):
+    from sdlc import cli
+
+    def never(*args):
+        raise AssertionError("the selection was made from an inconsistent record")
+
+    real = cli.read_alerts
+
+    def inconsistent(*args):
+        alerts, vulnerabilities = real(*args)
+        vulnerabilities[0]["dependency"] = "nuget:nowhere:Nothing"
+        return alerts, vulnerabilities
+
+    monkeypatch.setattr(cli, "read_alerts", inconsistent)
+    monkeypatch.setattr(cli.selection, "select", never)
+    assert main(["scan", "--repo", "alanta/azure-egress-proxy"]) == 1
+    err = capsys.readouterr().err
+    assert "unknown dependency id 'nuget:nowhere:Nothing'" in err
+    assert "the invalid record is kept as runs/alanta/azure-egress-proxy/" in err
+    [kept] = tmp_path.rglob("*.invalid.json")
+    assert "selection" not in json.loads(kept.read_text())
+    assert not list(tmp_path.rglob("report.md"))
+
+
+def test_a_selection_that_crashes_keeps_the_record_without_one(
+    scan_064aa09, monkeypatch, tmp_path, capsys
+):
+    from sdlc import cli
+
+    def crash(*args):
+        raise KeyError("fix_reached_by")
+
+    monkeypatch.setattr(cli.selection, "select", crash)
+    assert main(["scan", "--repo", "alanta/azure-egress-proxy"]) == 1
+    err = capsys.readouterr().err
+    assert "$.selection: it couldn't be made: KeyError('fix_reached_by')" in err
+    [kept] = tmp_path.rglob("*.invalid.json")
+    assert "selection" not in json.loads(kept.read_text())
+    assert not list(tmp_path.rglob("report.md"))
+
+
+def test_a_scan_records_the_trial_policys_groups_on_its_candidates(scan_064aa09):
+    record, _, _ = scan_064aa09("--trial-policy", str(TRIAL_POLICY))
+    groups = {
+        (c["dependency"], c["version"]): c.get("group")
+        for c in record["candidates"]
+        if c.get("basis") != "advisory_fix"
+    }
+    # The Microsoft and Aspire packages have a group of their own, after the NuGet one.
+    assert groups[("nuget:src/AppHost/AppHost.csproj:Aspire.AppHost.Sdk", "13.6.1")] == "microsoft"
+    assert groups[("nuget:Directory.Packages.props:Azure.Core", "1.63.0")] == "nuget-minor-patch"
+    assert groups[("gomod:proxy/go.mod:go", "1.27.2")] == "gomod-minor-patch"
+    assert groups[("dockerfile:mock-idp/Dockerfile:python", "3.14-alpine")] == (
+        "docker-minor-patch"
+    )
+    # Majors are in no group, held or not, and the record leaves the group out.
+    majors = [c for c in record["candidates"] if c["update_type"] == "major"]
+    assert majors and all("group" not in c for c in majors)
+    held = [c for c in majors if c["classification"] == "held_by_policy"]
+    assert {c["held_by"] for c in held} == {".NET SDK and images stay on the .NET runtime's major"}
+    # Lock drift and the advisories' fixes are grouped by the same rules.
+    fixes = [c for c in record["candidates"] if c.get("basis") == "advisory_fix"]
+    assert fixes and {c.get("group") for c in fixes} == {"gomod-minor-patch"}
+    assert {c.get("group") for c in record["candidates"]} == {
+        None,
+        "actions-minor-patch",
+        "docker-minor-patch",
+        "gomod-minor-patch",
+        "microsoft",
+        "nuget-minor-patch",
+    }
+
+
+def test_the_selection_of_064aa09_moves_go_off_its_ended_line(scan_064aa09):
+    """Go 1.25 is past its end of life at 064aa09, with standard library vulnerabilities on
+    the go directive: one breaking lifecycle unit carries both, and the batch, inside its
+    window, follows the trial policy's groups."""
+    from datetime import date
+
+    from sdlc import policy
+    from sdlc.selection import select
+
+    record, _, _ = scan_064aa09("--trial-policy", str(TRIAL_POLICY))
+    trial = policy.load(Path("."), TRIAL_POLICY, validate=lambda text: [])
+
+    outside = select(record, trial, date(2026, 10, 12))
+    found = {u["name"]: u for u in outside["units"]}
+    assert set(found) == {
+        "lifecycle-go-1.25",
+        "security-go-golang.org-x-crypto",
+        "security-go-golang.org-x-net",
+    }
+    go = found["lifecycle-go-1.25"]
+    assert go["reasons"] == ["lifecycle", "security"] and go["breaking"] is True
+    assert {t["dependency"]: t["version"] for t in go["targets"]} == {
+        "dockerfile:proxy/Dockerfile:docker.io/library/golang": "1.27-alpine",
+        "github-actions:.github/workflows/ci.yml:go": "1.27",
+        "github-actions:.github/workflows/release.yml:go": "1.27",
+        "gomod:proxy/go.mod:go": "1.27.2",
+    }
+    standard_library = {
+        v["advisory"]
+        for v in record["vulnerabilities"]
+        if v["dependency"] == "gomod:proxy/go.mod:go"
+    }
+    assert {a["advisory"] for a in go["evidence"]["advisories"]} == standard_library
+    assert all(not u["name"].startswith("security-golang-version") for u in outside["units"])
+
+    inside = select(record, trial, date(2026, 11, 3))
+    batched = {u["name"] for u in inside["units"] if u["reasons"] == ["batch"]}
+    assert {
+        "actions-minor-patch",
+        "docker-minor-patch",
+        "gomod-minor-patch",
+        "microsoft",
+        "nuget-minor-patch",
+    } <= batched
+    assert "docker-ghcr.io-devcontainers-features-docker-in-docker" in batched
 
 
 def test_out_chooses_where_the_run_directories_go(offline_scan, tmp_path, capsys):

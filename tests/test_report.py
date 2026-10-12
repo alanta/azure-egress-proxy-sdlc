@@ -4,13 +4,16 @@ import ast
 import copy
 import json
 import re
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
 
 from sdlc import report
+from sdlc.policy import Policy
 from sdlc.record import schema, validate_record
 from sdlc.report import render, text
+from sdlc.selection import KINDS, select
 
 VALID = Path(__file__).parent / "fixtures" / "records" / "valid.json"
 
@@ -74,6 +77,65 @@ def full(record):
             "scan_candidates": [],
         }
     ]
+    # Every kind of thing the selection can report, decided by the selection itself.
+    record["inventory"].append(
+        {
+            "id": "dockerfile:mock-idp/Dockerfile:python",
+            "ecosystem": "docker",
+            "name": "python",
+            "current": "3.10-alpine",
+            "origin": "declared",
+            "location": {"file": "mock-idp/Dockerfile", "line": 1},
+            "lookup": {"state": "current"},
+        }
+    )
+    record["lifecycle"] += [
+        {
+            "product": "python",
+            "line": "3.10",
+            "state": "nearing_end_of_life",
+            "end_of_life": "2026-10-31",
+            "supported_lines": ["3.12", "3.13"],
+            "source": "https://endoflife.date/api/v1/products/python",
+            "dependencies": ["dockerfile:mock-idp/Dockerfile:python"],
+            "locations": [{"file": "mock-idp/Dockerfile", "line": 1}],
+        },
+        {
+            "product": "alpine",
+            "line": "latest",
+            "state": "unknown",
+            "reason": "The tag names no release.",
+            "dependencies": [distroless["id"]],
+            "locations": [distroless["location"]],
+        },
+    ]
+    record["vulnerabilities"] += [
+        {
+            "advisory": "GHSA-open-apis-0001",
+            "dependency": record["inventory"][1]["id"],
+            "affected_version": "2.12.2",
+            "fixed_version": "3.0.0",
+            "fix_reached_by_candidate": False,
+            "fix_reached_by": [],
+            "fix_held_by": record["candidates"][1]["held_by"],
+            "source": "osv",
+            "reachability": "unknown",
+        },
+        {
+            "advisory": "GHSA-aspi-reap-0002",
+            "dependency": record["inventory"][0]["id"],
+            "affected_version": "13.5.4",
+            "fixed_version": "14.0.0",
+            "fix_reached_by_candidate": False,
+            "fix_reached_by": [],
+            "source": "osv",
+            "reachability": "unknown",
+        },
+    ]
+    trial = Policy(record["policy"], "{}", "{}")
+    today = datetime.fromisoformat(record["scanned_at"]).astimezone(UTC).date()
+    record["selection"] = select(record, trial, today)
+    assert {r["kind"] for r in record["selection"]["not_prepared"]} == set(KINDS)
     assert validate_record(record) == []
     return record
 
@@ -91,7 +153,10 @@ REPRESENTATIVE = {
     "dependabot_alerts": lambda r: [
         v for a in r["dependabot_alerts"]["alerts"] for v in (a["advisory"], a["package"])
     ],
-    "lifecycle": lambda r: [v for e in r["lifecycle"] for v in (e["product"], e["end_of_life"])],
+    "selection": lambda r: selection_values(r["selection"]),
+    "lifecycle": lambda r: [
+        v for e in r["lifecycle"] for v in (e["product"], e.get("end_of_life"))
+    ],
     "consistency": lambda r: [a["dependency"] for a in r["consistency"]],
     "inconsistencies": lambda r: [
         d["version"] for i in r["inconsistencies"] for d in i["declarations"]
@@ -99,6 +164,28 @@ REPRESENTATIVE = {
     "cross_checks": lambda r: [c["native_latest"] for c in r["cross_checks"]],
     "gaps": lambda r: [v for g in r["gaps"] for v in (g["subject"], g["reason"])],
 }
+
+
+def selection_values(selection):
+    """Every part of a selection that the report must show."""
+    values = [selection["date"], selection["batch_window"]["next_opens"]]
+    values += [
+        str(selection["defaults"]["batch_window"]["first_day"]),
+        str(selection["defaults"]["minimum_release_age_days"]),
+    ]
+    for unit in selection["units"]:
+        values += [unit["name"], *unit["reasons"]]
+        for t in unit["targets"]:
+            values += [t["current"], t["version"], t["update_type"]]
+        evidence = unit["evidence"]
+        for a in evidence.get("advisories", []):
+            values += [a["advisory"], a["source"], *a.get("aliases", [])]
+        for e in evidence.get("lifecycle", []):
+            values += [e["product"], e["line"], e.get("end_of_life")]
+    for r in selection["not_prepared"]:
+        values.append(r["detail"])
+        values += [r.get(k) for k in ("advisory", "held_by", "source", "package", "old_enough_on")]
+    return values
 
 
 def test_every_section_of_the_record_shows_in_the_report(full):
@@ -130,13 +217,13 @@ def test_the_report_names_what_the_spec_requires(record):
     rendered = render(record)
     assert "| Repository | alanta/azure-egress-proxy |" in rendered
     assert "| Commit | 064aa099ecf7ffea9664b89df29f7d89d6859358 |" in rendered
-    assert "| Scanned at | 2026-10-08T09:00:00+00:00 |" in rendered
+    assert "| Scanned at | 2026-10-05T09:00:00+00:00 |" in rendered
     assert "| Tools | renovate 44.145.1, endoflife.date v1 (details under Tools) |" in rendered
     assert (
         "| Update policy | trial file policies/azure-egress-proxy.renovate.json5, supplied for "
         "this scan |"
     ) in rendered
-    assert "| Record schema | version 2 |" in rendered
+    assert "| Record schema | version 3 |" in rendered
 
 
 def test_the_report_reads_nothing_but_the_record():
@@ -162,7 +249,7 @@ def test_rendering_leaves_the_record_as_it_was(record):
 def test_the_most_urgent_findings_come_first(record):
     rendered = render(record)
     headings = [line for line in rendered.splitlines() if line.startswith("## ")]
-    assert headings[:3] == ["## Summary", "## Lifecycle", "## Vulnerabilities"]
+    assert headings[:4] == ["## Summary", "## Would prepare", "## Lifecycle", "## Vulnerabilities"]
     summary = rendered.split("## Summary", 1)[1].split("\n## ", 1)[0]
     assert summary.index("**End of life:**") < summary.index("**Reachable vulnerabilities:**")
     assert summary.index("**Reachable vulnerabilities:**") < summary.index(
@@ -253,7 +340,7 @@ def test_unknown_states_are_shown_as_unknown_never_as_none(record):
         "not read: osv-scanner: It crashed.",
         "not read: dependabot-alerts: The credential has no Dependabot alerts permission.",
         "1 lookup failed",
-        "1 of 5 dependencies not looked up (skipped)",
+        "1 of 7 dependencies not looked up (skipped)",
         "reachability of 1 advisory",
         "whether a candidate fixes 1 advisory",
         "lifecycle of 1 line",
@@ -273,6 +360,7 @@ def test_a_record_with_everything_read_says_nothing_is_unknown(record):
     }
     record["inventory"][3]["lookup"] = {"state": "current"}
     record["vulnerabilities"] = []
+    drop_security_units(record)
     assert validate_record(record) == []
     rendered = render(record)
     assert "- **Unknown:** nothing; every source was read and every file covered" in rendered
@@ -306,6 +394,7 @@ def test_every_source_the_scan_couldnt_read_is_unknown(record):
     """Not only the sources the report knows by name: every unavailable gap, so a new source or
     a single module or lock file shows too."""
     record["vulnerabilities"] = []
+    drop_security_units(record)
     record["gaps"] += [
         {
             "kind": "unavailable_source",
@@ -324,7 +413,7 @@ def test_every_source_the_scan_couldnt_read_is_unknown(record):
     assert unknown.startswith("- **Unknown:** 4:\n")
     assert "  - not read: govulncheck: proxy/go.mod: govulncheck didn't run" in unknown
     assert "  - not read: src/Portal/packages.lock.json: OSV-Scanner returned no result" in unknown
-    assert "  - 1 of 5 dependencies not looked up (skipped), with the reasons under Not" in unknown
+    assert "  - 1 of 7 dependencies not looked up (skipped), with the reasons under Not" in unknown
     # Neither a gap's source nor the lack of advisories is claimed as complete.
     assert (
         "- **Reachable vulnerabilities:** none found; incomplete, 2 sources or files couldn't be "
@@ -429,6 +518,7 @@ def test_a_candidate_from_an_advisory_reads_as_its_fix_not_as_a_lookups_find(rec
             "affected_version": "v0.3.7",
             "fixed_version": "v0.3.8",
             "fix_reached_by_candidate": True,
+            "fix_reached_by": ["v0.3.8"],
             "source": "osv",
             "reachability": "unknown",
         }
@@ -452,3 +542,173 @@ def test_a_candidate_from_an_advisory_reads_as_its_fix_not_as_a_lookups_find(rec
         "whether newer versions exist for 1 dependency not looked up, whose only candidates "
         "are their advisories' fixes"
     ) in rendered
+
+
+def drop_security_units(record):
+    """The units that cite advisories, for a test that takes the advisories away."""
+    selection = record["selection"]
+    selection["units"] = [u for u in selection["units"] if "advisories" not in u["evidence"]]
+
+
+def would_prepare(rendered):
+    return rendered.split("\n## Would prepare\n", 1)[1].split("\n## ", 1)[0]
+
+
+def test_the_selection_shows_each_unit_with_its_targets_and_evidence(record):
+    section = would_prepare(render(record))
+    assert "- **Batch window:** days 1 to 7 of every month; open on 2026-10-05; the next one" in (
+        section
+    )
+    assert "opens 2026-11-01" in section
+    assert "- **Minimum release age for batch updates:** 7 days" in section
+    assert "### lifecycle-go-1.25\n\n- **Reason:** lifecycle\n- **Breaking:** yes" in section
+    assert "| go | proxy/go.mod:3 | 1.25.14 | minor | 1.27.2 | 33 days old |" in section
+    assert "- Lifecycle: go 1.25 is end of life, 2026-08-19; still supported: 1.26, 1.27" in section
+    assert "- **Reason:** security\n- **Breaking:** no" in section
+    assert (
+        "| golang.org/x/net | proxy/go.mod | v0.40.0 | minor | v0.45.0 | age unknown |" in section
+    )
+    assert (
+        "- Advisory GO-2026-6100 on golang.org/x/net v0.40.0 (proxy/go.mod): fixed in v0.41.0"
+        in (section)
+    )
+    assert "- **Reason:** batch" in section
+    assert (
+        "| Aspire.AppHost.Sdk | src/AppHost/AppHost.csproj:1 | 13.5.4 | minor | 13.6.1 | "
+        "25 days old |" in section
+    )
+    assert "- Batch window: days 1 to 7 of every month; minimum release age 7 days" in section
+    summary = summary_item(render(record), "Would prepare")
+    assert "3 units (1 breaking)" in summary and "3 reasons not prepared" in summary
+    assert "the batch window is open on 2026-10-05, the next one opens 2026-11-01" in summary
+
+
+def test_the_selection_says_what_it_could_not_prepare(full):
+    section = would_prepare(render(full))
+    for title in report.NOT_PREPARED.values():
+        assert f"#### {title}\n" in section
+    assert "- **Microsoft.OpenApi 2.12.2 (Directory.Packages.props):" not in section  # no unit
+    assert "GHSA-open-apis-0001:** Vulnerable, fix held by policy" in section
+    assert "Held by: Microsoft.OpenApi stays on 2.x" in section
+    assert "No candidate reaches the fixed version 14.0.0." in section
+    assert "python 3.10:** No in-scope candidate is on another supported line" in section
+    assert "**source dependabot-alerts:**" not in section  # the alerts were read in `full`
+    assert "Dependabot alert 5 on golang.org/x/text" in section
+    assert "age 2 days old" not in section
+    assert "2 days old, old enough on 2026-10-10" in section
+
+
+def test_the_selection_says_so_when_there_is_nothing_to_prepare(record_from):
+    from sdlc.renovate import Inventory
+
+    section = would_prepare(render(record_from(Inventory([], []))))
+    assert "No unit would be prepared." in section
+    assert "Nothing that would have been prepared was left out." in section
+    assert "closed on 2026-10-08" in section
+
+
+def test_the_selection_marks_a_collision_and_a_release_after_the_scan(record):
+    unit = record["selection"]["units"][2]
+    unit["name_collision"] = True
+    unit["targets"][0]["age_days"] = -2
+    record["selection"]["not_prepared"].append(
+        {
+            "kind": "no_candidate",
+            "reason": "security",
+            "dependency": record["inventory"][0]["id"],
+            "advisories": ["GHSA-one", "GHSA-two"],
+            "detail": "No single in-scope candidate reaches the fix of every advisory.",
+        }
+    )
+    section = would_prepare(render(record))
+    assert "changed to tell it apart" in section
+    assert "released 2 days after the scan" in section
+    assert "GHSA-one; GHSA-two:** No single in-scope candidate" in section
+
+
+def test_a_batch_unit_shows_the_open_security_reports_of_its_dependencies(record):
+    batch = record["selection"]["units"][2]
+    dep_id = batch["targets"][0]["dependency"]
+    reference = {
+        "kind": "fix_held",
+        "dependency": dep_id,
+        "advisory": "GHSA-held",
+        "held_by": "Aspire stays on 13.x",
+    }
+    record["selection"]["not_prepared"].insert(
+        0, reference | {"reason": "security", "detail": "Vulnerable, fix held by policy."}
+    )
+    batch["evidence"]["open_security_reports"] = [reference]
+    assert validate_record(record) == []
+    section = would_prepare(render(record))
+    assert (
+        "- Open security report, not prepared: Vulnerable, fix held by policy: GHSA-held on "
+        "Aspire.AppHost.Sdk 13.5.4 (src/AppHost/AppHost.csproj:1); held by: Aspire stays on 13.x"
+    ) in section
+    reference["held_by"] = HOSTILE
+    record["selection"]["not_prepared"][0]["held_by"] = HOSTILE
+    rendered = render(record)
+    assert "<script>" not in rendered
+    rest = outside_code(rendered)
+    assert "://" not in rest and "www." not in rest and "evil.example" not in rest
+
+
+def test_a_lifecycle_unit_on_several_lines_shows_each_of_them(record):
+    unit = record["selection"]["units"][1]
+    unit["evidence"]["lifecycle"].append(
+        {
+            "product": "python",
+            "line": "3.10",
+            "state": "nearing_end_of_life",
+            "end_of_life": "2026-10-31",
+        }
+    )
+    assert validate_record(record) == []
+    section = would_prepare(render(record))
+    assert "- Lifecycle: go 1.25 is end of life, 2026-08-19; still supported: 1.26, 1.27" in section
+    assert (
+        "- Lifecycle: python 3.10 is nearing end of life, 2026-10-31; still supported: unknown"
+        in (section)
+    )
+
+
+def assert_plain(rendered):
+    assert "<script>" not in rendered
+    rest = outside_code(rendered)
+    assert "://" not in rest and "www." not in rest and "evil.example" not in rest
+    assert "@someone" not in rest.replace("\\@someone", "")
+
+
+def test_hostile_text_in_the_selection_cant_change_the_report(full):
+    selection = full["selection"]
+    # A target's version must be an in-scope candidate's, so the candidate says the same.
+    target = selection["units"][0]["targets"][0]
+    candidate = next(
+        c
+        for c in full["candidates"]
+        if (c["dependency"], c["version"]) == (target["dependency"], target["version"])
+    )
+    candidate["version"] = target["version"] = HOSTILE
+    for v in full["vulnerabilities"]:
+        if v["dependency"] == target["dependency"]:
+            v["fix_reached_by"] = [HOSTILE]
+    advisory = selection["units"][0]["evidence"]["advisories"][0]
+    advisory["source"] = HOSTILE
+    advisory["aliases"] = [HOSTILE]
+    selection["units"][1]["evidence"]["lifecycle"][0]["product"] = HOSTILE
+    for r in selection["not_prepared"]:
+        r["detail"] = HOSTILE
+        if "package" in r:
+            r["package"] = HOSTILE
+        if "held_by" in r:
+            r["held_by"] = HOSTILE
+    full["dependabot_alerts"]["alerts"][0]["package"] = HOSTILE
+    assert validate_record(full) == []
+    rendered = render(full)
+    assert_plain(rendered)
+    section = would_prepare(rendered)
+    # The hostile text does show: escaped, in the fields the selection fills.
+    assert text(HOSTILE) in section
+    assert f"Dependabot alert 5 on {text(HOSTILE)}" in section
+    assert f"| {text(HOSTILE)} | " in section
+    assert f"- Lifecycle: {text(HOSTILE)} 1.25" in section

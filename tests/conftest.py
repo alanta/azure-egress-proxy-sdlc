@@ -11,7 +11,7 @@ def record_from():
 
     def as_record(inventory):
         return {
-            "schema_version": "2",
+            "schema_version": "3",
             "subject": {
                 "repository": "alanta/azure-egress-proxy",
                 "ref": "main",
@@ -27,6 +27,17 @@ def record_from():
             "consistency": [],
             "inconsistencies": [],
             "cross_checks": [],
+            # Nothing is selected here: the tests that use this don't look at the selection.
+            "selection": {
+                "date": "2026-10-08",
+                "defaults": {
+                    "batch_window": {"first_day": 1, "last_day": 7},
+                    "minimum_release_age_days": 7,
+                },
+                "batch_window": {"open": False, "next_opens": "2026-11-01"},
+                "units": [],
+                "not_prepared": [],
+            },
             # A record either has the alerts or says why it doesn't.
             "gaps": [
                 {
