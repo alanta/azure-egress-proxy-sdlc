@@ -77,7 +77,7 @@ For each version line in use that the scan reports as nearing its end of life or
 
 ### Requirement: Batch the remaining updates monthly
 
-Only when the scan's date falls in the batch window, by default the first seven days of the month, SHALL selection select batch updates. A batch update is each dependency's newest in-scope candidate, if it is at least the minimum release age old (7 days by default). A candidate with no known release date counts as old enough. Dependencies with a security or lifecycle unit SHALL be left out of the batch.
+Only when the scan's date falls in the batch window, by default the first seven days of the month, SHALL selection select batch updates. A batch update is each dependency's newest in-scope candidate, if it is at least the minimum release age old (7 days by default). A candidate with no known release date counts as old enough. Dependencies with a security or lifecycle unit SHALL be left out of the batch. A dependency with a security reason that selection reports but doesn't prepare SHALL stay in the batch, and its batch unit SHALL name that report in its evidence.
 
 #### Scenario: A scan inside the window
 
@@ -103,6 +103,11 @@ Only when the scan's date falls in the batch window, by default the first seven 
 
 - **WHEN** a dependency has a security unit and a newer in-scope candidate
 - **THEN** it is not in the batch
+
+#### Scenario: The dependency's fix is held
+
+- **WHEN** a scan inside the window finds a dependency whose security fix is held by policy, and which has an older in-scope candidate
+- **THEN** that candidate is selected as a batch update, and its unit's evidence names the held fix
 
 ### Requirement: Put each dependency in one unit
 

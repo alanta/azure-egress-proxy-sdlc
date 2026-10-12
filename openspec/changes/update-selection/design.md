@@ -65,7 +65,7 @@ Moving a whole line in one unit keeps declarations that belong together, such as
 
 ### 5. Batch window and minimum age are constants, measured against the scan's date
 
-The window is days 1 to 7 of the month, and the minimum release age is 7 days, both as named constants. The release date comes from Renovate's `releaseTimestamp`, stored as `released_at` on the candidate. Without it, the candidate is old enough and is marked "age unknown". The batch takes each dependency's newest in-scope candidate. A dependency whose newest candidate is too young waits for the next window, even when an older in-scope candidate would pass. That is the simplest rule, and the report shows that the dependency is waiting.
+The window is days 1 to 7 of the month, and the minimum release age is 7 days, both as named constants. The release date comes from Renovate's `releaseTimestamp`, stored as `released_at` on the candidate. Without it, the candidate is old enough and is marked "age unknown". The batch takes each dependency's newest in-scope candidate. A dependency whose security reason is only reported, such as a held fix or one no single candidate reaches, is still batched, because a newer version is usually an improvement, but its batch unit names that report, so it isn't mistaken for a routine update with no security reason. A dependency whose newest candidate is too young waits for the next window, even when an older in-scope candidate would pass. That is the simplest rule, and the report shows that the dependency is waiting.
 
 ### 6. Unit names come from the reason and the subject of the unit
 
