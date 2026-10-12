@@ -45,6 +45,7 @@ Pitfalls already solved in the Renovate integration (see the comments in `src/sd
 
 ## Planning with OpenSpec
 
+- **First a minimal end-to-end process, then improve it.** Effects early in the pipeline only show at its end, so get the whole chain working thinly before refining any part of it. Each part starts as the simplest version that is still real, and grows when a run shows it needs to.
 - **Every change goes through an OpenSpec change** in `openspec/changes/`: proposal, specs, design, then tasks. Use the CLI (`openspec new change`) to create one, never by hand.
 - **The specs in `openspec/specs/` describe the system as it is.** A change updates them when it's archived.
 - **Architecture decisions are ADRs** in `docs/adr/`, written from [the template](docs/adr/ADR-template.md).
