@@ -15,4 +15,4 @@
 
 ## 4. End-to-end check
 
-- [ ] 4.1 Run a scan of the subject's `main` with the trial policy. Verify that the record validates against version 2, and that the report has no parity section, but still has the Dependabot alerts.
+- [x] 4.1 Run a scan of the subject's `main` with the trial policy. Verify that the record validates against version 2, and that the report has no parity section, but still has the Dependabot alerts.
