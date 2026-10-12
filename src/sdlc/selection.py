@@ -51,6 +51,9 @@ NOT_EVALUATED = "not_evaluated"  # data the decision needs is missing
 WAITING = "waiting"  # a batch update too young for this window
 KINDS = (FIX_HELD, NO_ROUTE, NO_CANDIDATE, EARLY_WARNING, NOT_EVALUATED, WAITING)
 
+# The fields that identify a report of something not prepared, where a unit names it.
+REPORT_REFERENCE = ("kind", "dependency", "advisory", "advisories", "alert", "held_by")
+
 # Update types from smallest to largest. A digest only re-pins the same version, so it never
 # reaches a fix (the scan doesn't judge digests against advisories either).
 SIZES = ("digest", "patch", "minor", "major")
@@ -108,7 +111,10 @@ def select(record: dict[str, Any], policy: Policy, today: date) -> dict[str, Any
     units = _lifecycle_units(record, entries, candidates, fixes, today, not_prepared)
     units += _security_units(fixes, entries, today)
     in_units = {t["dependency"] for unit in units for t in unit["targets"]}
-    units += _batch_units(entries, candidates, in_units, today, not_prepared)
+    # A security reason that is only reported doesn't keep its dependency out of the batch,
+    # but its batch unit names the report.
+    open_reports = [r for r in not_prepared if r["reason"] == SECURITY and "dependency" in r]
+    units += _batch_units(entries, candidates, in_units, open_reports, today, not_prepared)
     units = _named(units)
 
     return {
@@ -515,11 +521,16 @@ def _batch_units(
     entries: dict[str, dict[str, Any]],
     candidates: dict[str, list[dict[str, Any]]],
     in_units: set[str],
+    open_reports: list[dict[str, Any]],
     today: date,
     not_prepared: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
     """Inside the batch window, every other dependency's newest in-scope candidate, if it is
     old enough, in units by the group the scan recorded for it.
+
+    A dependency whose security reason is only reported, such as a held fix, is batched too,
+    and its unit's evidence names the report, so the unit doesn't read as a routine update
+    with no security reason.
 
     A candidate without a release date counts as old enough, and its age is unknown. One that
     is too young waits for the next window, even when an older candidate would be old enough
@@ -566,19 +577,28 @@ def _batch_units(
             entry = entries[batch[0]["dependency"]]
             name = f"{entry['ecosystem']}-{entry['name']}"
             subject = {"ecosystem": entry["ecosystem"], "name": entry["name"]}
+        evidence: dict[str, Any] = {
+            "batch_window": {
+                "first_day": BATCH_WINDOW_FIRST_DAY,
+                "last_day": BATCH_WINDOW_LAST_DAY,
+            },
+            "minimum_release_age_days": MINIMUM_RELEASE_AGE_DAYS,
+        }
+        batched_ids = {t["dependency"] for t in batch}
+        named = [
+            {k: r[k] for k in REPORT_REFERENCE if k in r}
+            for r in sorted(open_reports, key=_report_order)
+            if r["dependency"] in batched_ids
+        ]
+        if named:
+            evidence["open_security_reports"] = named
         units.append(
             {
                 "name": name,
                 "reasons": [BATCH],
                 "subject": subject,
                 "targets": batch,
-                "evidence": {
-                    "batch_window": {
-                        "first_day": BATCH_WINDOW_FIRST_DAY,
-                        "last_day": BATCH_WINDOW_LAST_DAY,
-                    },
-                    "minimum_release_age_days": MINIMUM_RELEASE_AGE_DAYS,
-                },
+                "evidence": evidence,
             }
         )
     return units

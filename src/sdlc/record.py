@@ -248,6 +248,7 @@ def _selection_problems(record: dict[str, Any]) -> list[str]:
                 )
             elif update_type != target["update_type"]:
                 problems.append(f"{where}.update_type: not the update type of the candidate")
+        problems += _open_report_problems(unit, path, selection["not_prepared"])
         for j, advisory in enumerate(unit["evidence"].get("advisories", [])):
             if advisory["dependency"] not in entries:
                 problems.append(
@@ -259,6 +260,35 @@ def _selection_problems(record: dict[str, Any]) -> list[str]:
         for dep_id in [report.get("dependency"), *report.get("dependencies", [])]:
             if dep_id is not None and dep_id not in entries:
                 problems.append(f"$.selection.not_prepared[{i}]: unknown dependency id {dep_id!r}")
+    return problems
+
+
+def _open_report_problems(
+    unit: dict[str, Any], path: str, not_prepared: list[dict[str, Any]]
+) -> list[str]:
+    """A batch unit names exactly the open security reports of its dependencies."""
+    if "batch" not in unit["reasons"]:
+        return []
+    batched = {t["dependency"] for t in unit["targets"]}
+    named = unit["evidence"].get("open_security_reports", [])
+    problems = [
+        f"{path}.evidence.open_security_reports[{j}]: no security report in not_prepared is "
+        "about a dependency of the unit and says this"
+        for j, reference in enumerate(named)
+        if reference["dependency"] not in batched
+        or not any(
+            r["reason"] == "security" and all(r.get(k) == v for k, v in reference.items())
+            for r in not_prepared
+        )
+    ]
+    for i, report in enumerate(not_prepared):
+        if report["reason"] != "security" or report.get("dependency") not in batched:
+            continue
+        if not any(all(report.get(k) == v for k, v in ref.items()) for ref in named):
+            problems.append(
+                f"{path}.evidence.open_security_reports: doesn't name $.selection."
+                f"not_prepared[{i}] about {report['dependency']!r}"
+            )
     return problems
 
 

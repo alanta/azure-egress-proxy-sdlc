@@ -158,12 +158,16 @@ def reports(selection, kind):
     return [r for r in selection["not_prepared"] if r["kind"] == kind]
 
 
-def vulnerable(dep="Serilog", current="1.2.0", fixed="1.2.3", reached_by=None, **candidates):
+def vulnerable(
+    dep="Serilog", current="1.2.0", fixed="1.2.3", reached=True, reached_by=None, **candidates
+):
     """A NuGet package with an advisory, and its candidates as update type=version."""
     record = Record().dependency(PROPS + dep, current)
     for update_type, version in candidates.items():
         record.candidate(PROPS + dep, update_type, version)
-    return record.vulnerability(PROPS + dep, "GHSA-1", fixed, reached_by=reached_by)
+    return record.vulnerability(
+        PROPS + dep, "GHSA-1", fixed, reached=reached, reached_by=reached_by
+    )
 
 
 def test_a_reachable_and_an_unreachable_vulnerability_both_get_a_unit():
@@ -1078,3 +1082,41 @@ def test_a_fix_that_leaves_only_one_of_two_lines_is_a_unit_of_its_own():
         "No in-scope candidate that leaves alpine-linux 3.20 and go 1.25 also reaches the fix "
         "of every advisory on it, so its security fix is a unit of its own."
     )
+
+
+def test_a_dependency_whose_fix_is_held_stays_in_the_batch_and_its_unit_names_it():
+    hold = "Microsoft.OpenApi stays on 2.x"
+    record = (
+        Record()
+        .dependency(PROPS + "Microsoft.OpenApi", "2.12.2")
+        .candidate(PROPS + "Microsoft.OpenApi", "minor", "2.13.0", group="nuget-minor-patch")
+        .candidate(PROPS + "Microsoft.OpenApi", "major", "3.10.2", held_by=hold)
+        .vulnerability(
+            PROPS + "Microsoft.OpenApi", "GHSA-1", "3.0.0", reached=False, fix_held_by=hold
+        )
+    )
+    selection = record.select(THIRD)
+    [unit] = selection["units"]
+    assert unit["reasons"] == ["batch"]
+    assert targets(unit) == {PROPS + "Microsoft.OpenApi": "2.13.0"}
+    assert unit["evidence"]["open_security_reports"] == [
+        {
+            "kind": "fix_held",
+            "dependency": PROPS + "Microsoft.OpenApi",
+            "advisory": "GHSA-1",
+            "held_by": hold,
+        }
+    ]
+    assert [r["kind"] for r in selection["not_prepared"]] == ["fix_held"]
+
+
+def test_a_batch_unit_names_only_its_own_dependencies_open_reports():
+    record = (
+        vulnerable(fixed="9.0.0", reached="unknown", patch="1.2.5")
+        .dependency(AZURE_CORE, "1.62.0")
+        .candidate(AZURE_CORE, "minor", "1.63.0")
+    )
+    found = units(record.select(THIRD))
+    assert "open_security_reports" not in found["nuget-azure.core"]["evidence"]
+    [named] = found["nuget-serilog"]["evidence"]["open_security_reports"]
+    assert named == {"kind": "not_evaluated", "dependency": PROPS + "Serilog", "advisory": "GHSA-1"}

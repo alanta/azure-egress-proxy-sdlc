@@ -413,6 +413,16 @@ def _unit(view: _View, unit: dict[str, Any]) -> list[str]:
             f"- Batch window: {_window(evidence['batch_window'])}; minimum release age "
             f"{_days(evidence['minimum_release_age_days'])}"
         )
+    for r in evidence.get("open_security_reports", []):
+        about = [r["advisory"]] if "advisory" in r else list(r.get("advisories", []))
+        if "alert" in r:
+            about.append(f"Dependabot alert {r['alert']}")
+        held = f"; held by: {text(r['held_by'])}" if "held_by" in r else ""
+        lines.append(
+            f"- Open security report, not prepared: {NOT_PREPARED[r['kind']]}: "
+            f"{', '.join(text(a) for a in about)} on {view.entry(r['dependency'])} "
+            f"({view.where(r['dependency'])}){held}"
+        )
     lines.append("")
     return lines
 

@@ -618,6 +618,33 @@ def test_the_selection_marks_a_collision_and_a_release_after_the_scan(record):
     assert "GHSA-one; GHSA-two:** No single in-scope candidate" in section
 
 
+def test_a_batch_unit_shows_the_open_security_reports_of_its_dependencies(record):
+    batch = record["selection"]["units"][2]
+    dep_id = batch["targets"][0]["dependency"]
+    reference = {
+        "kind": "fix_held",
+        "dependency": dep_id,
+        "advisory": "GHSA-held",
+        "held_by": "Aspire stays on 13.x",
+    }
+    record["selection"]["not_prepared"].insert(
+        0, reference | {"reason": "security", "detail": "Vulnerable, fix held by policy."}
+    )
+    batch["evidence"]["open_security_reports"] = [reference]
+    assert validate_record(record) == []
+    section = would_prepare(render(record))
+    assert (
+        "- Open security report, not prepared: Vulnerable, fix held by policy: GHSA-held on "
+        "Aspire.AppHost.Sdk 13.5.4 (src/AppHost/AppHost.csproj:1); held by: Aspire stays on 13.x"
+    ) in section
+    reference["held_by"] = HOSTILE
+    record["selection"]["not_prepared"][0]["held_by"] = HOSTILE
+    rendered = render(record)
+    assert "<script>" not in rendered
+    rest = outside_code(rendered)
+    assert "://" not in rest and "www." not in rest and "evil.example" not in rest
+
+
 def test_hostile_text_in_the_selection_cant_change_the_report(record):
     selection = record["selection"]
     selection["units"][0]["name"] = "evil-name"

@@ -560,3 +560,77 @@ def test_the_selection_only_names_what_the_record_has(description, change, expec
     change(record["selection"])
     problems = validate_record(record)
     assert any(expected in p for p in problems), (description, problems)
+
+
+def with_open_report(record, *, named=True, reported=True):
+    """The fixture with a held fix on the batch unit's dependency."""
+    batch = record["selection"]["units"][2]
+    dep_id = batch["targets"][0]["dependency"]
+    reference = {
+        "kind": "fix_held",
+        "dependency": dep_id,
+        "advisory": "GHSA-held",
+        "held_by": "Aspire stays on 13.x",
+    }
+    if reported:
+        record["selection"]["not_prepared"].insert(
+            0, reference | {"reason": "security", "detail": "Vulnerable, fix held by policy."}
+        )
+    if named:
+        batch["evidence"]["open_security_reports"] = [reference]
+    return record
+
+
+def test_a_batch_unit_names_the_open_security_reports_of_its_dependencies():
+    assert validate_record(with_open_report(v3_record())) == []
+
+
+@pytest.mark.parametrize(
+    ("description", "change", "expected"),
+    [
+        (
+            "a named report that isn't in not_prepared",
+            lambda r: with_open_report(r, reported=False),
+            "open_security_reports[0]: no security report in not_prepared",
+        ),
+        (
+            "a report its unit doesn't name",
+            lambda r: with_open_report(r, named=False),
+            "open_security_reports: doesn't name $.selection.not_prepared[0]",
+        ),
+        (
+            "a named report about another dependency",
+            lambda r: with_open_report(r)["selection"]["units"][2]["evidence"][
+                "open_security_reports"
+            ][0].update(dependency="nuget:Directory.Packages.props:Microsoft.OpenApi"),
+            "open_security_reports[0]: no security report",
+        ),
+    ],
+)
+def test_open_security_reports_are_checked(description, change, expected):
+    record = v3_record()
+    change(record)
+    problems = validate_record(record)
+    assert any(expected in p for p in problems), (description, problems)
+
+
+def test_only_a_batch_unit_names_open_security_reports():
+    record = with_open_report(v3_record())
+    reports = record["selection"]["units"][2]["evidence"].pop("open_security_reports")
+    record["selection"]["units"][1]["evidence"]["open_security_reports"] = reports
+    assert any("should not be valid" in p for p in validate_record(record))
+
+
+@pytest.mark.parametrize(
+    ("change", "expected"),
+    [
+        ({"fix_reached_by_candidate": "unknown", "fix_reached_by": []}, "should not be valid"),
+        ({"fix_reached_by": []}, "should not be valid"),
+    ],
+)
+def test_fix_reached_by_is_absent_when_reach_is_unknown_or_not_judged(change, expected):
+    record = v3_record()
+    # The fixture's advisory names no fixed version, so the scan judged no candidate against it.
+    record["vulnerabilities"][0] |= change
+    problems = validate_record(record)
+    assert any(expected in p for p in problems), problems
