@@ -636,6 +636,8 @@ def test_a_scan_records_the_selection_it_made_on_its_own_date(scan_064aa09):
     assert selection["date"] == scanned.isoformat()
     assert selection == select(without, trial, scanned)
     assert selection["units"] and any(u["breaking"] for u in selection["units"])
+    assert "would prepare: " in out
+    assert "## Would prepare" in rendered
 
 
 def test_a_selection_failing_the_schema_fails_the_scan_without_a_report(

@@ -125,11 +125,13 @@ The report starts with a table: repository, ref, commit, time, the policy used, 
 **Summary.** The place to start. Each bullet says what was found, or that nothing was and why you can trust that or not:
 - *End of life* and *Nearing end of life*: runtime and OS lines in use whose support has ended or ends soon. "None found, but N are unknown" means N lines couldn't be checked.
 - *Reachable vulnerabilities* and *Vulnerabilities no in-scope candidate is known to fix*: advisories per dependency, with the fixed version and whether an in-scope candidate reaches it.
+- *Would prepare*: how many updates the scan would prepare, how many are breaking, how many reasons stayed unprepared, and whether the batch window is open.
 - *Inconsistent declarations*: the same thing (such as the Go version) declared with different values in different files.
 - *Unknown*: dependencies not looked up, and lifecycle lines it couldn't determine. Deliberately skipped dependencies are counted here too.
 - *Coverage gaps* and the totals.
 
 **Sections after the summary:**
+- **Would prepare:** the batch window and minimum release age in use, whether the window is open and when the next one opens; then each unit with its reason (`security`, `lifecycle` or `batch`), breaking mark, targets (current version, update type, target version, release age or *age unknown*) and evidence (the advisories, the ending line, or the batch window). *Not prepared* follows, grouped by why: the fix is held by policy, no fixed version is recorded, no candidate reaches the fix, a line is ending but no candidate leaves it, data is missing, or a batch update is too young for this window.
 - **Lifecycle:** one row per product line in use: `end of life`, `nearing end of life`, `supported` or `unknown` (with the reason, such as a tag that names no release), and where it is used.
 - **Vulnerabilities:** one row per advisory, with the source (`osv` or `govulncheck`). Reachability is `reachable`, `not reachable` or `unknown`; only govulncheck decides it, and only for Go. *In-scope candidate reaches fix* is `yes`, `no`, `no fix to reach` (no fixed version exists) or unknown. A sub-section compares with Dependabot alerts: alerts that match the scan's advisories, match them only in another file, or don't match. It is absent, with a gap, when the alerts couldn't be read.
 - **Declared versions:** the consistency check, and what was compared.
