@@ -27,7 +27,8 @@ from typing import Any
 from sdlc import lifecycle, native, osv
 from sdlc.policy import Policy
 
-# The batch window: these days of every month, inclusive.
+# The batch window: these days of every month, inclusive. It starts on the first, so the next
+# window always opens in the next month.
 BATCH_WINDOW_FIRST_DAY = 1
 BATCH_WINDOW_LAST_DAY = 7
 # How old a batch update's release must be, in days, on the scan's date.
@@ -128,14 +129,17 @@ def select(record: dict[str, Any], policy: Policy, today: date) -> dict[str, Any
 def batch_window(today: date) -> dict[str, Any]:
     """Whether the batch window is open on the date, and the first day of the next one."""
     is_open = BATCH_WINDOW_FIRST_DAY <= today.day <= BATCH_WINDOW_LAST_DAY
-    this_month = today.replace(day=BATCH_WINDOW_FIRST_DAY)
-    if today < this_month:
-        next_opens = this_month
-    elif today.month == 12:
-        next_opens = date(today.year + 1, 1, BATCH_WINDOW_FIRST_DAY)
-    else:
-        next_opens = date(today.year, today.month + 1, BATCH_WINDOW_FIRST_DAY)
-    return {"open": is_open, "next_opens": next_opens.isoformat()}
+    return {"open": is_open, "next_opens": _next_window(today).isoformat()}
+
+
+def _next_window(day: date) -> date:
+    """The first day of the window after the month of the day."""
+    return date(day.year + day.month // 12, day.month % 12 + 1, BATCH_WINDOW_FIRST_DAY)
+
+
+def _window_from(day: date) -> date:
+    """The first day on or after the given one that is inside a window."""
+    return day if day.day <= BATCH_WINDOW_LAST_DAY else _next_window(day)
 
 
 def _security_fixes(
@@ -542,9 +546,7 @@ def _batch_units(
                     "released_at": newest["released_at"],
                     "age_days": age,
                     "old_enough_on": ready.isoformat(),
-                    "detail": f"{newest['version']} is {age} days old, younger than "
-                    f"{MINIMUM_RELEASE_AGE_DAYS}, so it waits for the next window, which opens "
-                    f"on {window['next_opens']}.",
+                    "detail": _waiting(newest, age, ready, today),
                 }
             )
             continue
@@ -595,6 +597,7 @@ def _named(units: list[dict[str, Any]]) -> list[dict[str, Any]]:
         for unit in same:
             finished = {"name": name, "reasons": unit["reasons"], "subject": unit["subject"]}
             if len(same) > 1:
+                # Rare; a colliding name changes again when the other unit goes away.
                 identity = json.dumps([unit["reasons"][0], unit["subject"]], sort_keys=True)
                 finished["name"] = branch_name(f"{unit['name']}-{_digest(identity)}")
                 finished["name_collision"] = True
@@ -626,6 +629,28 @@ def branch_name(text: str) -> str:
 
 def _digest(text: str) -> str:
     return hashlib.sha256(text.encode()).hexdigest()[:8]
+
+
+def _waiting(candidate: dict[str, Any], age: int, ready: date, today: date) -> str:
+    """Why a batch update waits, and until when."""
+    version = candidate["version"]
+    if age < 0:
+        released = datetime.fromisoformat(candidate["released_at"]).astimezone(UTC).date()
+        why = f"{version}'s release date, {released.isoformat()}, is after the scan's date"
+    else:
+        why = (
+            f"{version} is {_days(age)} old, younger than the minimum of "
+            f"{_days(MINIMUM_RELEASE_AGE_DAYS)}"
+        )
+    selectable = _window_from(ready)
+    if selectable < _next_window(today):
+        return f"{why}. It is old enough on {ready.isoformat()}, still inside this window."
+    which = "the next window" if selectable == _next_window(today) else "the window"
+    return f"{why}, so it waits for {which}, which opens on {selectable.isoformat()}."
+
+
+def _days(count: int) -> str:
+    return f"{count} day" if count in (1, -1) else f"{count} days"
 
 
 def _package(entry: dict[str, Any]) -> tuple[str, str]:

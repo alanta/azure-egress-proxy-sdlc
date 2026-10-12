@@ -791,8 +791,8 @@ def test_a_too_young_newest_candidate_waits_for_the_next_window():
             "released_at": DAYS_BEFORE_THIRD[2],
             "age_days": 2,
             "old_enough_on": "2026-11-08",
-            "detail": "1.63.0 is 2 days old, younger than 7, so it waits for the next window, "
-            "which opens on 2026-12-01.",
+            "detail": "1.63.0 is 2 days old, younger than the minimum of 7 days, so it waits "
+            "for the next window, which opens on 2026-12-01.",
         }
     ]
 
@@ -803,6 +803,30 @@ def test_a_release_date_after_the_scan_waits_too():
     )
     [waiting] = reports(record.select(THIRD), "waiting")
     assert waiting["age_days"] == -2
+    assert waiting["detail"] == (
+        "1.63.0's release date, 2026-11-05, is after the scan's date, so it waits for the next "
+        "window, which opens on 2026-12-01."
+    )
+
+
+def test_a_candidate_old_enough_later_in_this_window_doesnt_wait_for_the_next():
+    record = outdated(
+        AZURE_CORE, "1.62.0", ("minor", "1.63.0", {"released_at": "2026-10-29T08:00:00+00:00"})
+    )
+    [waiting] = reports(record.select(THIRD), "waiting")
+    assert waiting["age_days"] == 5 and waiting["old_enough_on"] == "2026-11-05"
+    assert waiting["detail"] == (
+        "1.63.0 is 5 days old, younger than the minimum of 7 days. It is old enough on "
+        "2026-11-05, still inside this window."
+    )
+
+
+def test_a_one_day_old_candidate_is_one_day_old():
+    record = outdated(
+        AZURE_CORE, "1.62.0", ("minor", "1.63.0", {"released_at": "2026-11-02T08:00:00+00:00"})
+    )
+    [waiting] = reports(record.select(THIRD), "waiting")
+    assert waiting["detail"].startswith("1.63.0 is 1 day old,")
 
 
 def test_a_candidate_without_a_release_date_is_batched_with_its_age_unknown():
