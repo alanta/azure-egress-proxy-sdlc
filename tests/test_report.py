@@ -653,14 +653,62 @@ def test_a_batch_unit_shows_the_open_security_reports_of_its_dependencies(record
     assert "://" not in rest and "www." not in rest and "evil.example" not in rest
 
 
-def test_hostile_text_in_the_selection_cant_change_the_report(record):
-    selection = record["selection"]
-    selection["units"][0]["name"] = "evil-name"
-    selection["not_prepared"][0]["detail"] = HOSTILE
-    selection["units"][1]["evidence"]["lifecycle"][0]["source"] = HOSTILE
-    selection["units"][0]["evidence"]["advisories"][0]["source"] = HOSTILE
+def test_a_lifecycle_unit_on_several_lines_shows_each_of_them(record):
+    unit = record["selection"]["units"][1]
+    unit["evidence"]["lifecycle"].append(
+        {
+            "product": "python",
+            "line": "3.10",
+            "state": "nearing_end_of_life",
+            "end_of_life": "2026-10-31",
+        }
+    )
     assert validate_record(record) == []
-    rendered = render(record)
+    section = would_prepare(render(record))
+    assert "- Lifecycle: go 1.25 is end of life, 2026-08-19; still supported: 1.26, 1.27" in section
+    assert (
+        "- Lifecycle: python 3.10 is nearing end of life, 2026-10-31; still supported: unknown"
+        in (section)
+    )
+
+
+def assert_plain(rendered):
     assert "<script>" not in rendered
     rest = outside_code(rendered)
     assert "://" not in rest and "www." not in rest and "evil.example" not in rest
+    assert "@someone" not in rest.replace("\\@someone", "")
+
+
+def test_hostile_text_in_the_selection_cant_change_the_report(full):
+    selection = full["selection"]
+    # A target's version must be an in-scope candidate's, so the candidate says the same.
+    target = selection["units"][0]["targets"][0]
+    candidate = next(
+        c
+        for c in full["candidates"]
+        if (c["dependency"], c["version"]) == (target["dependency"], target["version"])
+    )
+    candidate["version"] = target["version"] = HOSTILE
+    for v in full["vulnerabilities"]:
+        if v["dependency"] == target["dependency"]:
+            v["fix_reached_by"] = [HOSTILE]
+    advisory = selection["units"][0]["evidence"]["advisories"][0]
+    advisory["source"] = HOSTILE
+    advisory["aliases"] = [HOSTILE]
+    selection["units"][1]["evidence"]["lifecycle"][0]["product"] = HOSTILE
+    for r in selection["not_prepared"]:
+        r["detail"] = HOSTILE
+        if "package" in r:
+            r["package"] = HOSTILE
+        if "held_by" in r:
+            r["held_by"] = HOSTILE
+    full["dependabot_alerts"]["alerts"][0]["package"] = HOSTILE
+    assert validate_record(full) == []
+    rendered = render(full)
+    assert_plain(rendered)
+    section = would_prepare(rendered)
+    # The hostile text does show: escaped, in the fields the selection fills.
+    assert text(HOSTILE) in section
+    assert f"Dependabot alert 5 on {text(HOSTILE)}" in section
+    assert f"| {text(HOSTILE)} | " in section
+    assert f"- Lifecycle: {text(HOSTILE)} 1.25" in section
