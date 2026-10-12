@@ -35,7 +35,7 @@ def find(updates, name, location=None):
 def test_dotnet_reports_direct_and_transitive_packages(dotnet):
     (core,) = {u for u in find(dotnet, "Azure.Core") if u.direct}
     assert (core.current, core.latest) == ("1.62.0", "1.63.0")
-    # PR #77's case: AppHost locks 10.0.11 transitively although 10.0.12 is declared centrally.
+    # AppHost locks 10.0.11 transitively although 10.0.12 is declared centrally.
     (http,) = find(dotnet, "Microsoft.Extensions.Http", "src/AppHost/AppHost.csproj")
     assert (http.current, http.latest, http.direct) == ("10.0.11", "10.0.12", False)
 

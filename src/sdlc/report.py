@@ -6,7 +6,7 @@ tools or the network. So everything the report says can be traced back to the re
 a record that fails its schema never gets a report (see outputs.py).
 
 Most of the text in a record comes from elsewhere: package names and file paths from the
-subject, PR titles from Dependabot, reasons from tools and APIs. All of it is escaped, so it
+subject, alert details from Dependabot, reasons from tools and APIs. All of it is escaped, so it
 reads as plain text and can't add HTML or formatting to the report. A word GitHub would turn
 into a link by itself (a URL, `www.` or an e-mail address) goes in a code span, where nothing
 is linked.
@@ -19,12 +19,11 @@ from typing import Any
 # The gap subjects of the sources that can be unavailable as a whole, as the scan writes them.
 OSV_SCANNER = "osv-scanner"
 DEPENDABOT_ALERTS = "dependabot-alerts"
-DEPENDABOT_PRS = "dependabot-prs"
 ENDOFLIFE = "endoflife.date"
 NATIVE = {"dotnet": "dotnet list package", "go": "go list -m -u"}
 # Unavailable sources that say nothing about vulnerabilities. Any other unavailable source,
 # including one added later, may hide an advisory, so the report never claims there are none.
-NOT_ABOUT_VULNERABILITIES = {DEPENDABOT_ALERTS, DEPENDABOT_PRS, ENDOFLIFE, *NATIVE.values()}
+NOT_ABOUT_VULNERABILITIES = {DEPENDABOT_ALERTS, ENDOFLIFE, *NATIVE.values()}
 
 # Where each top-level property of the record shows in the report: a heading, or a row of the
 # header table. The tests check this against the schema, so a new section can't go unrendered.
@@ -42,13 +41,11 @@ SECTIONS = {
     "consistency": "### What was compared",
     "inconsistencies": "## Declared versions",
     "cross_checks": "## Package manager cross-checks",
-    "parity": "## Parity with Dependabot",
     "gaps": "## Coverage gaps",
 }
 
 LIFECYCLE_STATES = ("end_of_life", "nearing_end_of_life", "supported", "unknown")
 REACHABILITY = ("reachable", "unknown", "not_reachable")
-RESULTS = ("missed", "stale", "held_by_policy", "matched")
 
 # Markdown and GitHub's extensions give these meaning in running text: emphasis, code, links,
 # tables, strikethrough and math; and an @ starting a word mentions someone. A backslash makes
@@ -87,7 +84,6 @@ def render(record: dict[str, Any]) -> str:
         _summary,
         _lifecycle,
         _vulnerabilities,
-        _parity,
         _declared,
         _candidates,
         _cross_checks,
@@ -257,27 +253,6 @@ def _summary(view: _View) -> list[str]:
         )
         lines += [f"  - {line}" for line in _per_dependency(view, unfixed)]
 
-    parity = record["parity"]
-    if DEPENDABOT_PRS in view.unavailable:
-        lines.append("- **Missed Dependabot updates:** unknown, Dependabot's PRs weren't read")
-    else:
-        missed = [
-            (pr, u)
-            for pr in parity["pull_requests"]
-            for u in pr["updates"]
-            if u["result"] == "missed"
-        ]
-        incomplete = "" if parity["complete"] else " (the comparison is incomplete)"
-        if missed:
-            lines.append(f"- **Missed Dependabot updates:** {len(missed)}{incomplete}:")
-            lines += [
-                f"  - #{pr['number']} {text(u['name'])} {_from(u)} → {text(u['to'])}: "
-                f"{text(u['reason'])}"
-                for pr, u in missed
-            ]
-        else:
-            lines.append(f"- **Missed Dependabot updates:** none{incomplete}")
-
     inconsistencies = record["inconsistencies"]
     names = ", ".join(text(i["dependency"]) for i in inconsistencies)
     lines.append(
@@ -341,8 +316,6 @@ def _unknowns(view: _View) -> list[str]:
     lines = sum(e["state"] == "unknown" for e in record["lifecycle"])
     if lines:
         found.append(f"lifecycle of {count(lines, 'line')}")
-    if not record["parity"]["complete"] and DEPENDABOT_PRS not in view.unavailable:
-        found.append("parity with Dependabot is incomplete")
     return found
 
 
@@ -563,117 +536,6 @@ def _alerts(view: _View) -> list[str]:
         ]
         lines += ["", *table(["Alert", "Advisory", "Package", "Manifest", "Fix", "Result"], rows)]
     return lines
-
-
-def _from(u: dict[str, Any]) -> str:
-    old = u.get("from") or " or ".join(
-        sorted({text(f["version"]) for f in u.get("from_versions", [])})
-    )
-    if not old:
-        return "unknown"
-    old = text(old) if "from" in u else old
-    if u.get("from_source") == "diff":
-        old += " (from the diff)"
-    return old
-
-
-def _parity(view: _View) -> list[str]:
-    parity = view.record["parity"]
-    lines = ["## Parity with Dependabot", ""]
-    if DEPENDABOT_PRS in view.unavailable:
-        return [
-            *lines,
-            f"**Unknown.** Dependabot's open PRs couldn't be read: "
-            f"{text(view.unavailable[DEPENDABOT_PRS])} Nothing is compared, and nothing is "
-            "listed as scan-only.",
-        ]
-    pulls = parity["pull_requests"]
-    updates = [u for pr in pulls for u in pr["updates"]]
-    results = Counter(u["result"] for u in updates)
-    lines.append(
-        f"{count(len(pulls), 'open Dependabot PR')}, read at "
-        f"{text(parity.get('captured_at', 'an unknown time'))}; the scan's lookups ran at "
-        f"{text(parity.get('looked_up_at', 'an unknown time'))}. Parity holds only for that "
-        "moment."
-    )
-    lines.append("")
-    lines.append(
-        f"{count(len(updates), 'proposed update')}: "
-        + ", ".join(f"{results[r]} {label(r)}" for r in RESULTS)
-        + "."
-    )
-    if parity["complete"]:
-        lines.append("The comparison is complete.")
-    else:
-        lines += ["", "**The comparison is incomplete:**"]
-        lines += [f"- {text(reason)}" for reason in parity["reasons"]]
-    for pr in pulls:
-        title = f": {text(pr['title'])}" if "title" in pr else ""
-        lines += ["", f"### #{pr['number']}{title}", ""]
-        head = f"At {text(pr['head'][:7])}" if "head" in pr else "Head unknown"
-        base = f" on {text(pr['base'])}" if "base" in pr else ""
-        state = f"{head}{base}, **{label(pr['state'])}**"
-        lines.append(state + (f": {text(pr['reason'])}" if "reason" in pr else "."))
-        if not pr["updates"]:
-            continue
-        rows = []
-        for u in pr["updates"]:
-            kind = u.get("update_type", "unknown")
-            if u.get("update_type_derived"):
-                kind += ", derived"
-            where = " ".join(text(u[k]) for k in ("ecosystem", "directory") if k in u)
-            if "group" in u:
-                where += f" group {text(u['group'])}"
-            detail = {
-                "matched": f"scan has {text(u.get('candidate', ''))}",
-                "held_by_policy": text(u.get("held_by", "")),
-            }.get(u["result"], "")
-            if "reason" in u:
-                detail = "; ".join(d for d in (detail, text(u["reason"])) if d)
-            rows.append(
-                [
-                    label(u["result"]),
-                    text(u["name"]),
-                    _from(u),
-                    text(u["to"]),
-                    kind,
-                    where,
-                    detail,
-                ]
-            )
-        headings = ["Result", "Dependency", "From", "To", "Type", "Where", "Detail"]
-        lines += ["", *table(headings, rows)]
-    lines += ["", "### Scan only", ""]
-    scan_only = parity["scan_only"]
-    lines.append(
-        f"{count(len(scan_only), 'entry', 'entries')} with in-scope candidates that no open "
-        "Dependabot PR proposes."
-    )
-    if scan_only:
-        rows = []
-        for dep_id in sorted(scan_only, key=lambda i: _by_ecosystem(view.entries[i])):
-            dep = view.entries[dep_id]
-            in_scope = [
-                candidate_version(c)
-                for c in view.candidates.get(dep_id, [])
-                if c["classification"] == "in_scope"
-            ]
-            rows.append(
-                [
-                    text(dep["ecosystem"])
-                    + (f" ({origin(dep)})" if dep["origin"] == "locked" else ""),
-                    text(dep["name"]),
-                    view.where(dep_id),
-                    version(dep["current"]),
-                    ", ".join(in_scope),
-                ]
-            )
-        lines += ["", *table(["Ecosystem", "Dependency", "Where", "Current", "Candidates"], rows)]
-    return lines
-
-
-def _by_ecosystem(dep: dict[str, Any]) -> tuple:
-    return (dep["ecosystem"], dep["origin"], dep["name"], dep["location"]["file"])
 
 
 def _declared(view: _View) -> list[str]:

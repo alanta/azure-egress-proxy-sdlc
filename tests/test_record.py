@@ -7,6 +7,7 @@ import pytest
 from sdlc.record import validate_record
 
 FIXTURE = Path(__file__).parent / "fixtures" / "records" / "valid.json"
+FIXTURE_V1 = Path(__file__).parent / "fixtures" / "records" / "valid.v1.json"
 AT = "2026-10-09T09:00:00+00:00"
 
 
@@ -59,11 +60,6 @@ def test_valid_record_passes(record):
             "'held_by' is a required property",
         ),
         (
-            "unknown parity result",
-            lambda r: r["parity"]["pull_requests"][0]["updates"][0].update(result="unknown"),
-            "is not one of",
-        ),
-        (
             "failed lookup without a reason",
             lambda r: r["inventory"][2]["lookup"].update(state="unknown"),
             "'reason' is a required property",
@@ -103,8 +99,8 @@ def test_valid_record_passes(record):
         ),
         (
             "wrong schema version",
-            lambda r: r.update(schema_version="2"),
-            "'1' was expected",
+            lambda r: r.update(schema_version="1"),
+            "'2' was expected",
         ),
         (
             "unexpected field",
@@ -230,11 +226,6 @@ def test_schema_rejects(record, description, change, expected):
             lambda r: r["tools"][1].update(fetched_at="2026-10-08T09:00:00"),
             "$.tools[1].fetched_at: '2026-10-08T09:00:00' has no time zone",
         ),
-        (
-            "complete parity with an unparseable PR",
-            lambda r: r["parity"]["pull_requests"][0].update(state="unparseable"),
-            "true although a pull request is unparseable",
-        ),
     ],
 )
 def test_consistency_rejects(record, description, change, expected):
@@ -312,3 +303,19 @@ def test_alerts_are_checked(record, description, alerts, cited, expected):
         changed["vulnerabilities"][0]["dependabot_alerts"] = cited
     problems = validate_record(changed)
     assert any(expected in p for p in problems), (description, problems)
+
+
+def test_version_2_rejects_parity():
+    record = json.loads(FIXTURE.read_text())
+    record["parity"] = json.loads(FIXTURE_V1.read_text())["parity"]
+    problems = validate_record(record)
+    assert any("Additional properties are not allowed" in p for p in problems), problems
+
+
+def test_version_1_record_still_passes_its_own_schema():
+    assert validate_record(json.loads(FIXTURE_V1.read_text()), version="1") == []
+
+
+def test_version_2_rejects_version_1_record():
+    problems = validate_record(json.loads(FIXTURE_V1.read_text()))
+    assert any("'2' was expected" in p for p in problems), problems

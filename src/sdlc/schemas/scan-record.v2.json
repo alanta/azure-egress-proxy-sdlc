@@ -1,0 +1,904 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/alanta/azure-egress-proxy-sdlc/schemas/scan-record.v2.json",
+  "title": "Dependency scan record, version 2",
+  "description": "Everything a revision scan found about one pinned commit of a subject repository. Every state is explicit: a gap, a failed lookup or an unavailable source is recorded, never left out.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "subject",
+    "scanned_at",
+    "tools",
+    "policy",
+    "inventory",
+    "candidates",
+    "vulnerabilities",
+    "lifecycle",
+    "consistency",
+    "inconsistencies",
+    "cross_checks",
+    "gaps"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "2"
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "ref",
+        "commit"
+      ],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+        },
+        "ref": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The ref as requested, before resolution."
+        },
+        "commit": {
+          "$ref": "#/$defs/commit"
+        }
+      }
+    },
+    "scanned_at": {
+      "$ref": "#/$defs/timestamp"
+    },
+    "tools": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "version"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1
+          },
+          "image": {
+            "type": "string",
+            "description": "Container image, pinned by digest."
+          },
+          "url": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The API base of a data source, such as endoflife.date."
+          },
+          "fetched_at": {
+            "$ref": "#/$defs/timestamp",
+            "description": "When the data source was read."
+          }
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source"
+      ],
+      "properties": {
+        "source": {
+          "enum": [
+            "subject",
+            "trial",
+            "none"
+          ],
+          "description": "subject: read from the scanned revision; trial: supplied for this run; none: no policy found, so every candidate is in scope."
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "if": {
+        "properties": {
+          "source": {
+            "enum": [
+              "subject",
+              "trial"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "source",
+          "path"
+        ]
+      }
+    },
+    "inventory": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/dependency"
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/candidate"
+      }
+    },
+    "vulnerabilities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/vulnerability"
+      }
+    },
+    "dependabot_alerts": {
+      "$ref": "#/$defs/dependabot_alerts"
+    },
+    "lifecycle": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/lifecycle"
+      }
+    },
+    "consistency": {
+      "type": "array",
+      "description": "Every logical dependency in the alias table, with the declarations the consistency check compared, so an alias nothing declares shows as such.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "dependency",
+          "compared"
+        ],
+        "properties": {
+          "dependency": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The logical dependency, such as the Go toolchain."
+          },
+          "compared": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "The inventory entries whose declared versions were compared."
+          }
+        }
+      }
+    },
+    "inconsistencies": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/inconsistency"
+      }
+    },
+    "cross_checks": {
+      "type": "array",
+      "description": "Direct dependencies a package manager reports as outdated where the scan has no matching candidate: a Renovate blind spot.",
+      "items": {
+        "$ref": "#/$defs/cross_check"
+      }
+    },
+    "gaps": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/gap"
+      }
+    }
+  },
+  "$defs": {
+    "commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "location": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "file"
+      ],
+      "properties": {
+        "file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "ecosystem",
+        "name",
+        "current",
+        "origin",
+        "location",
+        "lookup"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Unique within the record; candidates and findings refer to it."
+        },
+        "ecosystem": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Package or source type, such as nuget, gomod, docker, github-actions, pypi, bicep-module."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "current": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Current version or constraint as declared; null when it can't be determined."
+        },
+        "origin": {
+          "enum": [
+            "declared",
+            "locked"
+          ],
+          "description": "declared: written in a manifest; locked: resolved in a lock file."
+        },
+        "locked_because": {
+          "enum": [
+            "drift",
+            "vulnerability"
+          ],
+          "description": "Why the scan lists a locked entry, given exactly for those: drift, the lock file resolves an older version than the repository declares (design decision 3a); vulnerability, an advisory concerns a package only a lock file or an indirect module has."
+        },
+        "location": {
+          "$ref": "#/$defs/location"
+        },
+        "lookup": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "current",
+                "outdated",
+                "unknown",
+                "skipped"
+              ],
+              "description": "current: lookup succeeded, nothing newer; outdated: candidates exist; unknown: lookup failed; skipped: not looked up, see reason."
+            },
+            "datasource": {
+              "type": "string"
+            },
+            "looked_up_at": {
+              "$ref": "#/$defs/timestamp"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "basis": {
+              "enum": [
+                "advisory_fix"
+              ],
+              "description": "advisory_fix: no registry was asked; the dependency's candidates are the fixed versions its advisories name, which need not be the newest. Absent when the state comes from a lookup."
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "state": {
+                    "enum": [
+                      "unknown",
+                      "skipped"
+                    ]
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "state",
+                  "reason"
+                ]
+              }
+            },
+            {
+              "if": {
+                "required": [
+                  "basis"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "state": {
+                    "const": "outdated"
+                  }
+                },
+                "required": [
+                  "reason"
+                ],
+                "not": {
+                  "required": [
+                    "looked_up_at"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "if": {
+        "properties": {
+          "origin": {
+            "const": "locked"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "locked_because"
+        ]
+      },
+      "else": {
+        "not": {
+          "required": [
+            "locked_because"
+          ]
+        }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dependency",
+        "update_type",
+        "version",
+        "classification"
+      ],
+      "properties": {
+        "dependency": {
+          "type": "string",
+          "minLength": 1
+        },
+        "update_type": {
+          "enum": [
+            "patch",
+            "minor",
+            "major",
+            "digest"
+          ]
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "classification": {
+          "enum": [
+            "in_scope",
+            "held_by_policy"
+          ]
+        },
+        "held_by": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The policy rule that holds the candidate."
+        },
+        "basis": {
+          "enum": [
+            "advisory_fix"
+          ],
+          "description": "advisory_fix: the fixed version an advisory on the dependency names, added by the scan rather than found by a lookup, so not necessarily the newest version. Absent when a lookup found it, or, for lock drift, when it is the version the repository declares."
+        }
+      },
+      "if": {
+        "properties": {
+          "classification": {
+            "const": "held_by_policy"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "dependency",
+          "update_type",
+          "version",
+          "classification",
+          "held_by"
+        ]
+      }
+    },
+    "vulnerability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "advisory",
+        "dependency",
+        "affected_version",
+        "fixed_version",
+        "source",
+        "reachability"
+      ],
+      "properties": {
+        "advisory": {
+          "type": "string",
+          "minLength": 1
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dependency": {
+          "type": "string",
+          "minLength": 1
+        },
+        "affected_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fixed_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "null when the advisory names no fixed version."
+        },
+        "last_affected": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The advisory's last affected version, when it states that instead of a fixed version: a fix exists, and any version above this one has it."
+        },
+        "fix_reached_by_candidate": {
+          "enum": [
+            true,
+            false,
+            "unknown"
+          ],
+          "description": "Whether an in-scope update candidate of the dependency is outside the advisory; unknown when its lookup failed or the advisory's ranges can't be evaluated. Present whenever a fixed or last affected version is."
+        },
+        "fix_held_by": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The policy rule holding the only candidates that reach the fix."
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reachability": {
+          "enum": [
+            "reachable",
+            "not_reachable",
+            "unknown"
+          ]
+        },
+        "dependabot_alerts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "description": "Open Dependabot alerts, by number, on the same advisory and package: a second source that agrees. They describe the default branch, not necessarily the scanned commit (see dependabot_alerts)."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "fixed_version": {
+                "type": "string"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "fix_reached_by_candidate"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "last_affected"
+            ]
+          },
+          "then": {
+            "required": [
+              "fix_reached_by_candidate"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "fix_held_by"
+            ]
+          },
+          "then": {
+            "properties": {
+              "fix_reached_by_candidate": {
+                "const": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dependabot_alerts": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The repository's open Dependabot alerts, as a comparison source. Present only when they were read; otherwise a gap with subject dependabot-alerts says why, and the record claims nothing about them. They describe the default branch as Dependabot last analysed it, not necessarily the scanned commit.",
+      "required": [
+        "ref",
+        "commit",
+        "is_scanned_commit",
+        "read_at",
+        "alerts"
+      ],
+      "properties": {
+        "ref": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The default branch, which the alerts describe."
+        },
+        "commit": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/commit"
+            }
+          ],
+          "description": "The branch's head, read just before the alerts."
+        },
+        "is_scanned_commit": {
+          "type": "boolean",
+          "description": "Whether that head is the scanned commit. When it isn't, a difference between the alerts and the scan may be the branch's, not a miss of the scan."
+        },
+        "read_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "alerts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "number",
+              "advisory",
+              "ecosystem",
+              "package",
+              "manifest",
+              "fixed_version",
+              "result"
+            ],
+            "properties": {
+              "number": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "advisory": {
+                "type": "string",
+                "minLength": 1,
+                "description": "The GHSA id."
+              },
+              "aliases": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "ecosystem": {
+                "type": "string",
+                "description": "As Dependabot names it, such as go or nuget."
+              },
+              "package": {
+                "type": "string",
+                "minLength": 1
+              },
+              "manifest": {
+                "type": "string",
+                "description": "The file Dependabot found the package in."
+              },
+              "dependency": {
+                "type": "string",
+                "minLength": 1,
+                "description": "The inventory entry for the same package in the same file, when the scan has one."
+              },
+              "vulnerable_range": {
+                "type": "string",
+                "minLength": 1
+              },
+              "fixed_version": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Dependabot's first patched version; null when there is none."
+              },
+              "result": {
+                "enum": [
+                  "matched",
+                  "matched_elsewhere",
+                  "unmatched"
+                ],
+                "description": "matched: a vulnerability in this record has the same advisory on the same package, in the alert's manifest or a file beside it, and lists the alert; matched_elsewhere: only vulnerabilities in other files do, such as a central version, and they list it; unmatched: none does."
+              }
+            }
+          }
+        }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One version line in use, with every inventory entry that uses it. An image or runtime declaration without a mapping to lifecycle data is listed under its own name, as unknown.",
+      "required": [
+        "product",
+        "line",
+        "state",
+        "dependencies",
+        "locations"
+      ],
+      "properties": {
+        "product": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The endoflife.date product, such as go, dotnet, python, alpine-linux, debian; for an entry without a mapping, its own name."
+        },
+        "line": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The version line in use as the product names it, such as 1.25 or 10; the declared value when it names no line."
+        },
+        "state": {
+          "enum": [
+            "supported",
+            "nearing_end_of_life",
+            "end_of_life",
+            "unknown"
+          ]
+        },
+        "end_of_life": {
+          "type": "string",
+          "format": "date",
+          "description": "The date support ends or ended, when one is published."
+        },
+        "supported_lines": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "The lines still supported on the scan's date, oldest first."
+        },
+        "source": {
+          "type": "string",
+          "description": "Where the lifecycle data came from."
+        },
+        "dependencies": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "The inventory entries that use the line, with locations in the same order."
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "locations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/location"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "enum": [
+                  "nearing_end_of_life",
+                  "end_of_life"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "source"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "nearing_end_of_life"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "end_of_life"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "end_of_life"
+              }
+            },
+            "not": {
+              "required": [
+                "end_of_life"
+              ]
+            }
+          },
+          "then": {
+            "required": [
+              "reason"
+            ],
+            "description": "Ended without a published date: the reason says so."
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "unknown"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "reason"
+            ]
+          }
+        }
+      ]
+    },
+    "inconsistency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dependency",
+        "declarations"
+      ],
+      "properties": {
+        "dependency": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The logical dependency, such as the Go toolchain."
+        },
+        "declarations": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "dependency",
+              "location",
+              "version"
+            ],
+            "properties": {
+              "dependency": {
+                "type": "string",
+                "minLength": 1,
+                "description": "The inventory entry that makes this declaration, with the value as declared."
+              },
+              "location": {
+                "$ref": "#/$defs/location"
+              },
+              "version": {
+                "type": "string",
+                "minLength": 1,
+                "description": "The version read from the declared value, such as 1.27 from golang:1.27-alpine."
+              }
+            }
+          }
+        }
+      }
+    },
+    "gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "subject",
+        "reason"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "unsupported_source",
+            "unparseable_source",
+            "unavailable_source"
+          ]
+        },
+        "subject": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The file, or the data source (such as dependabot-alerts), that couldn't be covered."
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "cross_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "name",
+        "location",
+        "current",
+        "native_latest",
+        "scan_candidates"
+      ],
+      "properties": {
+        "source": {
+          "enum": [
+            "dotnet",
+            "go"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "location": {
+          "type": "string",
+          "minLength": 1
+        },
+        "current": {
+          "type": "string",
+          "minLength": 1
+        },
+        "native_latest": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scan_candidates": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

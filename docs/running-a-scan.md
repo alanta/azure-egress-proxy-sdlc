@@ -16,7 +16,7 @@ The first run pulls the images, which takes extra minutes. A scan of `alanta/azu
 
 ## The token
 
-The scan works without a token, but then little is looked up: Renovate's GitHub lookups are rate limited or refused (those dependencies become `unknown`), and the Dependabot alerts and PRs aren't read (gaps `dependabot-alerts` and `dependabot-prs`). The scan only makes GET requests and never needs write access.
+The scan works without a token, but then little is looked up: Renovate's GitHub lookups are rate limited or refused (those dependencies become `unknown`), and the Dependabot alerts aren't read (gap `dependabot-alerts`). The scan only makes GET requests and never needs write access.
 
 Use a fine-grained personal access token, with the subject repository as its only repository and these read-only permissions:
 
@@ -24,7 +24,6 @@ Use a fine-grained personal access token, with the subject repository as its onl
 |---|---|---|
 | Metadata: read (always included) | The repository and its default branch | Nothing is read |
 | Contents: read | The default branch's head (`GET /repos/{repo}/branches/{branch}`), which says whether the Dependabot alerts describe the scanned commit | `dependabot-alerts` is unavailable |
-| Pull requests: read | Open PRs, their commits and changed files, for the comparison with Dependabot | `dependabot-prs` is unavailable; parity is not compared |
 | Dependabot alerts: read | Open Dependabot alerts | `dependabot-alerts` is unavailable |
 
 The same token also goes to Renovate as `GITHUB_COM_TOKEN`, for lookups of GitHub tags and releases, where it avoids rate limits. It is passed to containers by name, so it never appears on a command line.
@@ -86,7 +85,7 @@ Each scan gets its own directory, and nothing is overwritten:
 
 ```
 <out>/<owner>/<name>/<commit>/<UTC time>/
-    record.json    the data, validated against the record schema
+    record.json    the data, validated against the version 2 record schema (`src/sdlc/schemas/scan-record.v2.json`)
     report.md      the report, rendered from record.json
 ```
 
@@ -122,7 +121,6 @@ The report starts with a table: repository, ref, commit, time, the policy used, 
 **Summary.** The place to start. Each bullet says what was found, or that nothing was and why you can trust that or not:
 - *End of life* and *Nearing end of life*: runtime and OS lines in use whose support has ended or ends soon. "None found, but N are unknown" means N lines couldn't be checked.
 - *Reachable vulnerabilities* and *Vulnerabilities no in-scope candidate is known to fix*: advisories per dependency, with the fixed version and whether an in-scope candidate reaches it.
-- *Missed Dependabot updates*: updates Dependabot proposes that the scan doesn't. This should be none.
 - *Inconsistent declarations*: the same thing (such as the Go version) declared with different values in different files.
 - *Unknown*: dependencies not looked up, and lifecycle lines it couldn't determine. Deliberately skipped dependencies are counted here too.
 - *Coverage gaps* and the totals.
@@ -130,7 +128,6 @@ The report starts with a table: repository, ref, commit, time, the policy used, 
 **Sections after the summary:**
 - **Lifecycle:** one row per product line in use: `end of life`, `nearing end of life`, `supported` or `unknown` (with the reason, such as a tag that names no release), and where it is used.
 - **Vulnerabilities:** one row per advisory, with the source (`osv` or `govulncheck`). Reachability is `reachable`, `not reachable` or `unknown`; only govulncheck decides it, and only for Go. *In-scope candidate reaches fix* is `yes`, `no`, `no fix to reach` (no fixed version exists) or unknown. A sub-section compares with Dependabot alerts: alerts that match the scan's advisories, match them only in another file, or don't match. It is absent, with a gap, when the alerts couldn't be read.
-- **Parity with Dependabot:** each open Dependabot PR and its updates, compared at the moment of the scan. An update is `matched` (the scan has an in-scope candidate at the same or a newer version), `held_by_policy` (the policy holds it, with the rule's description), `stale` (the repository already moved past what the PR replaces), or `missed` (the scan doesn't propose it, with the reason). A PR is `stale` when all its updates are, and `partly stale` when only some are; its other updates are compared as usual. A PR for another branch is `not_compared`, with the branch it targets. *Scan only* lists in-scope candidates that no open PR proposes; these are not mismatches. "The comparison is incomplete" means a PR couldn't be parsed or a hold couldn't be evaluated, so treat the other results with care. The one result that needs action is `missed`.
 - **Declared versions:** the consistency check, and what was compared.
 - **Update candidates:** *Held by policy* (with the rule) and *In scope*, each with its current version, update type and candidate. A candidate marked *advisory's fix* is the fixed version an advisory names for a dependency nothing looked up, so a newer version may exist.
 - **Package manager cross-checks:** direct dependencies that `dotnet list package` or `go list -m -u` call outdated and the scan doesn't. These are a Renovate blind spot and should be none.
@@ -154,7 +151,7 @@ The scan exits 0 when it wrote a record and report, and 1 otherwise, with an `er
 | `error: policy ... ; no record written` | The policy is invalid; the message says which rule. Fix the policy and run again. A scan never falls back to "everything in scope". |
 | `error: Renovate failed (N): ...` | The Renovate container failed; its last output follows. Check that the runtime works (`docker run --rm hello-world`), that the images can be pulled, and whether the output names a network error. |
 | Gap `unavailable_source` for `dotnet list package`, `go list -m -u`, `osv-scanner` | That tool's container failed (`exit N: ...` with its output). The scan carries on and says nothing about what that tool would have found. |
-| Gap `unavailable_source` for `dependabot-alerts` or `dependabot-prs` | No token, a missing permission, alerts disabled for the repository, or a rate limit. The reason is in the gap; fix the token and run again. |
+| Gap `unavailable_source` for `dependabot-alerts` | No token, a missing permission, alerts disabled for the repository, or a rate limit. The reason is in the gap; fix the token and run again. |
 | Dependencies `unknown` | Lookups failed, usually from GitHub's rate limit without a token (60 requests an hour) or an unreachable registry. Run again with a token or later; one failed lookup affects only its own dependencies. |
 | `unknown` lifecycle lines with "endoflife.date" in the reason | endoflife.date couldn't be reached or answered badly. Run again. |
 | `.invalid.json` or `.unrendered.json` | A bug in the scan; see Outputs. |
