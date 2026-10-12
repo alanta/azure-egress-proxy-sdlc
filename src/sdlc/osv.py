@@ -590,6 +590,12 @@ def _range_end(key: tuple, events: list[dict[str, str]]) -> tuple[str, str] | No
     return None  # affected from here on
 
 
+def version_order(version: str) -> tuple | None:
+    """The scan's order of Go and NuGet versions, as a sort key; None for something that
+    isn't a version. The selection compares candidates with fixed versions by it."""
+    return _key(version)
+
+
 def _key(version: str) -> tuple | None:
     """A sort key with SemVer precedence, which Go and NuGet versions both follow.
 
