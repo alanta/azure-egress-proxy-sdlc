@@ -1,7 +1,7 @@
 """Read the subject's open Dependabot alerts and compare them with the scan's advisories.
 
-Dependabot is the baseline the scan has to match (design decision 5), so its alerts are a
-comparison source, the way its open PRs are, not findings of the scan. They describe the
+Dependabot's alerts are a second source that confirms the scan's vulnerability matches, not
+findings of the scan. They describe the
 repository's default branch as Dependabot last analysed it, which need not be the scanned
 commit. So the record keeps them in a section of their own, with the branch they describe, its
 head when they were read, whether that head is the scanned commit, and the time:

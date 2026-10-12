@@ -36,9 +36,7 @@ def origin(tmp_path):
 
 def test_branch_resolves_to_its_current_commit(origin):
     repo, _, second = origin
-    assert resolve("alanta/demo", "main", url=str(repo)) == Revision(
-        "alanta/demo", "main", second, branch="main"
-    )
+    assert resolve("alanta/demo", "main", url=str(repo)) == Revision("alanta/demo", "main", second)
 
 
 @pytest.mark.parametrize("tag", ["v0.1.0", "v0.1.1"])
@@ -50,12 +48,6 @@ def test_tags_resolve_to_the_commit_not_the_tag_object(origin, tag):
 def test_full_hash_names_itself(origin):
     repo, first, _ = origin
     assert resolve("alanta/demo", first, url=str(repo)).commit == first
-
-
-def test_a_tag_or_commit_names_no_branch(origin):
-    repo, first, _ = origin
-    assert resolve("alanta/demo", "v0.1.0", url=str(repo)).branch is None
-    assert resolve("alanta/demo", first, url=str(repo)).branch is None
 
 
 def test_unknown_ref_fails(origin):

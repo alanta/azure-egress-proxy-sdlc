@@ -18,7 +18,11 @@ def schema(version: str = SCHEMA_VERSION) -> dict[str, Any]:
 
 
 def validate_record(record: Any, version: str = SCHEMA_VERSION) -> list[str]:
-    """Return every problem with a scan record; an empty list means it is valid."""
+    """Return every problem with a scan record; an empty list means it is valid.
+
+    A version 1 record is checked against its own schema, but its `parity` section, which no
+    scan writes any more, gets no checks beyond that schema.
+    """
     validator = Draft202012Validator(
         schema(version), format_checker=Draft202012Validator.FORMAT_CHECKER
     )

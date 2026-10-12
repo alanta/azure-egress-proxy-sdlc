@@ -27,7 +27,6 @@ class Revision:
     repository: str
     ref: str
     commit: str
-    branch: str | None = None  # the ref, when it names a branch
 
 
 def github_url(repository: str) -> str:
@@ -70,7 +69,7 @@ def resolve(repository: str, ref: str, url: str | None = None) -> Revision:
         refs[name] = commit
     # An annotated tag lists both the tag object and, with ^{}, the commit it points to.
     if f"refs/heads/{ref}" in refs:
-        return Revision(repository, ref, refs[f"refs/heads/{ref}"], branch=ref)
+        return Revision(repository, ref, refs[f"refs/heads/{ref}"])
     for name in (f"refs/tags/{ref}^{{}}", f"refs/tags/{ref}"):
         if name in refs:
             return Revision(repository, ref, refs[name])

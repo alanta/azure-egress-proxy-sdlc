@@ -305,10 +305,6 @@ def test_alerts_are_checked(record, description, alerts, cited, expected):
     assert any(expected in p for p in problems), (description, problems)
 
 
-def test_version_2_record_passes():
-    assert validate_record(json.loads(FIXTURE.read_text())) == []
-
-
 def test_version_2_rejects_parity():
     record = json.loads(FIXTURE.read_text())
     record["parity"] = json.loads(FIXTURE_V1.read_text())["parity"]

@@ -6,7 +6,7 @@ tools or the network. So everything the report says can be traced back to the re
 a record that fails its schema never gets a report (see outputs.py).
 
 Most of the text in a record comes from elsewhere: package names and file paths from the
-subject, PR titles from Dependabot, reasons from tools and APIs. All of it is escaped, so it
+subject, alert details from Dependabot, reasons from tools and APIs. All of it is escaped, so it
 reads as plain text and can't add HTML or formatting to the report. A word GitHub would turn
 into a link by itself (a URL, `www.` or an e-mail address) goes in a code span, where nothing
 is linked.

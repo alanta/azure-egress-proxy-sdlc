@@ -75,7 +75,7 @@ def offline_scan(monkeypatch, tmp_path):
         runs.append(policy)
         return nuget(("10.0.13", "patch"), ("11.0.1", "major"))
 
-    monkeypatch.setattr(cli, "resolve", lambda repo, ref: Revision(repo, ref, "a" * 40, branch=ref))
+    monkeypatch.setattr(cli, "resolve", lambda repo, ref: Revision(repo, ref, "a" * 40))
     monkeypatch.setattr(cli, "checkout", fake_checkout)
     monkeypatch.setattr(renovate, "run", fake_run)
     monkeypatch.setattr(renovate, "validate", lambda text: [])
@@ -540,7 +540,7 @@ def test_an_offline_scan_of_064aa09_writes_a_record_and_a_report_from_it(
         )
 
     monkeypatch.setenv("SDLC_GITHUB_TOKEN", "a-token")
-    monkeypatch.setattr(cli, "resolve", lambda repo, ref: Revision(repo, ref, commit, branch=ref))
+    monkeypatch.setattr(cli, "resolve", lambda repo, ref: Revision(repo, ref, commit))
     monkeypatch.setattr(renovate, "run", lambda path, *, policy=None, token=None: report)
     monkeypatch.setattr(
         native,

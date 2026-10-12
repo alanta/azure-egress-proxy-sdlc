@@ -37,7 +37,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Scan a pinned revision of a subject repository for dependencies and updates.",
         description=(
             "Inventory the dependencies of a subject repository at a pinned revision, "
-            "find update candidates, and compare the result with open Dependabot PRs. "
+            "find update candidates, and check them against advisories and lifecycle data. "
             "Writes a JSON record and a Markdown report rendered from it to a run directory "
             "under --out. Read-only: nothing is written to the subject repository. Lookups "
             "use the read-only token in SDLC_GITHUB_TOKEN when it is set."
