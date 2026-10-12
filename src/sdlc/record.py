@@ -12,14 +12,16 @@ SCHEMA_VERSION = "1"
 
 
 @cache
-def schema() -> dict[str, Any]:
-    text = files("sdlc").joinpath(f"schemas/scan-record.v{SCHEMA_VERSION}.json").read_text()
+def schema(version: str = SCHEMA_VERSION) -> dict[str, Any]:
+    text = files("sdlc").joinpath(f"schemas/scan-record.v{version}.json").read_text()
     return json.loads(text)
 
 
-def validate_record(record: Any) -> list[str]:
+def validate_record(record: Any, version: str = SCHEMA_VERSION) -> list[str]:
     """Return every problem with a scan record; an empty list means it is valid."""
-    validator = Draft202012Validator(schema(), format_checker=Draft202012Validator.FORMAT_CHECKER)
+    validator = Draft202012Validator(
+        schema(version), format_checker=Draft202012Validator.FORMAT_CHECKER
+    )
     problems = [
         f"{error.json_path}: {error.message}"
         for error in sorted(validator.iter_errors(record), key=lambda e: e.json_path)
@@ -40,7 +42,7 @@ def _consistency_problems(record: dict[str, Any]) -> list[str]:
         if "looked_up_at" in d["lookup"]
     ]
     for key in ("captured_at", "looked_up_at"):
-        if key in record["parity"]:
+        if key in record.get("parity", {}):
             timestamps.append((f"$.parity.{key}", record["parity"][key]))
     timestamps += [
         (f"$.tools[{i}].fetched_at", t["fetched_at"])
@@ -74,13 +76,13 @@ def _consistency_problems(record: dict[str, Any]) -> list[str]:
         (f"$.vulnerabilities[{i}].dependency", v["dependency"])
         for i, v in enumerate(record["vulnerabilities"])
     ]
+    parity = record.get("parity", {"scan_only": [], "pull_requests": []})
     references += [
-        (f"$.parity.scan_only[{i}]", dep_id)
-        for i, dep_id in enumerate(record["parity"]["scan_only"])
+        (f"$.parity.scan_only[{i}]", dep_id) for i, dep_id in enumerate(parity["scan_only"])
     ]
     references += [
         (f"$.parity.pull_requests[{i}].updates[{j}].dependencies[{k}]", dep_id)
-        for i, pr in enumerate(record["parity"]["pull_requests"])
+        for i, pr in enumerate(parity["pull_requests"])
         for j, update in enumerate(pr["updates"])
         for k, dep_id in enumerate(update.get("dependencies", []))
     ]
@@ -111,7 +113,8 @@ def _consistency_problems(record: dict[str, Any]) -> list[str]:
     problems += _inconsistency_problems(record)
     problems += _lifecycle_problems(record)
 
-    problems += _parity_problems(record)
+    if "parity" in record:
+        problems += _parity_problems(record)
 
     return problems
 

@@ -7,6 +7,7 @@ import pytest
 from sdlc.record import validate_record
 
 FIXTURE = Path(__file__).parent / "fixtures" / "records" / "valid.json"
+FIXTURE_V2 = Path(__file__).parent / "fixtures" / "records" / "valid.v2.json"
 AT = "2026-10-09T09:00:00+00:00"
 
 
@@ -312,3 +313,19 @@ def test_alerts_are_checked(record, description, alerts, cited, expected):
         changed["vulnerabilities"][0]["dependabot_alerts"] = cited
     problems = validate_record(changed)
     assert any(expected in p for p in problems), (description, problems)
+
+
+def test_version_2_record_passes():
+    assert validate_record(json.loads(FIXTURE_V2.read_text()), version="2") == []
+
+
+def test_version_2_rejects_parity():
+    record = json.loads(FIXTURE_V2.read_text())
+    record["parity"] = json.loads(FIXTURE.read_text())["parity"]
+    problems = validate_record(record, version="2")
+    assert any("Additional properties are not allowed" in p for p in problems), problems
+
+
+def test_version_2_rejects_version_1_record():
+    problems = validate_record(json.loads(FIXTURE.read_text()), version="2")
+    assert any("'2' was expected" in p for p in problems), problems
