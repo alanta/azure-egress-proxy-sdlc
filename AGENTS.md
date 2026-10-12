@@ -49,6 +49,18 @@ Pitfalls already solved in the Renovate integration (see the comments in `src/sd
 - **The specs in `openspec/specs/` describe the system as it is.** A change updates them when it's archived.
 - **Architecture decisions are ADRs** in `docs/adr/`, written from [the template](docs/adr/ADR-template.md).
 
+## Implementing a change
+
+- **Use `/openspec-apply-change <name>`.** The checkboxes in the change's `tasks.md` are the live state. Tick a task only once its own verification has passed.
+- **One branch per change**, stacked on the branch of the change it builds on if that hasn't merged yet. Commit at least once per task.
+- **Per task:**
+  1. An implementation subagent, with the model chosen for that task (see "Working with the maintainer").
+  2. For any task that changes logic, a read-only review subagent.
+  3. Fixes for what the review found.
+  4. Tick the task.
+- **End-to-end tasks run a real scan of the subject,** as [running-a-scan.md](docs/running-a-scan.md) describes. A surprise becomes a task or an issue, never a silent fix.
+- **When every task is done,** run `/openspec-verify-change`, fix what it finds, and open the PR. Archive the change with `/openspec-archive-change` in a PR of its own once it has merged.
+
 ## Documentation
 
 - **Documents describe the current state.** Don't add "Update …" sections, dated notes or change logs. Git holds the history.

@@ -1,6 +1,6 @@
 # Tasks
 
-This change builds on `retire-dependabot-pr-comparison`, which introduces the version 2 record schema. Start once that change has merged.
+This change builds on `retire-dependabot-pr-comparison`, which introduces the version 2 record schema. Start once that change is done, and stack on its branch if it hasn't merged yet.
 
 ## 1. Release dates on candidates
 
