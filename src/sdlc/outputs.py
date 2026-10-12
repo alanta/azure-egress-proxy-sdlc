@@ -87,6 +87,11 @@ def write(record: dict[str, Any], directory: Path) -> tuple[Path, Path]:
     return directory / RECORD, directory / REPORT
 
 
+def reject(record: dict[str, Any], directory: Path, problems: list[str]) -> None:
+    """Keep a record that can't go further, as `write` does one that fails validation."""
+    raise InvalidRecord(problems, *_keep(record, directory, "invalid"))
+
+
 def _keep(record: Any, directory: Path, why: str) -> tuple[Path | None, str | None]:
     """The record as a file of its own beside the run directory; or why it couldn't be."""
     kept = directory.with_name(f"{directory.name}.{why}.json")

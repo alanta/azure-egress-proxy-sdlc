@@ -662,6 +662,49 @@ def test_a_selection_failing_the_schema_fails_the_scan_without_a_report(
     assert json.loads(kept.read_text())["selection"]["units"][0]["reasons"] == ["urgent"]
 
 
+def test_an_inconsistent_record_is_kept_with_its_problems_and_never_selected_from(
+    scan_064aa09, monkeypatch, tmp_path, capsys
+):
+    from sdlc import cli
+
+    def never(*args):
+        raise AssertionError("the selection was made from an inconsistent record")
+
+    real = cli.read_alerts
+
+    def inconsistent(*args):
+        alerts, vulnerabilities = real(*args)
+        vulnerabilities[0]["dependency"] = "nuget:nowhere:Nothing"
+        return alerts, vulnerabilities
+
+    monkeypatch.setattr(cli, "read_alerts", inconsistent)
+    monkeypatch.setattr(cli.selection, "select", never)
+    assert main(["scan", "--repo", "alanta/azure-egress-proxy"]) == 1
+    err = capsys.readouterr().err
+    assert "unknown dependency id 'nuget:nowhere:Nothing'" in err
+    assert "the invalid record is kept as runs/alanta/azure-egress-proxy/" in err
+    [kept] = tmp_path.rglob("*.invalid.json")
+    assert "selection" not in json.loads(kept.read_text())
+    assert not list(tmp_path.rglob("report.md"))
+
+
+def test_a_selection_that_crashes_keeps_the_record_without_one(
+    scan_064aa09, monkeypatch, tmp_path, capsys
+):
+    from sdlc import cli
+
+    def crash(*args):
+        raise KeyError("fix_reached_by")
+
+    monkeypatch.setattr(cli.selection, "select", crash)
+    assert main(["scan", "--repo", "alanta/azure-egress-proxy"]) == 1
+    err = capsys.readouterr().err
+    assert "$.selection: it couldn't be made: KeyError('fix_reached_by')" in err
+    [kept] = tmp_path.rglob("*.invalid.json")
+    assert "selection" not in json.loads(kept.read_text())
+    assert not list(tmp_path.rglob("report.md"))
+
+
 def test_a_scan_records_the_trial_policys_groups_on_its_candidates(scan_064aa09):
     record, _, _ = scan_064aa09("--trial-policy", str(TRIAL_POLICY))
     groups = {

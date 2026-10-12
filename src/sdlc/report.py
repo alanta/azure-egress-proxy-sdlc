@@ -305,7 +305,7 @@ NOT_PREPARED = {
     "no_candidate": "Vulnerable, no candidate reaches the fix",
     "early_warning": "Early warning: line ending, no candidate leaves it",
     "not_evaluated": "Not evaluated: data is missing",
-    "waiting": "Waiting for a later window",
+    "waiting": "Too young to batch yet",
 }
 
 

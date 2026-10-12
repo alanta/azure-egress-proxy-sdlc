@@ -227,8 +227,29 @@ def _selection_problems(record: dict[str, Any]) -> list[str]:
         problems.append(f"$.selection.date: {selection['date']!r} isn't the scan's date {scanned}")
 
     names: set[str] = set()
+    targeted: dict[str, int] = {}
+    fixes = {
+        (v["dependency"], v["advisory"]): v.get("fix_reached_by", [])
+        for v in record["vulnerabilities"]
+    }
     for i, unit in enumerate(selection["units"]):
         path = f"$.selection.units[{i}]"
+        breaking = "lifecycle" in unit["reasons"] or any(
+            t["update_type"] == "major" for t in unit["targets"]
+        )
+        if unit["breaking"] != breaking:
+            problems.append(
+                f"{path}.breaking: {unit['breaking']}, but a unit is breaking exactly when it has "
+                "a lifecycle reason or a major target"
+            )
+        for target in unit["targets"]:
+            if target["dependency"] in targeted:
+                problems.append(
+                    f"{path}.targets: {target['dependency']!r} is already a target of "
+                    f"$.selection.units[{targeted[target['dependency']]}]"
+                )
+            targeted.setdefault(target["dependency"], i)
+        reached = {t["dependency"]: t["version"] for t in unit["targets"]}
         if unit["name"] in names:
             problems.append(f"{path}.name: duplicate unit name {unit['name']!r}")
         names.add(unit["name"])
@@ -250,10 +271,18 @@ def _selection_problems(record: dict[str, Any]) -> list[str]:
                 problems.append(f"{where}.update_type: not the update type of the candidate")
         problems += _open_report_problems(unit, path, selection["not_prepared"])
         for j, advisory in enumerate(unit["evidence"].get("advisories", [])):
+            where = f"{path}.evidence.advisories[{j}]"
+            key = (advisory["dependency"], advisory["advisory"])
             if advisory["dependency"] not in entries:
                 problems.append(
-                    f"{path}.evidence.advisories[{j}].dependency: unknown dependency id "
-                    f"{advisory['dependency']!r}"
+                    f"{where}.dependency: unknown dependency id {advisory['dependency']!r}"
+                )
+            elif key not in fixes:
+                problems.append(f"{where}: no such advisory on {advisory['dependency']!r}")
+            elif reached.get(advisory["dependency"]) not in fixes[key]:
+                problems.append(
+                    f"{where}: the unit's target for {advisory['dependency']!r} isn't among the "
+                    "candidates that reach the advisory's fix"
                 )
 
     for i, report in enumerate(selection["not_prepared"]):
@@ -261,6 +290,27 @@ def _selection_problems(record: dict[str, Any]) -> list[str]:
             if dep_id is not None and dep_id not in entries:
                 problems.append(f"$.selection.not_prepared[{i}]: unknown dependency id {dep_id!r}")
     return problems
+
+
+def assembled_problems(record: dict[str, Any]) -> list[str]:
+    """The problems of a record that is assembled but has no selection yet: the whole schema
+    and every check, with an empty selection in its place, so the selection is only made from
+    a record that holds together."""
+    try:
+        today = datetime.fromisoformat(record["scanned_at"]).astimezone(UTC).date().isoformat()
+    except (KeyError, TypeError, ValueError):
+        today = "1970-01-01"  # the timestamp is reported either way
+    placeholder = {
+        "date": today,
+        "defaults": {
+            "batch_window": {"first_day": 1, "last_day": 7},
+            "minimum_release_age_days": 0,
+        },
+        "batch_window": {"open": False, "next_opens": today},
+        "units": [],
+        "not_prepared": [],
+    }
+    return validate_record({**record, "selection": placeholder})
 
 
 def _open_report_problems(

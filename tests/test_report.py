@@ -360,6 +360,7 @@ def test_a_record_with_everything_read_says_nothing_is_unknown(record):
     }
     record["inventory"][3]["lookup"] = {"state": "current"}
     record["vulnerabilities"] = []
+    drop_security_units(record)
     assert validate_record(record) == []
     rendered = render(record)
     assert "- **Unknown:** nothing; every source was read and every file covered" in rendered
@@ -393,6 +394,7 @@ def test_every_source_the_scan_couldnt_read_is_unknown(record):
     """Not only the sources the report knows by name: every unavailable gap, so a new source or
     a single module or lock file shows too."""
     record["vulnerabilities"] = []
+    drop_security_units(record)
     record["gaps"] += [
         {
             "kind": "unavailable_source",
@@ -540,6 +542,12 @@ def test_a_candidate_from_an_advisory_reads_as_its_fix_not_as_a_lookups_find(rec
         "whether newer versions exist for 1 dependency not looked up, whose only candidates "
         "are their advisories' fixes"
     ) in rendered
+
+
+def drop_security_units(record):
+    """The units that cite advisories, for a test that takes the advisories away."""
+    selection = record["selection"]
+    selection["units"] = [u for u in selection["units"] if "advisories" not in u["evidence"]]
 
 
 def would_prepare(rendered):

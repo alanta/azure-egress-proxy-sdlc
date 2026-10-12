@@ -634,3 +634,67 @@ def test_fix_reached_by_is_absent_when_reach_is_unknown_or_not_judged(change, ex
     record["vulnerabilities"][0] |= change
     problems = validate_record(record)
     assert any(expected in p for p in problems), problems
+
+
+def test_a_unit_is_breaking_exactly_when_it_moves_a_lifecycle_or_a_major():
+    for index, wrong in ((0, True), (1, False)):
+        record = v3_record()
+        record["selection"]["units"][index]["breaking"] = wrong
+        assert any(".breaking:" in p for p in validate_record(record)), index
+    record = v3_record()
+    record["selection"]["units"][0]["targets"][0]["update_type"] = "major"
+    record["candidates"][-1]["update_type"] = "major"
+    problems = validate_record(record)
+    assert any("$.selection.units[0].breaking" in p for p in problems), problems
+    record["selection"]["units"][0]["breaking"] = True
+    assert validate_record(record) == []
+
+
+def test_a_dependency_is_the_target_of_one_unit_only():
+    record = v3_record()
+    record["selection"]["units"][2]["targets"].append(
+        dict(record["selection"]["units"][0]["targets"][0])
+    )
+    problems = validate_record(record)
+    assert any("is already a target of $.selection.units[0]" in p for p in problems), problems
+
+
+def test_a_security_unit_cites_real_advisories_whose_fix_its_target_reaches():
+    record = v3_record()
+    record["selection"]["units"][0]["evidence"]["advisories"][0]["advisory"] = "GO-0000-0000"
+    problems = validate_record(record)
+    assert any("no such advisory on" in p for p in problems), problems
+
+    record = v3_record()
+    target = record["selection"]["units"][0]["targets"][0]
+    record["candidates"].append(
+        {
+            "dependency": target["dependency"],
+            "update_type": "patch",
+            "version": "v0.40.1",
+            "classification": "in_scope",
+        }
+    )
+    target.update(version="v0.40.1", update_type="patch")
+    problems = validate_record(record)
+    assert any("isn't among the candidates that reach the advisory's fix" in p for p in problems)
+
+
+@pytest.mark.parametrize(
+    "name",
+    ["Upper", "-lead", "trail-", "a..b", "with space", "a/b", "x.lock", "", "a" * 101],
+)
+def test_a_unit_name_must_be_safe_as_a_branch_name(name):
+    record = v3_record()
+    record["selection"]["units"][0]["name"] = name
+    assert validate_record(record), name
+
+
+def test_every_name_the_selection_makes_passes_the_schema():
+    from sdlc.selection import branch_name
+
+    record = v3_record()
+    for text in ("Aspire.AppHost.Sdk", "a..b", "x.lock", "--x--", "A/B c", "z" * 300, "é"):
+        record["selection"]["units"][0]["name"] = branch_name(text)
+        problems = [p for p in validate_record(record) if ".name" in p]
+        assert problems == [], (text, problems)
