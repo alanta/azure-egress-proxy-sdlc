@@ -63,13 +63,21 @@ GROUP_NAME = "groupName"
 
 # Options that change which updates of a group share a branch in Renovate
 # (workers/repository/updates/branch-name.ts): a slug or branch name of their own, a prefix
-# for part of a group, or a split of its patches or of its minors by version. The scan only
-# follows a group as one branch per groupName, so it refuses them in any rule, and at the top
-# level those that would reach a group. Majors are kept out of groups by the group rules
-# themselves (see _split), so separateMajorMinor and separateMultipleMajor don't matter.
+# for part of a group, or a split of its minors by version. The scan only follows a group as
+# one branch per groupName, so it refuses them in any rule, and at the top level those that
+# would reach a group. `branchTopic` is not among them: a group's branch takes its topic from
+# `group.branchTopic`, so branchTopic only names the branches of updates in no group, and
+# how those are put together is the selection's business. Majors are kept out of groups by
+# the group rules themselves (see _group_rule), so separateMajorMinor and
+# separateMultipleMajor don't matter.
 BRANCH_OPTIONS = {"groupSlug", "group", "branchName", "branchPrefix", "additionalBranchPrefix"}
 TOP_LEVEL_BRANCH_OPTIONS = {GROUP_NAME, "groupSlug", "group", "branchName"}
-SPLIT_OPTIONS = {"separateMinorPatch", "separateMultipleMinor"}  # off by default
+# Off by default; the scan follows only the default.
+SPLIT_OPTIONS = {"separateMultipleMinor"}
+# The scan's own Renovate configuration sets separateMinorPatch, to get a patch candidate as
+# well as a minor one. A policy that turned it off would drop the patch candidates security
+# fixes are targeted at, and one that turns it on changes nothing, so it is refused either way.
+SCAN_OPTIONS = {"separateMinorPatch"}
 
 
 class PolicyError(Exception):
@@ -188,6 +196,7 @@ def _split(
     _check_branches(config, where, TOP_LEVEL_BRANCH_OPTIONS)
     rules = config.get("packageRules") or []
     holds, groups, kept = [], [], []
+    slugs: dict[str, tuple[str, str]] = {}  # each group's slug: its name and first rule
     for index, rule in enumerate(rules):
         label = f"{where}: packageRules[{index}]"
         _check_not_hidden(rule, label)
@@ -205,7 +214,16 @@ def _split(
             )
         if rule.get("enabled") is not False and "allowedVersions" not in rule:
             if GROUP_NAME in rule:
-                groups.append(_group_rule(rule, label))
+                group = _group_rule(rule, label)
+                name, first = slugs.setdefault(_slug(group.name), (group.name, label))
+                if name != group.name:
+                    # Renovate's branch for a group is named after its slug, so both groups
+                    # would end up on one branch.
+                    raise PolicyError(
+                        f"{label} names group {group.name!r}, which Renovate can't tell apart "
+                        f"from group {name!r} in {first}"
+                    )
+                groups.append(group)
             kept.append(rule)
             continue
 
@@ -238,8 +256,12 @@ def _group_rule(rule: dict[str, Any], label: str) -> GroupRule:
     """
     name = rule[GROUP_NAME]
     if not isinstance(name, str) or not name.strip():
-        raise PolicyError(f"{label}: groupName must name the group")
+        raise PolicyError(f"{label}: groupName must be a non-empty string")
     label = f"{label} (group {name})"
+    if "{{" in name:
+        # Renovate compiles groupName as a template, such as `{{datasource}} updates`, so one
+        # rule can make several groups.
+        raise PolicyError(f"{label}: groupName is a template, which the scan doesn't follow")
     unsupported = sorted(
         k for k in rule if k.startswith(("match", "exclude")) and k not in MATCHERS
     )
@@ -274,8 +296,21 @@ def _normalized(rule: dict[str, Any], label: str) -> dict[str, Any]:
     return normalized
 
 
+def _slug(name: str) -> str:
+    """A slug at least as coarse as Renovate's slugify(groupName, lower), so that two names
+    Renovate gives one branch always have the same slug here."""
+    return re.sub(r"[^a-z0-9]", "", name.lower())
+
+
 def _check_branches(config: dict[str, Any], where: str, options: set[str]) -> None:
-    """Fail on options that would split or merge groups in a way the scan doesn't follow."""
+    """Fail on options that would split or merge groups in a way the scan doesn't follow,
+    or that the scan sets itself."""
+    own = sorted(SCAN_OPTIONS & config.keys())
+    if own:
+        raise PolicyError(
+            f"{where} sets {', '.join(own)}, which the scan sets itself to find patch "
+            "candidates as well as minor ones"
+        )
     found = sorted(options & config.keys())
     found += sorted(k for k in SPLIT_OPTIONS & config.keys() if config[k] is not False)
     if found:

@@ -10,7 +10,13 @@
   "token": "fine-grained, read-only, azure-egress-proxy only (GITHUB_COM_TOKEN)",
   "config": "none in the subject; onboarding off, requireConfig optional",
   "report-with-trial-policy.json": {
-    "captured_at": "2026-10-12",
+    "captured_at": "2026-10-12T07:42Z",
+    "renovate": {
+      "version": "44.145.1",
+      "image": "docker.io/renovate/renovate:44.145.1@sha256:6f1f3e2d9d0c3f99aa1f61f7509d302185de7deb173ac8c5ff88a5ce283ec435"
+    },
+    "mode": "--platform=local --dry-run=lookup --report-type=file",
+    "token": "the scan's fine-grained, read-only token for azure-egress-proxy only (GITHUB_COM_TOKEN), from the local keyring",
     "config": "the scan's src/sdlc/config/scan.renovate.json5 plus the trial policy policies/azure-egress-proxy.renovate.json5 as of 4be1c87, committed into the checkout as .github/renovate.json5, as sdlc scan's run with the whole policy does",
     "purpose": "Renovate's branchName per update under the trial policy's group rules"
   }

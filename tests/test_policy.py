@@ -334,7 +334,27 @@ def test_a_policy_without_holds_needs_one_run(tmp_path, checkout):
             '{packageRules: [{matchUpdateTypes: ["!major"], groupName: "g"}]}',
             r"\(group g\) matchUpdateTypes: the scan can't evaluate '!major'",
         ),
-        ('{packageRules: [{matchUpdateTypes: ["minor"], groupName: ""}]}', "must name the group"),
+        (
+            '{packageRules: [{matchUpdateTypes: ["minor"], groupName: ""}]}',
+            "groupName must be a non-empty string",
+        ),
+        (
+            '{packageRules: [{matchUpdateTypes: ["minor"], groupName: ["g"]}]}',
+            "groupName must be a non-empty string",
+        ),
+        # Renovate compiles groupName as a template, so one rule can make several groups.
+        (
+            '{packageRules: [{matchUpdateTypes: ["minor"], groupName: "{{datasource}} updates"}]}',
+            r"\(group \{\{datasource\}\} updates\): groupName is a template",
+        ),
+        # Renovate names a group's branch after its lower-cased slug.
+        (
+            '{packageRules: [{matchManagers: ["gomod"], matchUpdateTypes: ["minor"], '
+            'groupName: "Go modules"}, {matchManagers: ["regex"], matchUpdateTypes: ["minor"], '
+            'groupName: "go-modules"}]}',
+            r"packageRules\[1\] names group 'go-modules', which Renovate can't tell apart from "
+            r"group 'Go modules' in .*packageRules\[0\]",
+        ),
         # Renovate gives a group's majors a branch of their own.
         ('{packageRules: [{matchDatasources: ["nuget"], groupName: "g"}]}', "can group major"),
         (
@@ -350,7 +370,15 @@ def test_a_policy_without_holds_needs_one_run(tmp_path, checkout):
             '{packageRules: [{matchPackageNames: ["a"], additionalBranchPrefix: "x-"}]}',
             "sets additionalBranchPrefix",
         ),
-        ("{separateMinorPatch: true}", "sets separateMinorPatch"),
+        # The scan sets separateMinorPatch itself; turning it off would drop patch candidates.
+        ("{separateMinorPatch: true}", "sets separateMinorPatch, which the scan sets itself"),
+        ("{separateMinorPatch: false}", "sets separateMinorPatch, which the scan sets itself"),
+        (
+            '{packageRules: [{matchUpdateTypes: ["minor"], groupName: "g", '
+            "separateMinorPatch: false}]}",
+            r"packageRules\[0\] sets separateMinorPatch",
+        ),
+        ("{separateMultipleMinor: true}", "sets separateMultipleMinor"),
         ('{groupName: "everything"}', "sets groupName"),
     ],
 )
@@ -793,11 +821,16 @@ def test_a_group_rule_may_carry_options_that_dont_change_the_group(tmp_path, che
         """{separateMajorMinor: true, packageRules: [{
           description: "Weekly", matchManagers: "gomod", matchUpdateTypes: ["minor", "patch"],
           groupName: "go", schedule: ["on monday"], automerge: true, labels: ["deps"],
-          separateMinorPatch: false,
+          separateMultipleMinor: false, branchTopic: "{{{depNameSanitized}}}",
+        }, {
+          // The same group again: a second rule adds to it.
+          matchManagers: "custom.regex", matchDatasources: "go", matchUpdateTypes: ["minor"],
+          groupName: "go",
         }]}""",
     )
     fields = {"depName": "m", "packageName": "m", "datasource": "go", "manager": "gomod"}
     assert group_of(fields, "patch", active) == "go"
+    assert group_of({**fields, "manager": "regex"}, "minor", active) == "go"
 
 
 def test_without_a_policy_nothing_is_grouped():
@@ -841,6 +874,9 @@ def test_groups_put_together_what_renovates_branches_do(trial):
         if group:
             # Renovate names a group's branch after its slug, which is the name itself here.
             assert branch == f"renovate/{group}", key
+        else:
+            # An update Renovate put in a group, but we didn't, is on that group's branch.
+            assert branch not in {f"renovate/{g.name}" for g in trial.groups}, key
         ours.setdefault(("group", group) if group else ("own", branch), set()).add(key)
         renovates.setdefault(branch, set()).add(key)
 

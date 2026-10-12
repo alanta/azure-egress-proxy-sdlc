@@ -75,8 +75,10 @@ The scan fails (exit 1, nothing written) when the policy:
 - uses `extends`, or sets `major`, `minor`, `patch` and the like directly (use a package rule with `matchUpdateTypes`);
 - is not in `.github/renovate.json5` while the subject has Renovate configuration in another place (`renovate.json`, `.renovaterc`, a `renovate` key in `package.json`, and so on);
 - has a hold rule (`enabled: false` or `allowedVersions`) that has no `description`, uses a key other than `description`, `enabled`, `allowedVersions` or the matchers `matchPackageNames`, `matchDepNames`, `matchDatasources`, `matchManagers`, `matchUpdateTypes`, sets `enabled: true`, uses an `override*` option, or uses a `matchUpdateTypes` value the scan can't evaluate (such as `bump`);
-- has a group rule (`groupName`) that uses a `match*` or `exclude*` key other than those five matchers, or that can group majors because its `matchUpdateTypes` is missing or includes `major` (Renovate gives a group's majors a branch of their own);
-- sets an option that changes how Renovate puts grouped updates on branches: `groupSlug`, `group`, `branchName`, `branchPrefix` or `additionalBranchPrefix` in a package rule, `groupName`, `groupSlug`, `group` or `branchName` at the top level, or `separateMinorPatch` or `separateMultipleMinor` anywhere;
+- has a group rule (`groupName`) whose `groupName` isn't a non-empty string or is a template (contains `{{`), that uses a `match*` or `exclude*` key other than those five matchers, or that can group majors because its `matchUpdateTypes` is missing or includes `major` (Renovate gives a group's majors a branch of their own);
+- has two group rules with different names that Renovate would put on one branch, because they differ only in case or punctuation (such as `Go modules` and `go-modules`); rules that repeat the same name add to one group;
+- sets an option that changes how Renovate puts grouped updates on branches: `groupSlug`, `group`, `branchName`, `branchPrefix` or `additionalBranchPrefix` in a package rule, `groupName`, `groupSlug`, `group` or `branchName` at the top level, or `separateMultipleMinor` anywhere unless it is `false`;
+- sets `separateMinorPatch` anywhere, to any value: the scan sets it itself, so that it finds patch candidates as well as minor ones;
 - has a hold that Renovate applies but the scan's matching can't explain.
 
 A hold rule's `description` is what the report shows as the reason an update is held. [policies/azure-egress-proxy.renovate.json5](../policies/azure-egress-proxy.renovate.json5) is a working example.
