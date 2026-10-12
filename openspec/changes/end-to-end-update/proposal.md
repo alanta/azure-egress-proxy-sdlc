@@ -13,7 +13,7 @@ It builds on `update-selection`, which decides the units.
   - **Routine units:** one generic applier. It replaces each target's current version at the file and line the scan recorded, then refreshes the ecosystem's lock files (`dotnet restore --force-evaluate`, `go mod tidy`).
   - **Units it can't apply,** such as actions pinned by SHA, which need the new digest: reported as "no applier yet" and skipped.
   - **Breaking units:** go to the agent.
-- **Agent.** A coding agent runs once per breaking unit, and once more for a unit whose CI is red.
+- **Agent.** Claude Code runs headless (`claude -p`) once per breaking unit, and once more for a unit whose CI is red.
   - **Where:** in a container that holds no credential for GitHub or the subject. Its network access is limited to the model's API and the package registries the build needs.
   - **What it gets:** the unit, the diff so far, and build, test or CI output. No upstream release notes yet.
   - **What it can't do:** push. Its result goes through the same check as any other.
@@ -46,8 +46,8 @@ None. The scan and the selection are used as they are.
 - **Code:** a `prepare` command, the generic applier, the agent step, the check, and delivery through the GitHub API. Also a prepare record schema and its report.
 - **Credentials:**
   - **The machine account's classic token** (`public_repo`), kept in the keyring like the scan's token. It only pushes to the machine account's fork and opens PRs.
-  - **A key for the model's API,** for the agent's container.
+  - **A Claude Code token** from `claude setup-token` on the maintainer's subscription, for the agent's container, kept in the keyring. It can only make model requests.
   - The scan's read-only token is unchanged, but it needs `Pull requests: read` again to read the PRs and their checks.
 - **Subject:** for the first time, the system opens PRs on the subject, always as drafts and from the fork. A maintainer approves the first CI run of the machine account.
-- **Prerequisites the maintainer sets up:** the machine account, its fork and token, and the model API key.
+- **Prerequisites the maintainer sets up:** the machine account, its fork and token, and the Claude Code token.
 - **Docs:** a how-to for running a prepare and reading its report, next to [running-a-scan.md](../../../docs/running-a-scan.md).
