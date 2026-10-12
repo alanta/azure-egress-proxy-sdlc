@@ -16,7 +16,7 @@ from sdlc.policy import (
     reconcile,
 )
 from sdlc.record import validate_record
-from sdlc.renovate import Inventory, match_fields, normalize
+from sdlc.renovate import Inventory, entries, match_fields, normalize
 
 REPORTS = Path(__file__).parents[1] / "fixtures" / "azure-egress-proxy" / "renovate" / "064aa09"
 TRIAL_POLICY = Path(__file__).parents[1] / "policies" / "azure-egress-proxy.renovate.json5"
@@ -802,3 +802,56 @@ def test_a_group_rule_may_carry_options_that_dont_change_the_group(tmp_path, che
 
 def test_without_a_policy_nothing_is_grouped():
     assert group_of(nuget("Microsoft.Extensions.Http"), "patch", NO_POLICY) is None
+
+
+def test_groups_put_together_what_renovates_branches_do(trial):
+    """Our grouping against Renovate's branches for the same updates: `064aa09` under the
+    trial policy, where two updates share a group if and only if they share a branch.
+
+    Every update in the report is compared, held ones included, since grouping doesn't look
+    at holds. Renovate's report has no groupName, so its partition is by branchName. Two
+    narrowings, both about how Renovate names branches rather than about grouping:
+    - The scan's own config sets separateMinorPatch, to get a patch candidate as well as a
+      minor one. With it, Renovate puts a group's patches on `renovate/patch-<group>`. The
+      policy groups minor and patch together, as Renovate does without that option, so the
+      prefix is undone.
+    - An update in no group is on Renovate's branch for its package, which can span files
+      (docker-in-docker in two devcontainer files). Units of ungrouped updates are the
+      selection's business, so such an update is keyed by its own branch here. The partitions
+      still differ if it shares a branch with a grouped update.
+    """
+    report = json.loads((REPORTS / "report-with-trial-policy.json").read_text())
+    fields = match_fields(report)
+    branches = {
+        (dep_id, update["updateType"]): update["branchName"]
+        for dep_id, (_, dep) in entries(report).items()
+        for update in dep.get("updates") or []
+    }
+    candidates = normalize(report, looked_up_at=AT).candidates
+    assert len(candidates) == len(branches) == 34
+
+    ours, renovates, folded = {}, {}, set()
+    for candidate in candidates:
+        key = (candidate["dependency"], candidate["update_type"])
+        branch = branches[key]
+        if candidate["update_type"] == "patch" and branch.startswith("renovate/patch-"):
+            folded.add(branch)
+            branch = "renovate/" + branch.removeprefix("renovate/patch-")
+        group = group_of(fields[candidate["dependency"]], candidate["update_type"], trial)
+        if group:
+            # Renovate names a group's branch after its slug, which is the name itself here.
+            assert branch == f"renovate/{group}", key
+        ours.setdefault(("group", group) if group else ("own", branch), set()).add(key)
+        renovates.setdefault(branch, set()).add(key)
+
+    assert {frozenset(v) for v in ours.values()} == {frozenset(v) for v in renovates.values()}
+    assert folded == {"renovate/patch-gomod-minor-patch", "renovate/patch-nuget-minor-patch"}
+    grouped = {k[1]: len(v) for k, v in ours.items() if k[0] == "group"}
+    assert grouped == {
+        "actions-minor-patch": 7,
+        "docker-minor-patch": 3,
+        "gomod-minor-patch": 3,
+        "nuget-minor-patch": 5,
+        "microsoft": 2,
+    }
+    assert len(renovates) == 14
