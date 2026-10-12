@@ -440,11 +440,12 @@ def _released_at(value: Any) -> str | None:
         return None
     try:
         parsed = datetime.fromisoformat(value)
-    except ValueError:
+        if parsed.tzinfo is None:
+            return None
+        # A time at the edge of the calendar, such as year 1 at +01:00, has no UTC time.
+        return parsed.astimezone(UTC).isoformat(timespec="seconds")
+    except (ValueError, OverflowError):
         return None
-    if parsed.tzinfo is None:
-        return None
-    return parsed.astimezone(UTC).isoformat(timespec="seconds")
 
 
 class _LineFinder:

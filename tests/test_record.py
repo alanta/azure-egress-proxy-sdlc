@@ -363,3 +363,14 @@ def test_version_2_has_no_release_date():
     record["candidates"][0]["released_at"] = "2026-09-10T03:16:59+00:00"
     problems = validate_record(record, version="2")
     assert any("Additional properties are not allowed" in p for p in problems), problems
+
+
+def test_version_3_rejects_a_release_date_on_an_advisory_fix():
+    record = v3_record()
+    candidate = {k: v for k, v in record["candidates"][1].items() if k != "released_at"}
+    record["candidates"].append({**candidate, "basis": "advisory_fix"})
+    # Its advisory isn't in the fixture, which the semantic checks report either way.
+    without = validate_record(record, version="3")
+    record["candidates"][-1]["released_at"] = "2026-09-10T03:16:59+00:00"
+    added = set(validate_record(record, version="3")) - set(without)
+    assert len(added) == 1 and "should not be valid" in added.pop(), added

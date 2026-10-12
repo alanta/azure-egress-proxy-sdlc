@@ -418,22 +418,45 @@
           "description": "When the source published this version, in UTC. Absent when the source publishes no date, and always for an advisory fix."
         }
       },
-      "if": {
-        "properties": {
-          "classification": {
-            "const": "held_by_policy"
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "classification": {
+                "const": "held_by_policy"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "dependency",
+              "update_type",
+              "version",
+              "classification",
+              "held_by"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "basis"
+            ],
+            "properties": {
+              "basis": {
+                "const": "advisory_fix"
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "required": [
+                "released_at"
+              ]
+            }
           }
         }
-      },
-      "then": {
-        "required": [
-          "dependency",
-          "update_type",
-          "version",
-          "classification",
-          "held_by"
-        ]
-      }
+      ]
     },
     "vulnerability": {
       "type": "object",

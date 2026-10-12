@@ -90,7 +90,20 @@ def test_every_candidate_has_a_release_date_exactly_when_renovate_gave_a_timesta
     assert len(scanned.candidates) == 31
 
 
-@pytest.mark.parametrize("value", [None, "", "yesterday", "2026-09-10T03:16:59", 1757474219, []])
+@pytest.mark.parametrize(
+    "value",
+    [
+        None,
+        "",
+        "yesterday",
+        "2026-09-10T03:16:59",
+        1757474219,
+        [],
+        # Valid timestamps whose UTC time falls outside the calendar.
+        "0001-01-01T00:00:00+01:00",
+        "9999-12-31T23:59:59-01:00",
+    ],
+)
 def test_a_release_timestamp_that_is_not_a_timestamp_is_left_out(value):
     report = load("report-with-scan-config.json")
     for entries in report["repositories"]["local"]["packageFiles"].values():
