@@ -11,7 +11,7 @@ def record_from():
 
     def as_record(inventory):
         return {
-            "schema_version": "1",
+            "schema_version": "2",
             "subject": {
                 "repository": "alanta/azure-egress-proxy",
                 "ref": "main",
@@ -27,12 +27,6 @@ def record_from():
             "consistency": [],
             "inconsistencies": [],
             "cross_checks": [],
-            "parity": {
-                "baseline": "dependabot",
-                "complete": True,
-                "pull_requests": [],
-                "scan_only": [],
-            },
             # A record either has the alerts or says why it doesn't.
             "gaps": [
                 {

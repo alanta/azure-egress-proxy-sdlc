@@ -8,7 +8,7 @@ from typing import Any
 
 from jsonschema import Draft202012Validator
 
-SCHEMA_VERSION = "1"
+SCHEMA_VERSION = "2"
 
 
 @cache
@@ -41,9 +41,6 @@ def _consistency_problems(record: dict[str, Any]) -> list[str]:
         for i, d in enumerate(record["inventory"])
         if "looked_up_at" in d["lookup"]
     ]
-    for key in ("captured_at", "looked_up_at"):
-        if key in record.get("parity", {}):
-            timestamps.append((f"$.parity.{key}", record["parity"][key]))
     timestamps += [
         (f"$.tools[{i}].fetched_at", t["fetched_at"])
         for i, t in enumerate(record["tools"])
@@ -76,16 +73,6 @@ def _consistency_problems(record: dict[str, Any]) -> list[str]:
         (f"$.vulnerabilities[{i}].dependency", v["dependency"])
         for i, v in enumerate(record["vulnerabilities"])
     ]
-    parity = record.get("parity", {"scan_only": [], "pull_requests": []})
-    references += [
-        (f"$.parity.scan_only[{i}]", dep_id) for i, dep_id in enumerate(parity["scan_only"])
-    ]
-    references += [
-        (f"$.parity.pull_requests[{i}].updates[{j}].dependencies[{k}]", dep_id)
-        for i, pr in enumerate(parity["pull_requests"])
-        for j, update in enumerate(pr["updates"])
-        for k, dep_id in enumerate(update.get("dependencies", []))
-    ]
     alerts = record.get("dependabot_alerts", {}).get("alerts", [])
     references += [
         (f"$.dependabot_alerts.alerts[{i}].dependency", a["dependency"])
@@ -112,9 +99,6 @@ def _consistency_problems(record: dict[str, Any]) -> list[str]:
     problems += _alert_problems(record)
     problems += _inconsistency_problems(record)
     problems += _lifecycle_problems(record)
-
-    if "parity" in record:
-        problems += _parity_problems(record)
 
     return problems
 
@@ -143,54 +127,6 @@ def _advisory_fix_problems(record: dict[str, Any]) -> list[str]:
                 f"{path}: {c['dependency']!r} wasn't looked up, so its candidates come from "
                 "advisories, yet this one doesn't say so"
             )
-    return problems
-
-
-def _parity_problems(record: dict[str, Any]) -> list[str]:
-    """Incomplete exactly when a reason says why; unread PRs are never an empty list."""
-    problems = []
-    parity = record["parity"]
-    pull_requests = parity["pull_requests"]
-    if any(pr["state"] == "unparseable" for pr in pull_requests) and parity["complete"]:
-        problems.append("$.parity.complete: true although a pull request is unparseable")
-    if parity["complete"] == ("reasons" in parity):
-        problems.append("$.parity.reasons: must be given exactly when the comparison is incomplete")
-    unread = any(
-        g["kind"] == "unavailable_source" and g["subject"] == "dependabot-prs"
-        for g in record["gaps"]
-    )
-    if unread and (parity["complete"] or pull_requests or parity["scan_only"]):
-        problems.append(
-            "$.parity: a gap says the PRs weren't read, yet it compares or lists something"
-        )
-    for i, pr in enumerate(pull_requests):
-        if pr["state"] in ("not_compared", "unparseable") and (pr["updates"] or "reason" not in pr):
-            problems.append(
-                f"$.parity.pull_requests[{i}]: {pr['state']} needs a reason and no updates"
-            )
-        if pr["state"] in ("current", "partly_stale", "stale"):
-            stale = sum(u["result"] == "stale" for u in pr["updates"])
-            fits = {
-                "current": stale == 0,
-                "partly_stale": 0 < stale < len(pr["updates"]),
-                "stale": 0 < stale == len(pr["updates"]),
-            }
-            if not fits[pr["state"]]:
-                problems.append(
-                    f"$.parity.pull_requests[{i}]: {pr['state']}, yet {stale} of its "
-                    f"{len(pr['updates'])} updates are stale"
-                )
-            if (pr["state"] == "current") == ("reason" in pr):
-                problems.append(
-                    f"$.parity.pull_requests[{i}]: a reason must name its stale updates exactly "
-                    "when it has some"
-                )
-        for j, update in enumerate(pr["updates"]):
-            path = f"$.parity.pull_requests[{i}].updates[{j}]"
-            if (update["result"] == "held_by_policy") != ("held_by" in update):
-                problems.append(f"{path}: held_by must be given exactly when held by policy")
-            if (update["result"] == "matched") != ("candidate" in update):
-                problems.append(f"{path}: candidate must be given exactly when matched")
     return problems
 
 

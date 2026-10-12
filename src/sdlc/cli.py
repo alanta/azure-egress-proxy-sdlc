@@ -13,18 +13,16 @@ from sdlc import (
     consistency,
     coverage,
     dependabot,
-    dependabot_prs,
     govulncheck,
     lifecycle,
     native,
     osv,
     outputs,
-    parity,
     policy,
     renovate,
 )
 from sdlc.record import SCHEMA_VERSION
-from sdlc.subject import Revision, SubjectError, checkout, default_branch, resolve
+from sdlc.subject import Revision, SubjectError, checkout, resolve
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -154,24 +152,6 @@ def scan(
             alerts, vulnerabilities = read_alerts(
                 revision, token, reached.vulnerabilities, inventory.dependencies, gaps
             )
-            # Read in the same run as the lookups: parity holds only at a point in time.
-            pulls = read_pull_requests(revision, token, gaps)
-            # Renovate's own fields for its entries; the scan's locked entries by their name.
-            fields = osv.match_fields(inventory.dependencies) | renovate.match_fields(baseline)
-            compared = parity.compare(
-                pulls,
-                inventory.dependencies,
-                inventory.candidates,
-                fields,
-                subject_policy,
-                looked_up_at=looked_up_at,
-                # PRs for another branch propose changes to another revision.
-                branch=revision.branch or default_branch(revision.repository),
-                checkout=path,
-                unavailable=next(
-                    (g["reason"] for g in gaps if g["subject"] == dependabot_prs.SUBJECT), None
-                ),
-            )
             declared = consistency.check(baseline, inventory.dependencies)
             gaps += declared.gaps
             lifecycles = lifecycle.check(
@@ -205,7 +185,6 @@ def scan(
         ],
         "inconsistencies": declared.inconsistencies,
         "cross_checks": disagreements,
-        "parity": compared,
         "gaps": gaps,
     }
     directory = outputs.run_directory(out, repository, revision.commit, looked_up_at)
@@ -267,20 +246,6 @@ def summary(record: dict) -> list[str]:
         f"vulnerabilities: {found}; {reach['reachable']} reachable, "
         f"{reach['unknown']} with reachability unknown"
     )
-    parity = record["parity"]
-    if dependabot_prs.SUBJECT in unread:
-        lines.append("parity with Dependabot: unknown, its PRs weren't read")
-    else:
-        results = Counter(u["result"] for pr in parity["pull_requests"] for u in pr["updates"])
-        lines.append(
-            "parity with Dependabot: "
-            + ", ".join(
-                f"{results[r]} {r.replace('_', ' ')}"
-                for r in ("matched", "held_by_policy", "missed", "stale")
-            )
-            + f", {len(parity['scan_only'])} scan only"
-            + ("" if parity["complete"] else "; incomplete")
-        )
     lines.append(f"inconsistent declarations: {len(record['inconsistencies'])}")
     return lines
 
@@ -341,22 +306,6 @@ def read_alerts(
         )
         return None, vulnerabilities
     return dependabot.compare(alerts, vulnerabilities, dependencies, revision.commit)
-
-
-def read_pull_requests(
-    revision: Revision, token: str | None, gaps: list[dict]
-) -> dependabot_prs.PullRequests | None:
-    """Dependabot's open PRs with their proposed updates, or None and a gap saying why not.
-
-    None never means there are no open PRs: it means nothing is known about them.
-    """
-    try:
-        return dependabot_prs.read(revision.repository, token)
-    except dependabot.Unavailable as error:
-        gaps.append(
-            {"kind": "unavailable_source", "subject": dependabot_prs.SUBJECT, "reason": str(error)}
-        )
-        return None
 
 
 def describe(subject_policy: policy.Policy) -> str:

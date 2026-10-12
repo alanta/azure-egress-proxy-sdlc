@@ -77,15 +77,6 @@ def resolve(repository: str, ref: str, url: str | None = None) -> Revision:
     raise SubjectError(f"{repository} has no branch or tag named {ref!r}")
 
 
-def default_branch(repository: str, url: str | None = None) -> str:
-    """The branch the remote's HEAD points to."""
-    listing = _git("ls-remote", "--symref", url or github_url(repository), "HEAD")
-    for line in listing.splitlines():
-        if line.startswith("ref: refs/heads/") and line.endswith("\tHEAD"):
-            return line.removeprefix("ref: refs/heads/").removesuffix("\tHEAD")
-    raise SubjectError(f"{repository} doesn't say which branch is its default")
-
-
 @contextmanager
 def checkout(revision: Revision, url: str | None = None) -> Iterator[Path]:
     """Yield a directory holding exactly that commit; it is deleted afterwards."""

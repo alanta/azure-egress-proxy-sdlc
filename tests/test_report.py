@@ -97,12 +97,6 @@ REPRESENTATIVE = {
         d["version"] for i in r["inconsistencies"] for d in i["declarations"]
     ],
     "cross_checks": lambda r: [c["native_latest"] for c in r["cross_checks"]],
-    "parity": lambda r: [
-        v
-        for pr in r["parity"]["pull_requests"]
-        for u in pr["updates"]
-        for v in (f"#{pr['number']}", u["name"], u["to"], u["reason"])
-    ],
     "gaps": lambda r: [v for g in r["gaps"] for v in (g["subject"], g["reason"])],
 }
 
@@ -142,7 +136,7 @@ def test_the_report_names_what_the_spec_requires(record):
         "| Update policy | trial file policies/azure-egress-proxy.renovate.json5, supplied for "
         "this scan |"
     ) in rendered
-    assert "| Record schema | version 1 |" in rendered
+    assert "| Record schema | version 2 |" in rendered
 
 
 def test_the_report_reads_nothing_but_the_record():
@@ -171,12 +165,10 @@ def test_the_most_urgent_findings_come_first(record):
     assert headings[:3] == ["## Summary", "## Lifecycle", "## Vulnerabilities"]
     summary = rendered.split("## Summary", 1)[1].split("\n## ", 1)[0]
     assert summary.index("**End of life:**") < summary.index("**Reachable vulnerabilities:**")
-    assert summary.index("**Reachable vulnerabilities:**") < summary.index("**Missed Dependabot")
-    assert summary.index("**Missed Dependabot") < summary.index("**Inconsistent declarations:**")
-    assert "  - go 1.25: ended 2026-08-19; still supported: 1.26, 1.27 (proxy/go.mod:3)" in summary
-    assert "  - #77 Microsoft.Extensions.Http 10.0.11 → 10.0.12: the scan has no candidate" in (
-        summary
+    assert summary.index("**Reachable vulnerabilities:**") < summary.index(
+        "**Inconsistent declarations:**"
     )
+    assert "  - go 1.25: ended 2026-08-19; still supported: 1.26, 1.27 (proxy/go.mod:3)" in summary
 
 
 HOSTILE = (
@@ -206,10 +198,7 @@ def test_untrusted_text_is_plain_text():
     assert text("renovate:44@sha256:abc") == "renovate:44@sha256:abc"
 
 
-def test_a_hostile_pr_title_and_names_cant_change_the_report(record):
-    pr = record["parity"]["pull_requests"][0]
-    pr["title"] = HOSTILE
-    pr["updates"][0]["reason"] = HOSTILE
+def test_hostile_names_and_reasons_cant_change_the_report(record):
     record["inventory"][0]["name"] = HOSTILE
     record["gaps"][0]["reason"] = HOSTILE
     assert validate_record(record) == []
@@ -217,7 +206,6 @@ def test_a_hostile_pr_title_and_names_cant_change_the_report(record):
     assert "<script>" not in rendered
     rest = outside_code(rendered)
     assert "://" not in rest and "www." not in rest and "evil.example" not in rest
-    assert f"### #77: {text(HOSTILE)}\n" in rendered
     # Every row of every table keeps its header's columns: no pipe from the text splits a cell.
     columns = None
     for line in rendered.splitlines():
@@ -246,16 +234,7 @@ def test_unknown_states_are_shown_as_unknown_never_as_none(record):
         "dependencies": record["lifecycle"][0]["dependencies"],
         "locations": record["lifecycle"][0]["locations"],
     }
-    # Dependabot's PRs weren't read either.
-    record["parity"] = {
-        "baseline": "dependabot",
-        "complete": False,
-        "reasons": ["Dependabot's open PRs couldn't be read: 403"],
-        "pull_requests": [],
-        "scan_only": [],
-    }
     record["gaps"] += [
-        {"kind": "unavailable_source", "subject": "dependabot-prs", "reason": "GitHub said 403."},
         {"kind": "unavailable_source", "subject": "osv-scanner", "reason": "It crashed."},
     ]
     assert validate_record(record) == []
@@ -268,14 +247,11 @@ def test_unknown_states_are_shown_as_unknown_never_as_none(record):
     assert "- **End of life:** none found, but 1 line is unknown" in rendered
     assert "- **Reachable vulnerabilities:** unknown, OSV-Scanner didn't run" in rendered
     assert "## Vulnerabilities\n\n**Unknown.** OSV-Scanner didn't run: It crashed." in rendered
-    assert "- **Missed Dependabot updates:** unknown, Dependabot's PRs weren't read" in rendered
-    assert "**Unknown.** Dependabot's open PRs couldn't be read: GitHub said 403." in rendered
     assert "### Dependabot alerts\n\n**Unavailable:**" in rendered
     unknown = summary_item(rendered, "Unknown")
     for part in (
         "not read: osv-scanner: It crashed.",
         "not read: dependabot-alerts: The credential has no Dependabot alerts permission.",
-        "not read: dependabot-prs: GitHub said 403.",
         "1 lookup failed",
         "1 of 5 dependencies not looked up (skipped)",
         "reachability of 1 advisory",
@@ -283,7 +259,6 @@ def test_unknown_states_are_shown_as_unknown_never_as_none(record):
         "lifecycle of 1 line",
     ):
         assert part in unknown
-    assert "Missed Dependabot updates:** none" not in rendered
     assert "nothing; every source was read" not in rendered
 
 
@@ -458,7 +433,6 @@ def test_a_candidate_from_an_advisory_reads_as_its_fix_not_as_a_lookups_find(rec
             "reachability": "unknown",
         }
     )
-    record["parity"]["scan_only"].append(entry["id"])
     assert validate_record(record) == []
     rendered = render(record)
     assert "| golang.org/x/text | proxy/go.mod:12 | v0.3.7 | patch | v0.3.8 (advisory's fix) |" in (
@@ -478,4 +452,3 @@ def test_a_candidate_from_an_advisory_reads_as_its_fix_not_as_a_lookups_find(rec
         "whether newer versions exist for 1 dependency not looked up, whose only candidates "
         "are their advisories' fixes"
     ) in rendered
-    assert "| v0.3.7 | v0.3.8 (advisory's fix) |" in rendered  # scan only

@@ -113,14 +113,6 @@ class _Answer:
         return False
 
 
-def checked_out(root, *files):
-    """Empty files in the fake checkout: what a parity comparison needs to know they exist."""
-    for file in files:
-        path = root / file
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.touch()
-
-
 def endoflife(request, timeout):
     """endoflife.date as captured, so no scan in these tests reaches it."""
     product = request.full_url.rsplit("/", 1)[1]
@@ -240,7 +232,7 @@ def test_a_malformed_lock_file_is_unparseable_and_the_scan_carries_on(
     # The rest of the scan went on: Renovate's entry, its candidates and the other sections.
     assert [d["name"] for d in record["inventory"]] == ["Microsoft.Extensions.Http"]
     assert len(record["candidates"]) == 2
-    assert all(heading in report for heading in ("## Vulnerabilities", "## Parity with Dependabot"))
+    assert all(heading in report for heading in ("## Vulnerabilities", "## Declared versions"))
 
 
 def test_scan_without_govulncheck_reports_a_gap_and_carries_on(offline_scan, monkeypatch, tmp_path):
@@ -495,141 +487,6 @@ def test_scan_with_endoflife_date_unreachable_reports_unknown(offline_scan, monk
     assert "- **End of life:** none found, but 1 line is unknown\n" in report
 
 
-def test_scan_without_a_token_says_nothing_is_known_about_dependabot_s_prs(
-    offline_scan, tmp_path, capsys
-):
-    assert main(["scan", "--repo", "alanta/demo"]) == 0
-    assert "parity with Dependabot: unknown, its PRs weren't read" in capsys.readouterr().out
-    record, report = written(tmp_path)
-    [gap] = [g for g in record["gaps"] if g["subject"] == "dependabot-prs"]
-    assert gap["reason"].startswith("No token in SDLC_GITHUB_TOKEN")
-    assert (
-        f"## Parity with Dependabot\n\n**Unknown.** Dependabot's open PRs couldn't be read: "
-        f"{text(gap['reason'])} Nothing is compared, and nothing is listed as scan-only."
-    ) in report
-    assert "- **Missed Dependabot updates:** unknown, Dependabot's PRs weren't read" in report
-    assert "### Scan only" not in report
-
-
-def test_scan_compares_dependabot_s_updates_and_lists_unparseable_prs(
-    offline_scan, monkeypatch, capsys, tmp_path
-):
-    from sdlc import dependabot_prs, renovate
-
-    prs = FIXTURES / "azure-egress-proxy" / "prs"
-
-    def parsed(n, with_diff=True):
-        files = json.loads((prs / str(n) / "files.json").read_text())
-        return dependabot_prs.parse(
-            json.loads((prs / str(n) / "pr.json").read_text()),
-            json.loads((prs / str(n) / "commits.json").read_text()),
-            (lambda: files) if with_diff else None,
-        )
-
-    def report(path, *, policy=None, token=None):
-        python = {
-            "depName": "python",
-            "datasource": "docker",
-            "currentValue": "3.12-alpine",
-            "updates": [{"updateType": "minor", "newValue": "3.14-alpine"}],
-        }
-        http = {
-            "depName": "Microsoft.Extensions.Http",
-            "datasource": "nuget",
-            "currentValue": "10.0.12",
-            "updates": [{"updateType": "patch", "newValue": "10.0.13"}],
-        }
-        files = {
-            "dockerfile": [{"packageFile": "mock-idp/Dockerfile", "deps": [python]}],
-            "nuget": [{"packageFile": "Directory.Packages.props", "deps": [http]}],
-        }
-        return {"repositories": {"local": {"packageFiles": files}}}
-
-    # The checkout has the files the PRs change, as the revision they were made for does.
-    checked_out(tmp_path / "checkout", "mock-idp/Dockerfile", "proxy/Dockerfile")
-    # AppHost's lock file resolves the declared 10.0.12 by now, not #77's 10.0.11.
-    lock = tmp_path / "checkout" / "src" / "AppHost" / "packages.lock.json"
-    lock.parent.mkdir(parents=True)
-    resolved = {"Microsoft.Extensions.Http": {"type": "Transitive", "resolved": "10.0.12"}}
-    lock.write_text(json.dumps({"version": 1, "dependencies": {"net10.0": resolved}}))
-    found = [parsed(76), parsed(77), parsed(99, with_diff=False)]
-    monkeypatch.setattr(renovate, "run", report)
-    monkeypatch.setattr(
-        dependabot_prs,
-        "read",
-        lambda repository, token: dependabot_prs.PullRequests("2026-10-09T09:00:00+00:00", found),
-    )
-    assert main(["scan", "--repo", "alanta/demo"]) == 0
-    assert (
-        "parity with Dependabot: 1 matched, 0 held by policy, 1 missed, 1 stale, 1 scan only; "
-        "incomplete"
-    ) in capsys.readouterr().out
-    record, report = written(tmp_path)
-    assert [pr["state"] for pr in record["parity"]["pull_requests"]] == [
-        "current",
-        "stale",
-        "unparseable",
-    ]
-    assert (
-        "3 open Dependabot PRs, read at 2026-10-09T09:00:00+00:00; the scan's lookups ran at "
-    ) in report
-    assert "3 proposed updates: 1 missed, 1 stale, 0 held by policy, 1 matched." in report
-    assert (
-        "**The comparison is incomplete:**\n- #99 is unparseable: its diff wasn't read\n"
-    ) in report
-    assert (
-        "### #76: docker: bump the docker-minor-patch group across 2 directories with 2 updates"
-        "\n\nAt deddfe4 on main, **current**.\n"
-    ) in report
-    assert (
-        "| matched | python | 3.12-alpine | 3.14-alpine | minor, derived | docker /mock-idp "
-        "group docker-minor-patch | scan has 3.14-alpine |"
-    ) in report
-    assert (
-        "| missed | library/golang | 1.25-alpine | 1.27-alpine | minor, derived | docker /proxy "
-        "group docker-minor-patch | library/golang is not in the inventory in proxy/Dockerfile |"
-    ) in report
-    assert "- **Missed Dependabot updates:** 1 (the comparison is incomplete):\n" in report
-    assert "At cc93b67 on main, **stale**: the revision no longer has what it updates" in report
-    assert (
-        "| stale | Microsoft.Extensions.Http | 10.0.11 | 10.0.12 | patch | nuget group microsoft "
-        "| src/AppHost/packages.lock.json has 10.0.12, not 10.0.11 |"
-    ) in report
-    assert "At 7aea495 on main, **unparseable**: its diff wasn't read\n" in report
-    # #77 changes only the lock file, so the central 10.0.13 is the scan's alone; the
-    # Dockerfile's python is matched.
-    assert "1 entry with in-scope candidates that no open Dependabot PR proposes." in report
-    assert (
-        "| nuget | Microsoft.Extensions.Http | Directory.Packages.props | 10.0.12 | 10.0.13 |"
-    ) in report
-
-
-def test_scan_lists_what_only_the_scan_proposes(offline_scan, monkeypatch, tmp_path, capsys):
-    from sdlc import dependabot_prs
-
-    monkeypatch.setattr(
-        dependabot_prs,
-        "read",
-        lambda repository, token: dependabot_prs.PullRequests("2026-10-09T09:00:00+00:00", []),
-    )
-    assert main(["scan", "--repo", "alanta/demo"]) == 0
-    assert (
-        "parity with Dependabot: 0 matched, 0 held by policy, 0 missed, 0 stale, 1 scan only\n"
-    ) in capsys.readouterr().out
-    record, report = written(tmp_path)
-    assert record["parity"]["scan_only"] == [
-        "nuget:Directory.Packages.props:Microsoft.Extensions.Http"
-    ]
-    assert "0 open Dependabot PRs, read at 2026-10-09T09:00:00+00:00" in report
-    assert "0 proposed updates: 0 missed, 0 stale, 0 held by policy, 0 matched." in report
-    assert "- **Missed Dependabot updates:** none\n" in report
-    assert "1 entry with in-scope candidates that no open Dependabot PR proposes." in report
-    assert (
-        "| nuget | Microsoft.Extensions.Http | Directory.Packages.props | 10.0.12 | "
-        "10.0.13, 11.0.1 |"
-    ) in report
-
-
 def test_a_record_failing_its_schema_fails_the_scan_without_a_report(
     offline_scan, monkeypatch, tmp_path, capsys
 ):
@@ -666,7 +523,7 @@ def test_an_offline_scan_of_064aa09_writes_a_record_and_a_report_from_it(
     """The whole scan on the evidence captured at 064aa09, with its tools and APIs faked."""
     import gzip
 
-    from sdlc import cli, dependabot, dependabot_prs, govulncheck, native, osv, renovate
+    from sdlc import cli, dependabot, govulncheck, native, osv, renovate
     from sdlc.subject import Revision
 
     evidence = FIXTURES / "azure-egress-proxy"
@@ -680,17 +537,6 @@ def test_an_offline_scan_of_064aa09_writes_a_record_and_a_report_from_it(
     with gzip.open(evidence / "govulncheck" / "064aa09" / "govulncheck.json.gz") as f:
         run = govulncheck.Run(
             "proxy/go.mod", "go1.25.14", govulncheck.parse(f.read().decode(), "go1.25.14")
-        )
-
-    def pull(number):
-        def part(name):
-            return json.loads(read("prs", str(number), name))
-
-        # 064aa09 has every file the PRs open then change.
-        checked_out(tmp_path / "checkout", *(f["filename"] for f in part("files.json")))
-
-        return dependabot_prs.parse(
-            part("pr.json"), part("commits.json"), lambda: part("files.json")
         )
 
     monkeypatch.setenv("SDLC_GITHUB_TOKEN", "a-token")
@@ -723,14 +569,6 @@ def test_an_offline_scan_of_064aa09_writes_a_record_and_a_report_from_it(
             "main", "e93d7062b075352f151f8e6b5a15f60913e7bd98", "2026-10-09T09:00:00+00:00", alerts
         ),
     )
-    monkeypatch.setattr(
-        dependabot_prs,
-        "read",
-        lambda repository, token: dependabot_prs.PullRequests(
-            "2026-10-07T18:42:07+00:00", [pull(n) for n in (75, 76, 77, 98, 99)]
-        ),
-    )
-
     assert main(["scan", "--repo", "alanta/azure-egress-proxy"]) == 0
     out = capsys.readouterr().out
     [directory] = (tmp_path / "runs").glob("*/*/*/*")
@@ -751,16 +589,11 @@ def test_an_offline_scan_of_064aa09_writes_a_record_and_a_report_from_it(
         assert f"| {text(v['advisory'])}" in rendered
     for gap in record["gaps"]:
         assert f"| {text(gap['subject'])} | {text(gap['reason'])} |" in rendered
-    for pr in record["parity"]["pull_requests"]:
-        assert f"### #{pr['number']}: {text(pr['title'])}" in rendered
 
     # What a maintainer of 064aa09 needs to see first.
     summary = rendered.split("\n## Summary\n", 1)[1].split("\n## ", 1)[0]
     assert "- **End of life:**" in summary and "  - go 1.25: ended " in summary
     assert "- **Reachable vulnerabilities:**" in summary
-    assert "- **Missed Dependabot updates:** none\n" in summary
-    # Every update of the five PRs open then is matched, #77 by AppHost's lock drift.
-    assert "11 proposed updates: 0 missed, 0 stale, 0 held by policy, 11 matched." in rendered
     assert (
         "| Microsoft.Extensions.Http | src/AppHost/packages.lock.json | 10.0.11 | patch | 10.0.12 |"
     ) in rendered

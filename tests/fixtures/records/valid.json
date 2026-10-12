@@ -1,5 +1,5 @@
 {
-  "schema_version": "1",
+  "schema_version": "2",
   "subject": {
     "repository": "alanta/azure-egress-proxy",
     "ref": "main",
@@ -159,30 +159,6 @@
   ],
   "inconsistencies": [],
   "cross_checks": [],
-  "parity": {
-    "baseline": "dependabot",
-    "captured_at": "2026-10-08T09:00:05+00:00",
-    "looked_up_at": "2026-10-08T09:00:00+00:00",
-    "complete": true,
-    "pull_requests": [
-      {
-        "number": 77,
-        "state": "current",
-        "updates": [
-          {
-            "name": "Microsoft.Extensions.Http",
-            "from": "10.0.11",
-            "to": "10.0.12",
-            "result": "missed",
-            "reason": "the scan has no candidate in src/AppHost/packages.lock.json"
-          }
-        ]
-      }
-    ],
-    "scan_only": [
-      "nuget:src/AppHost/AppHost.csproj:Aspire.AppHost.Sdk"
-    ]
-  },
   "gaps": [
     {
       "kind": "unavailable_source",
