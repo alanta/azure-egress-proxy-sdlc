@@ -1,5 +1,5 @@
 {
-  "schema_version": "2",
+  "schema_version": "3",
   "subject": {
     "repository": "alanta/azure-egress-proxy",
     "ref": "main",
@@ -107,7 +107,8 @@
       "dependency": "nuget:src/AppHost/AppHost.csproj:Aspire.AppHost.Sdk",
       "update_type": "minor",
       "version": "13.6.1",
-      "classification": "in_scope"
+      "classification": "in_scope",
+      "released_at": "2026-09-10T03:16:59+00:00"
     },
     {
       "dependency": "nuget:Directory.Packages.props:Microsoft.OpenApi",

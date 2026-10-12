@@ -11,7 +11,7 @@ def record_from():
 
     def as_record(inventory):
         return {
-            "schema_version": "2",
+            "schema_version": "3",
             "subject": {
                 "repository": "alanta/azure-egress-proxy",
                 "ref": "main",

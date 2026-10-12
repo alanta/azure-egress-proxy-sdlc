@@ -7,6 +7,7 @@ import pytest
 from sdlc.record import validate_record
 
 FIXTURE = Path(__file__).parent / "fixtures" / "records" / "valid.json"
+FIXTURE_V2 = Path(__file__).parent / "fixtures" / "records" / "valid.v2.json"
 FIXTURE_V1 = Path(__file__).parent / "fixtures" / "records" / "valid.v1.json"
 AT = "2026-10-09T09:00:00+00:00"
 
@@ -99,8 +100,8 @@ def test_valid_record_passes(record):
         ),
         (
             "wrong schema version",
-            lambda r: r.update(schema_version="1"),
-            "'2' was expected",
+            lambda r: r.update(schema_version="2"),
+            "'3' was expected",
         ),
         (
             "unexpected field",
@@ -305,7 +306,7 @@ def test_alerts_are_checked(record, description, alerts, cited, expected):
     assert any(expected in p for p in problems), (description, problems)
 
 
-def test_version_2_rejects_parity():
+def test_version_3_rejects_parity():
     record = json.loads(FIXTURE.read_text())
     record["parity"] = json.loads(FIXTURE_V1.read_text())["parity"]
     problems = validate_record(record)
@@ -316,22 +317,28 @@ def test_version_1_record_still_passes_its_own_schema():
     assert validate_record(json.loads(FIXTURE_V1.read_text()), version="1") == []
 
 
-def test_version_2_rejects_version_1_record():
-    problems = validate_record(json.loads(FIXTURE_V1.read_text()))
+def test_version_2_record_still_passes_its_own_schema():
+    assert validate_record(json.loads(FIXTURE_V2.read_text()), version="2") == []
+
+
+def test_version_3_rejects_version_2_record():
+    problems = validate_record(json.loads(FIXTURE_V2.read_text()))
+    assert any("'3' was expected" in p for p in problems), problems
+
+
+def test_version_2_rejects_version_3_record():
+    problems = validate_record(json.loads(FIXTURE.read_text()), version="2")
     assert any("'2' was expected" in p for p in problems), problems
 
 
 def v3_record():
-    record = json.loads(FIXTURE.read_text())
-    record["schema_version"] = "3"
-    return record
+    return json.loads(FIXTURE.read_text())
 
 
 def test_version_3_accepts_a_candidate_with_and_without_a_release_date():
     record = v3_record()
-    assert "released_at" not in record["candidates"][0]
-    assert validate_record(record, version="3") == []
-    record["candidates"][0]["released_at"] = "2026-09-10T03:16:59+00:00"
+    assert "released_at" in record["candidates"][0]
+    assert "released_at" not in record["candidates"][1]
     assert validate_record(record, version="3") == []
 
 
@@ -352,7 +359,7 @@ def test_version_3_rejects_a_malformed_release_date(value, expected):
 
 
 def test_version_2_has_no_release_date():
-    record = json.loads(FIXTURE.read_text())
+    record = json.loads(FIXTURE_V2.read_text())
     record["candidates"][0]["released_at"] = "2026-09-10T03:16:59+00:00"
     problems = validate_record(record, version="2")
     assert any("Additional properties are not allowed" in p for p in problems), problems

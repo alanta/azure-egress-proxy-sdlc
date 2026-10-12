@@ -13,6 +13,7 @@ import subprocess
 import tempfile
 from collections.abc import Iterator
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from importlib.resources import files
 from pathlib import Path
 from typing import Any
@@ -417,16 +418,33 @@ def _lookup(dep: dict, dep_id: str, looked_up_at: str) -> tuple[dict, list[dict]
             return {"state": "unknown", "reason": "; ".join(warnings), **lookup}, []
         return {"state": "current", **lookup}, []
 
-    candidates = [
-        {
+    candidates = []
+    for update in updates:
+        candidate = {
             "dependency": dep_id,
             "update_type": update["updateType"],
             "version": update.get("newValue") or update.get("newVersion") or update["newDigest"],
             "classification": "in_scope",
         }
-        for update in updates
-    ]
+        if released_at := _released_at(update.get("releaseTimestamp")):
+            candidate["released_at"] = released_at
+        candidates.append(candidate)
     return {"state": "outdated", **lookup}, candidates
+
+
+def _released_at(value: Any) -> str | None:
+    """Renovate's release timestamp as an ISO 8601 time in UTC, or None when the report has
+    none or something that isn't a timestamp with a time zone: it is upstream data, and
+    no date is better than an invented one."""
+    if not isinstance(value, str):
+        return None
+    try:
+        parsed = datetime.fromisoformat(value)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        return None
+    return parsed.astimezone(UTC).isoformat(timespec="seconds")
 
 
 class _LineFinder:

@@ -136,7 +136,7 @@ def test_the_report_names_what_the_spec_requires(record):
         "| Update policy | trial file policies/azure-egress-proxy.renovate.json5, supplied for "
         "this scan |"
     ) in rendered
-    assert "| Record schema | version 2 |" in rendered
+    assert "| Record schema | version 3 |" in rendered
 
 
 def test_the_report_reads_nothing_but_the_record():

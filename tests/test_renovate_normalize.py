@@ -59,6 +59,61 @@ def test_outdated_dependency_gets_its_candidate_and_lookup_details(scanned):
     assert candidates_for(scanned, aspire["id"]) == {"minor": "13.6.1"}
 
 
+def test_a_release_timestamp_becomes_the_candidates_release_date(scanned):
+    (aspire,) = by_name(scanned, "Aspire.AppHost.Sdk")
+    (candidate,) = [c for c in scanned.candidates if c["dependency"] == aspire["id"]]
+    assert candidate["released_at"] == "2026-10-07T06:01:19+00:00"
+
+
+def test_a_candidate_without_a_release_timestamp_has_no_release_date(scanned):
+    (sdk,) = [
+        d
+        for d in by_name(scanned, "mcr.microsoft.com/dotnet/sdk")
+        if d["lookup"]["state"] == "outdated"
+    ][:1]
+    candidates = [c for c in scanned.candidates if c["dependency"] == sdk["id"]]
+    assert candidates
+    assert all("released_at" not in c for c in candidates)
+
+
+def test_every_candidate_has_a_release_date_exactly_when_renovate_gave_a_timestamp(scanned):
+    report = load("report-with-scan-config.json")
+    stamped = sum(
+        "releaseTimestamp" in update
+        for entries in report["repositories"]["local"]["packageFiles"].values()
+        for entry in entries
+        for dep in entry["deps"]
+        for update in dep.get("updates", [])
+        if update["updateType"] in ("patch", "minor", "major", "digest")
+    )
+    assert stamped == sum("released_at" in c for c in scanned.candidates) == 16
+    assert len(scanned.candidates) == 31
+
+
+@pytest.mark.parametrize("value", [None, "", "yesterday", "2026-09-10T03:16:59", 1757474219, []])
+def test_a_release_timestamp_that_is_not_a_timestamp_is_left_out(value):
+    report = load("report-with-scan-config.json")
+    for entries in report["repositories"]["local"]["packageFiles"].values():
+        for entry in entries:
+            for dep in entry["deps"]:
+                for update in dep.get("updates", []):
+                    update["releaseTimestamp"] = value
+    inventory = normalize(report, looked_up_at=AT)
+    assert inventory.candidates
+    assert all("released_at" not in c for c in inventory.candidates)
+
+
+def test_a_release_timestamp_in_another_zone_is_kept_in_utc():
+    report = load("report-with-scan-config.json")
+    for entries in report["repositories"]["local"]["packageFiles"].values():
+        for entry in entries:
+            for dep in entry["deps"]:
+                for update in dep.get("updates", []):
+                    update["releaseTimestamp"] = "2026-09-10T05:16:59+02:00"
+    inventory = normalize(report, looked_up_at=AT)
+    assert {c["released_at"] for c in inventory.candidates} == {"2026-09-10T03:16:59+00:00"}
+
+
 def test_majors_are_candidates_too(scanned):
     central, referenced = sorted(
         by_name(scanned, "Microsoft.OpenApi"), key=lambda d: d["location"]["file"]

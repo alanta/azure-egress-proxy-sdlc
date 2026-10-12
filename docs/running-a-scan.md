@@ -85,7 +85,7 @@ Each scan gets its own directory, and nothing is overwritten:
 
 ```
 <out>/<owner>/<name>/<commit>/<UTC time>/
-    record.json    the data, validated against the version 2 record schema (`src/sdlc/schemas/scan-record.v2.json`)
+    record.json    the data, validated against the version 3 record schema (`src/sdlc/schemas/scan-record.v3.json`)
     report.md      the report, rendered from record.json
 ```
 
