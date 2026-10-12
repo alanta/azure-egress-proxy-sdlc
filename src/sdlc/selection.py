@@ -351,73 +351,67 @@ def _lifecycle_units(
 
     Each dependency's target is its smallest in-scope candidate on another line that is still
     supported. One without such a candidate is an early warning, and the unit keeps the others.
-    A dependency with a security fix brings it along: the unit carries both reasons, with the
-    higher of the two targets, and the dependency gets no security unit (design decision 4).
+    A dependency with a security fix brings it along: the unit carries both reasons, and the
+    target must also reach every fix; without such a candidate the dependency is an early
+    warning, and its fix stays a unit of its own (design decision 4). A dependency on several
+    ending lines is in one unit, which carries all of them, and its target must leave each.
     A line whose state is unknown is reported as not evaluated.
     """
-    units: list[dict[str, Any]] = []
-    taken: dict[str, str] = {}  # dependency id: the line whose unit it is in
+    ending = []
     for line in sorted(record["lifecycle"], key=lambda e: (e["product"], e["line"])):
-        product, name = line["product"], line["line"]
-        about = {"reason": LIFECYCLE, "product": product, "line": name}
         if line["state"] == "unknown":
             not_prepared.append(
-                about
-                | {
+                {
                     "kind": NOT_EVALUATED,
+                    "reason": LIFECYCLE,
+                    "product": line["product"],
+                    "line": line["line"],
                     "dependencies": line["dependencies"],
                     "detail": line["reason"],
                 }
             )
-            continue
-        if line["state"] not in ENDING:
-            continue
-        supported = [s for s in line.get("supported_lines", []) if s != name]
-        targets, advisories = [], []
+        elif line["state"] in ENDING:
+            ending.append(line)
+    on: dict[str, list[dict[str, Any]]] = {}
+    for line in ending:
         for dep_id in line["dependencies"]:
-            entry = entries[dep_id]
-            report = about | {"dependency": dep_id}
-            if dep_id in taken:
-                not_prepared.append(
-                    report
-                    | {
-                        "kind": NOT_EVALUATED,
-                        "detail": f"It is already in the unit for {taken[dep_id]}, and a "
-                        "dependency is in one unit only, so whether that unit's target also "
-                        f"leaves {product} {name} isn't evaluated.",
-                    }
-                )
+            on.setdefault(dep_id, []).append(line)
+
+    def home(lines: list[dict[str, Any]]) -> dict[str, Any]:
+        # The line with the most dependencies, so that declarations that belong together,
+        # such as everything that names the Go toolchain, stay in one unit.
+        return min(lines, key=lambda e: (-len(e["dependencies"]), e["product"], e["line"]))
+
+    units: list[dict[str, Any]] = []
+    for line in ending:
+        targets, advisories, carried = [], [], []
+        for dep_id in line["dependencies"]:
+            lines = on[dep_id]
+            if home(lines) is not line:
                 continue
-            target, problem = _on_supported_line(
-                candidates.get(dep_id, []), entry, product, name, supported
-            )
+            fix = fixes.get(dep_id)
+            target, problem = _leaving(candidates.get(dep_id, []), entries[dep_id], lines, fix)
             if target is None:
-                not_prepared.append(report | problem)
+                not_prepared.append({"reason": LIFECYCLE, "dependency": dep_id} | problem)
                 continue
-            taken[dep_id] = f"{product} {name}"
-            fix = fixes.pop(dep_id, None)
             if fix is not None:
-                target = max(target, fix.target, key=_size)
+                del fixes[dep_id]
                 advisories += [_advisory(v) for v in fix.advisories]
-            targets.append(_target(target, entry, today))
+            carried += [other for other in lines if other is not line and other not in carried]
+            targets.append(_target(target, entries[dep_id], today))
         if not targets:
             continue
-        evidence: dict[str, Any] = {
-            "lifecycle": {
-                k: line[k]
-                for k in ("product", "line", "state", "end_of_life", "supported_lines", "source")
-                if k in line
-            }
-        }
+        carried.sort(key=lambda e: (e["product"], e["line"]))
+        evidence: dict[str, Any] = {"lifecycle": [_line_evidence(e) for e in [line, *carried]]}
         if advisories:
             evidence["advisories"] = sorted(
                 advisories, key=lambda a: (a["dependency"], a["advisory"])
             )
         units.append(
             {
-                "name": f"lifecycle-{product}-{name}",
+                "name": f"lifecycle-{line['product']}-{line['line']}",
                 "reasons": [LIFECYCLE, SECURITY] if advisories else [LIFECYCLE],
-                "subject": {"product": product, "line": name},
+                "subject": {"product": line["product"], "line": line["line"]},
                 "targets": sorted(targets, key=lambda t: t["dependency"]),
                 "evidence": evidence,
             }
@@ -425,51 +419,86 @@ def _lifecycle_units(
     return units
 
 
-def _on_supported_line(
+def _leaving(
     candidates: list[dict[str, Any]],
     entry: dict[str, Any],
-    product: str,
-    line: str,
-    supported: list[str],
+    lines: list[dict[str, Any]],
+    fix: _Fix | None,
 ) -> tuple[dict[str, Any] | None, dict[str, Any]]:
-    """The smallest in-scope candidate on a supported line, or else what to report instead."""
+    """The smallest in-scope candidate on another supported line of each of the ending
+    lines, which also reaches the fix when there is one, or else what to report instead."""
+    about = [{"product": e["product"], "line": e["line"]} for e in lines]
     lookup = entry["lookup"]
     if lookup["state"] in ("unknown", "skipped"):
         return None, {
             "kind": NOT_EVALUATED,
-            "detail": f"Whether a candidate leaves the line is unknown: the lookup of "
-            f"{entry['name']} is {lookup['state']}. {lookup['reason']}",
+            "lines": about,
+            "detail": f"Whether a candidate leaves {_named_lines(lines)} is unknown: the lookup "
+            f"of {entry['name']} is {lookup['state']}. {lookup['reason']}",
         }
-    held = []
+    held, left = [], set()
     for candidate in sorted(candidates, key=_size):
         if candidate["update_type"] == "digest":
             continue
-        on = lifecycle.candidate_line(product, line, entry, candidate["version"])
-        if on is None:
-            if candidate["classification"] != "in_scope":
-                continue
-            # A smaller candidate whose line is unknown might be the target.
+        found = [
+            lifecycle.candidate_line(e["product"], e["line"], entry, candidate["version"])
+            for e in lines
+        ]
+        leaves = [i for i, (e, on) in enumerate(zip(lines, found, strict=True)) if on in _others(e)]
+        if candidate["classification"] != "in_scope":
+            if len(leaves) == len(lines):
+                held.append(candidate)
+            continue
+        left |= set(leaves)
+        if fix is not None and candidate["version"] not in fix.versions:
+            continue
+        if None in found:
+            # This candidate might be the target, so a line that can't be read stops here.
+            unread = _named_lines([e for e, on in zip(lines, found, strict=True) if on is None])
             return None, {
                 "kind": NOT_EVALUATED,
-                "detail": f"The {product} line of candidate {candidate['version']} can't be "
+                "lines": about,
+                "detail": f"The {unread} line of candidate {candidate['version']} can't be "
                 "read from the record.",
             }
-        if on not in supported:
-            continue
-        if candidate["classification"] == "in_scope":
+        if len(leaves) == len(lines):
             return candidate, {}
-        held.append(candidate)
-    lines = ", ".join(supported) or "none"
-    problem: dict[str, Any] = {
-        "kind": EARLY_WARNING,
-        "detail": f"No in-scope candidate is on another supported line ({lines}).",
-    }
+
+    stuck = [e for i, e in enumerate(lines) if i not in left]
+    if stuck:
+        detail = "No in-scope candidate is on another supported line of " + " or ".join(
+            f"{e['product']} {e['line']} ({', '.join(_others(e)) or 'none'})" for e in stuck
+        )
+        about = [{"product": e["product"], "line": e["line"]} for e in stuck]
+    elif len(lines) > 1:
+        detail = f"No single in-scope candidate leaves {_named_lines(lines)} at once"
+    else:
+        detail = (
+            f"No in-scope candidate both leaves {_named_lines(lines)} and reaches the fix of "
+            "every advisory on it, so its security fix is a unit of its own"
+        )
+    problem: dict[str, Any] = {"kind": EARLY_WARNING, "lines": about, "detail": detail + "."}
     if held:
         rules = sorted({c["held_by"] for c in held})
         problem["held_by"] = "; ".join(rules)
         versions = ", ".join(c["version"] for c in held)
-        problem["detail"] += f" {versions} would be, but the policy holds it: {'; '.join(rules)}."
+        them = "it" if len(held) == 1 else "them"
+        problem["detail"] += f" {versions} would, but the policy holds {them}: {'; '.join(rules)}."
     return None, problem
+
+
+def _others(line: dict[str, Any]) -> list[str]:
+    """The supported lines a dependency on this one can move to."""
+    return [s for s in line.get("supported_lines", []) if s != line["line"]]
+
+
+def _named_lines(lines: list[dict[str, Any]]) -> str:
+    return " and ".join(f"{e['product']} {e['line']}" for e in lines)
+
+
+def _line_evidence(line: dict[str, Any]) -> dict[str, Any]:
+    keys = ("product", "line", "state", "end_of_life", "supported_lines", "source")
+    return {k: line[k] for k in keys if k in line}
 
 
 def _batch_units(

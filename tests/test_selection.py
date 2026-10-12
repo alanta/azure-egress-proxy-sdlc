@@ -474,14 +474,16 @@ def test_a_line_nearing_its_end_moves_to_a_supported_line():
     assert unit["subject"] == {"product": "go", "line": "1.25"}
     assert targets(unit) == {GO_MOD + "go": "1.27.2"}
     assert unit["evidence"] == {
-        "lifecycle": {
-            "product": "go",
-            "line": "1.25",
-            "state": "nearing_end_of_life",
-            "end_of_life": "2026-12-01",
-            "supported_lines": ["1.26", "1.27"],
-            "source": "https://endoflife.date/api/v1/products/go",
-        }
+        "lifecycle": [
+            {
+                "product": "go",
+                "line": "1.25",
+                "state": "nearing_end_of_life",
+                "end_of_life": "2026-12-01",
+                "supported_lines": ["1.26", "1.27"],
+                "source": "https://endoflife.date/api/v1/products/go",
+            }
+        ]
     }
 
 
@@ -519,10 +521,9 @@ def test_a_dependency_without_a_supported_target_is_an_early_warning():
     assert warning == {
         "kind": "early_warning",
         "reason": "lifecycle",
-        "product": "go",
-        "line": "1.25",
         "dependency": SETUP_GO,
-        "detail": "No in-scope candidate is on another supported line (1.26, 1.27).",
+        "lines": [{"product": "go", "line": "1.25"}],
+        "detail": "No in-scope candidate is on another supported line of go 1.25 (1.26, 1.27).",
     }
 
 
@@ -539,7 +540,10 @@ def test_an_early_warning_names_the_rule_that_holds_the_move():
     assert selection["units"] == []
     [warning] = reports(selection, "early_warning")
     assert warning["held_by"] == hold
-    assert warning["detail"].endswith(f"11.0 would be, but the policy holds it: {hold}.")
+    assert warning["detail"] == (
+        f"No in-scope candidate is on another supported line of dotnet 10 (11). 11.0 would, "
+        f"but the policy holds it: {hold}."
+    )
 
 
 def test_an_ending_go_line_carries_the_standard_library_vulnerabilities():
@@ -561,15 +565,34 @@ def test_an_ending_go_line_carries_the_standard_library_vulnerabilities():
     assert selection["not_prepared"] == []
 
 
-def test_the_higher_of_the_lifecycle_and_security_targets_wins():
+def test_the_lifecycle_target_also_reaches_every_fix():
     record = (
         go_line(minor="1.26.3")
         .candidate(GO_MOD + "go", "minor", "1.27.1", basis="advisory_fix")
         .lifecycle("go", "1.25", "end_of_life", [GO_MOD + "go"], **GO_LINES)
+        # 1.26.3 leaves the line, but only 1.27.1 is outside the advisory.
         .vulnerability(GO_MOD + "go", "GO-1", "1.27.1", reached_by=["1.27.1"])
     )
     [unit] = record.select()["units"]
+    assert unit["reasons"] == ["lifecycle", "security"]
     assert targets(unit) == {GO_MOD + "go": "1.27.1"}
+
+
+def test_without_a_candidate_that_does_both_the_fix_is_a_unit_of_its_own():
+    record = (
+        go_line(patch="1.25.15", minor="1.27.2")
+        .lifecycle("go", "1.25", "nearing_end_of_life", [GO_MOD + "go"], **GO_LINES)
+        .vulnerability(GO_MOD + "go", "GO-1", "1.25.15", reached_by=["1.25.15"])
+    )
+    selection = record.select()
+    [unit] = selection["units"]
+    assert unit["name"] == "security-golang-version-go"
+    assert targets(unit) == {GO_MOD + "go": "1.25.15"}
+    [warning] = reports(selection, "early_warning")
+    assert warning["detail"] == (
+        "No in-scope candidate both leaves go 1.25 and reaches the fix of every advisory on it, "
+        "so its security fix is a unit of its own."
+    )
 
 
 def test_a_security_fix_stays_a_unit_when_its_line_has_no_target():
@@ -606,7 +629,9 @@ def test_a_candidate_whose_line_cant_be_read_is_not_evaluated():
         "go", "1.25", "end_of_life", [GO_MOD + "go"], **GO_LINES
     )
     [unknown] = reports(record.select(), "not_evaluated")
-    assert unknown["detail"] == "The go line of candidate 1.27rc1 can't be read from the record."
+    assert unknown["detail"] == (
+        "The go 1.25 line of candidate 1.27rc1 can't be read from the record."
+    )
 
 
 def test_a_line_of_unknown_state_is_not_evaluated():
@@ -634,22 +659,44 @@ def test_a_line_of_unknown_state_is_not_evaluated():
     }
 
 
-def test_a_dependency_on_two_ending_lines_is_in_one_unit():
-    image = "dockerfile:proxy/Dockerfile:docker.io/library/golang"
-    record = (
-        Record()
-        .dependency(image, "1.25-alpine3.20", ecosystem="docker")
-        .candidate(image, "minor", "1.27-alpine3.22")
-        .lifecycle("alpine-linux", "3.20", "end_of_life", [image], supported_lines=["3.21", "3.22"])
-        .lifecycle("go", "1.25", "end_of_life", [image], **GO_LINES)
+ALPINE_LINES = {"supported_lines": ["3.21", "3.22"]}
+
+
+def two_ending_lines(image_candidate):
+    """Go 1.25 and Alpine 3.20 past their end, with an image on both and go.mod on Go."""
+    return (
+        go_line(minor="1.27.2")
+        .dependency(GOLANG, "1.25-alpine3.20", ecosystem="docker")
+        .candidate(GOLANG, "minor", image_candidate)
+        .lifecycle("alpine-linux", "3.20", "end_of_life", [GOLANG], **ALPINE_LINES)
+        .lifecycle("go", "1.25", "end_of_life", [GOLANG, GO_MOD + "go"], **GO_LINES)
     )
-    selection = record.select()
+
+
+def test_a_dependency_on_two_ending_lines():
+    selection = two_ending_lines("1.27-alpine3.22").select()
     [unit] = selection["units"]
-    assert unit["name"] == "lifecycle-alpine-linux-3.20"
-    assert targets(unit) == {image: "1.27-alpine3.22"}
-    [unknown] = reports(selection, "not_evaluated")
-    assert unknown["product"] == "go"
-    assert "already in the unit for alpine-linux 3.20" in unknown["detail"]
+    # The image stays with the other declarations of the Go toolchain.
+    assert unit["name"] == "lifecycle-go-1.25"
+    assert unit["reasons"] == ["lifecycle"]
+    assert targets(unit) == {GOLANG: "1.27-alpine3.22", GO_MOD + "go": "1.27.2"}
+    assert [(e["product"], e["line"]) for e in unit["evidence"]["lifecycle"]] == [
+        ("go", "1.25"),
+        ("alpine-linux", "3.20"),
+    ]
+    assert selection["not_prepared"] == []
+
+
+def test_a_candidate_that_leaves_only_one_of_two_ending_lines_isnt_the_target():
+    selection = two_ending_lines("1.27-alpine3.20").select()
+    [unit] = selection["units"]
+    assert targets(unit) == {GO_MOD + "go": "1.27.2"}
+    [warning] = reports(selection, "early_warning")
+    assert warning["dependency"] == GOLANG
+    assert warning["lines"] == [{"product": "alpine-linux", "line": "3.20"}]
+    assert warning["detail"] == (
+        "No in-scope candidate is on another supported line of alpine-linux 3.20 (3.21, 3.22)."
+    )
 
 
 THIRD = date(2026, 11, 3)
