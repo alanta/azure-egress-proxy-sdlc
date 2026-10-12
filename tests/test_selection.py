@@ -229,7 +229,9 @@ def test_a_held_patch_is_passed_over_for_an_in_scope_minor():
         .dependency(PROPS + "Serilog", "1.2.0")
         .candidate(PROPS + "Serilog", "patch", "1.2.5", held_by="Patches wait")
         .candidate(PROPS + "Serilog", "minor", "1.4.0")
-        .vulnerability(PROPS + "Serilog", "GHSA-1", "1.2.3")
+        # The scan lists in-scope candidates only; listing the held one too shows that the
+        # selection doesn't rely on that alone to keep holds winning.
+        .vulnerability(PROPS + "Serilog", "GHSA-1", "1.2.3", reached_by=["1.2.5", "1.4.0"])
     )
     [unit] = record.select()["units"]
     assert targets(unit) == {PROPS + "Serilog": "1.4.0"}
@@ -1120,3 +1122,20 @@ def test_a_batch_unit_names_only_its_own_dependencies_open_reports():
     assert "open_security_reports" not in found["nuget-azure.core"]["evidence"]
     [named] = found["nuget-serilog"]["evidence"]["open_security_reports"]
     assert named == {"kind": "not_evaluated", "dependency": PROPS + "Serilog", "advisory": "GHSA-1"}
+
+
+def test_a_version_that_cant_be_ordered_comes_after_those_that_can():
+    record = (
+        Record()
+        .dependency(PROPS + "Serilog", "1.2.0")
+        .candidate(PROPS + "Serilog", "minor", "stable-1.4")
+        .candidate(PROPS + "Serilog", "minor", "1.4.0", basis="advisory_fix")
+        .vulnerability(PROPS + "Serilog", "GHSA-1", "1.2.3")
+    )
+    [unit] = record.select(THIRD)["units"]
+    # Smallest for a fix: the version the order knows, before the one it doesn't.
+    assert targets(unit) == {PROPS + "Serilog": "1.4.0"}
+    del record.record["vulnerabilities"][0]
+    [unit] = record.select(THIRD)["units"]
+    # Newest for the batch: still the version the order knows.
+    assert targets(unit) == {PROPS + "Serilog": "1.4.0"}

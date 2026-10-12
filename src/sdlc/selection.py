@@ -546,7 +546,7 @@ def _batch_units(
         in_scope = [c for c in candidates[dep_id] if c["classification"] == "in_scope"]
         if not in_scope:
             continue
-        newest = max(in_scope, key=_size)
+        newest = max(in_scope, key=_newness)
         age = _age(newest, today)
         if age is not None and age < MINIMUM_RELEASE_AGE_DAYS:
             ready = datetime.fromisoformat(newest["released_at"]).astimezone(UTC).date()
@@ -723,7 +723,15 @@ def _advisory(vulnerability: dict[str, Any]) -> dict[str, Any]:
 
 
 def _size(candidate: dict[str, Any]) -> tuple:
-    """Smaller update types first; within one, the lower version."""
+    """Smaller update types first; within one, the lower version, and anything that isn't a
+    version last, as the scan orders fix_reached_by."""
+    version = osv.version_order(candidate["version"])
+    return SIZES.index(candidate["update_type"]), version is None, version or ()
+
+
+def _newness(candidate: dict[str, Any]) -> tuple:
+    """Larger update types first; within one, the higher version, and anything that isn't a
+    version after every version, since its order is unknown."""
     version = osv.version_order(candidate["version"])
     return SIZES.index(candidate["update_type"]), version is not None, version or ()
 

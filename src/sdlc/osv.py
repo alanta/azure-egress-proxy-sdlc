@@ -309,7 +309,7 @@ def vulnerability(
     if fixed or last_affected:
         reached, held_by, reached_by = _reached(entry, candidates, advisory, ecosystem, name)
         found["fix_reached_by_candidate"] = reached
-        if reached is not None and reached != "unknown":
+        if reached != "unknown":
             # Which ones, so the selection needn't compare versions with the fix itself: a
             # version above the fixed one can be affected again by a later range.
             found["fix_reached_by"] = reached_by
