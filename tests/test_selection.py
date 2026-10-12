@@ -5,6 +5,7 @@ from datetime import date
 
 import pytest
 
+from sdlc import native, report
 from sdlc.policy import NO_POLICY, Policy
 from sdlc.selection import NAME_LENGTH, SelectionError, batch_window, branch_name, select
 
@@ -406,13 +407,35 @@ def test_a_source_that_wasnt_read_is_not_evaluated():
     record.record["gaps"] = [
         {"kind": "unavailable_source", "subject": "osv-scanner", "reason": "It failed."},
         {"kind": "unavailable_source", "subject": "govulncheck: proxy/go.mod", "reason": "Gone."},
+        {
+            "kind": "unavailable_source",
+            "subject": "src/A/packages.lock.json",
+            "reason": "OSV-Scanner returned no result for this lock file.",
+        },
+        {
+            "kind": "unavailable_source",
+            "subject": "src/A/packages.lock.json: Pkg",
+            "reason": "OSV-Scanner found no resolved version.",
+        },
+        {"kind": "unavailable_source", "subject": "dependabot-alerts", "reason": "No token."},
+        # Sources that give no security reason.
         {"kind": "unavailable_source", "subject": "dotnet list package", "reason": "No SDK."},
+        {"kind": "unavailable_source", "subject": "go list -m -u", "reason": "No Go."},
+        {"kind": "unavailable_source", "subject": "endoflife.date", "reason": "Down."},
+        {"kind": "unparseable_source", "subject": "infra/x.yaml", "reason": "Not read."},
     ]
     found = reports(record.select(), "not_evaluated")
-    assert [(r["source"], r["detail"]) for r in found] == [
+    assert sorted((r["source"], r["detail"]) for r in found) == [
+        ("dependabot-alerts", "No token."),
         ("govulncheck: proxy/go.mod", "Gone."),
         ("osv-scanner", "It failed."),
+        ("src/A/packages.lock.json", "OSV-Scanner returned no result for this lock file."),
+        ("src/A/packages.lock.json: Pkg", "OSV-Scanner found no resolved version."),
     ]
+
+
+def test_the_report_names_the_native_sources_as_the_scan_does():
+    assert report.NATIVE == native.LABELS
 
 
 def test_an_alert_the_scan_didnt_match_is_not_evaluated():

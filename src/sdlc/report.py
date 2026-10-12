@@ -20,7 +20,7 @@ from typing import Any
 OSV_SCANNER = "osv-scanner"
 DEPENDABOT_ALERTS = "dependabot-alerts"
 ENDOFLIFE = "endoflife.date"
-NATIVE = {"dotnet": "dotnet list package", "go": "go list -m -u"}
+NATIVE = {"dotnet": "dotnet list package", "go": "go list -m -u"}  # as native.LABELS
 # Unavailable sources that say nothing about vulnerabilities. Any other unavailable source,
 # including one added later, may hide an advisory, so the report never claims there are none.
 NOT_ABOUT_VULNERABILITIES = {DEPENDABOT_ALERTS, ENDOFLIFE, *NATIVE.values()}

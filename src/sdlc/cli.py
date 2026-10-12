@@ -96,8 +96,8 @@ def scan(
             gaps = coverage.gaps(path, baseline)
             native_updates = []
             for query, label in (
-                (native.dotnet_updates, "dotnet list package"),
-                (native.go_updates, "go list -m -u"),
+                (native.dotnet_updates, native.LABELS["dotnet"]),
+                (native.go_updates, native.LABELS["go"]),
             ):
                 try:
                     native_updates += query(path)

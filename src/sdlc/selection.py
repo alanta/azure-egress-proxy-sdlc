@@ -24,7 +24,7 @@ from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
-from sdlc import dependabot, lifecycle, osv
+from sdlc import lifecycle, native, osv
 from sdlc.policy import Policy
 
 # The batch window: these days of every month, inclusive.
@@ -58,9 +58,11 @@ SIZES = ("digest", "patch", "minor", "major")
 # name and a prefix such as `sdlc/` comfortably fit in.
 NAME_LENGTH = 100
 
-# The sources of security reasons: when one couldn't be read, its reasons aren't evaluated.
-SECURITY_SOURCES = ("osv-scanner", dependabot.SUBJECT)
-GOVULNCHECK = "govulncheck: "
+# Unavailable sources that give no security reason. Every other one, such as OSV-Scanner, a
+# lock file it returned nothing for, govulncheck or the Dependabot alerts, may hide one, so
+# its reasons are reported as not evaluated. Like the report's NOT_ABOUT_VULNERABILITIES,
+# but the alerts count here: they are evidence of a vulnerability, not only a comparison.
+NOT_ABOUT_SECURITY = {lifecycle.SUBJECT, *native.LABELS.values()}
 
 
 class SelectionError(Exception):
@@ -259,7 +261,8 @@ def _unknown(entry: dict[str, Any], candidates: list[dict[str, Any]], fix: str) 
 
 
 def _unread_sources(record: dict[str, Any]) -> list[dict[str, Any]]:
-    """The security sources the scan couldn't read: what they would say isn't evaluated."""
+    """The sources of security reasons the scan couldn't read, in whole or for one file or
+    package: what they would say isn't evaluated."""
     return [
         {
             "kind": NOT_EVALUATED,
@@ -268,8 +271,7 @@ def _unread_sources(record: dict[str, Any]) -> list[dict[str, Any]]:
             "detail": gap["reason"],
         }
         for gap in record["gaps"]
-        if gap["kind"] == "unavailable_source"
-        and (gap["subject"] in SECURITY_SOURCES or gap["subject"].startswith(GOVULNCHECK))
+        if gap["kind"] == "unavailable_source" and gap["subject"] not in NOT_ABOUT_SECURITY
     ]
 
 

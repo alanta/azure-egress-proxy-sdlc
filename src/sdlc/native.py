@@ -26,6 +26,8 @@ GO_IMAGE = (
 
 # Scratch space inside the container, not on the host.
 CONTAINER_TMP = "/tmp"  # noqa: S108
+# The gap subject of each query when it couldn't run, per ecosystem.
+LABELS = {"dotnet": "dotnet list package", "go": "go list -m -u"}
 
 
 class NativeError(Exception):
