@@ -407,6 +407,11 @@
           "minLength": 1,
           "description": "The policy rule that holds the candidate."
         },
+        "group": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The group the policy's group rules put the candidate in, by its groupName. Absent when no group rule matches it. Recorded whether or not the candidate is held."
+        },
         "basis": {
           "enum": [
             "advisory_fix"

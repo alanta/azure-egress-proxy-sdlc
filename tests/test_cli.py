@@ -517,31 +517,43 @@ def test_a_record_failing_its_schema_fails_the_scan_without_a_report(
     assert json.loads(kept.read_text())["cross_checks"] == [disagreement]
 
 
-def test_an_offline_scan_of_064aa09_writes_a_record_and_a_report_from_it(
-    offline_scan, monkeypatch, tmp_path, capsys
-):
-    """The whole scan on the evidence captured at 064aa09, with its tools and APIs faked."""
+TRIAL_POLICY = Path(__file__).parents[1] / "policies" / "azure-egress-proxy.renovate.json5"
+COMMIT_064AA09 = "064aa099ecf7ffea9664b89df29f7d89d6859358"
+
+
+@pytest.fixture
+def scan_064aa09(offline_scan, monkeypatch, tmp_path, capsys):
+    """The whole scan on the evidence captured at 064aa09, with its tools and APIs faked.
+
+    Returns a function that runs it with extra arguments, and gives the record, the report
+    and what the scan printed. With the trial policy, both of Renovate's runs answer with its
+    report under that policy: the report without it was captured on another day, when the
+    registries offered other versions.
+    """
     import gzip
 
     from sdlc import cli, dependabot, govulncheck, native, osv, renovate
     from sdlc.subject import Revision
 
     evidence = FIXTURES / "azure-egress-proxy"
-    commit = "064aa099ecf7ffea9664b89df29f7d89d6859358"
 
     def read(*path):
         return (evidence.joinpath(*path)).read_text()
 
     report = json.loads(read("renovate", "064aa09", "report-with-scan-config.json"))
+    with_trial = json.loads(read("renovate", "064aa09", "report-with-trial-policy.json"))
     scanned = json.loads(read("osv", "064aa09", "osv-scanner.json"))
     with gzip.open(evidence / "govulncheck" / "064aa09" / "govulncheck.json.gz") as f:
         run = govulncheck.Run(
             "proxy/go.mod", "go1.25.14", govulncheck.parse(f.read().decode(), "go1.25.14")
         )
 
+    def renovate_run(path, *, policy=None, token=None):
+        return report if policy is None else with_trial
+
     monkeypatch.setenv("SDLC_GITHUB_TOKEN", "a-token")
-    monkeypatch.setattr(cli, "resolve", lambda repo, ref: Revision(repo, ref, commit))
-    monkeypatch.setattr(renovate, "run", lambda path, *, policy=None, token=None: report)
+    monkeypatch.setattr(cli, "resolve", lambda repo, ref: Revision(repo, ref, COMMIT_064AA09))
+    monkeypatch.setattr(renovate, "run", renovate_run)
     monkeypatch.setattr(
         native,
         "dotnet_updates",
@@ -569,18 +581,26 @@ def test_an_offline_scan_of_064aa09_writes_a_record_and_a_report_from_it(
             "main", "e93d7062b075352f151f8e6b5a15f60913e7bd98", "2026-10-09T09:00:00+00:00", alerts
         ),
     )
-    assert main(["scan", "--repo", "alanta/azure-egress-proxy"]) == 0
-    out = capsys.readouterr().out
-    [directory] = (tmp_path / "runs").glob("*/*/*/*")
-    assert directory.relative_to(tmp_path / "runs").parts[:3] == (
-        "alanta",
-        "azure-egress-proxy",
-        commit,
-    )
-    assert f"record: runs/alanta/azure-egress-proxy/{commit}/" in out
-    record = json.loads((directory / "record.json").read_text())
-    assert validate_record(record) == []
-    rendered = (directory / "report.md").read_text()
+
+    def scan(*args):
+        assert main(["scan", "--repo", "alanta/azure-egress-proxy", *args]) == 0
+        out = capsys.readouterr().out
+        [directory] = (tmp_path / "runs").glob("*/*/*/*")
+        assert directory.relative_to(tmp_path / "runs").parts[:3] == (
+            "alanta",
+            "azure-egress-proxy",
+            COMMIT_064AA09,
+        )
+        assert f"record: runs/alanta/azure-egress-proxy/{COMMIT_064AA09}/" in out
+        record = json.loads((directory / "record.json").read_text())
+        assert validate_record(record) == []
+        return record, (directory / "report.md").read_text(), out
+
+    return scan
+
+
+def test_an_offline_scan_of_064aa09_writes_a_record_and_a_report_from_it(scan_064aa09):
+    record, rendered, _ = scan_064aa09()
 
     # Everything the record lists shows in the report.
     for dep in record["inventory"]:
@@ -601,6 +621,38 @@ def test_an_offline_scan_of_064aa09_writes_a_record_and_a_report_from_it(
     assert "main at e93d706, **not** the scanned commit 064aa09" in rendered
     assert "| govulncheck | v1.8.0 |" in rendered
     assert "| osv-scanner | 2.6.0 |" in rendered
+
+
+def test_a_scan_records_the_trial_policys_groups_on_its_candidates(scan_064aa09):
+    record, _, _ = scan_064aa09("--trial-policy", str(TRIAL_POLICY))
+    groups = {
+        (c["dependency"], c["version"]): c.get("group")
+        for c in record["candidates"]
+        if c.get("basis") != "advisory_fix"
+    }
+    # The Microsoft and Aspire packages have a group of their own, after the NuGet one.
+    assert groups[("nuget:src/AppHost/AppHost.csproj:Aspire.AppHost.Sdk", "13.6.1")] == "microsoft"
+    assert groups[("nuget:Directory.Packages.props:Azure.Core", "1.63.0")] == "nuget-minor-patch"
+    assert groups[("gomod:proxy/go.mod:go", "1.27.2")] == "gomod-minor-patch"
+    assert groups[("dockerfile:mock-idp/Dockerfile:python", "3.14-alpine")] == (
+        "docker-minor-patch"
+    )
+    # Majors are in no group, held or not, and the record leaves the group out.
+    majors = [c for c in record["candidates"] if c["update_type"] == "major"]
+    assert majors and all("group" not in c for c in majors)
+    held = [c for c in majors if c["classification"] == "held_by_policy"]
+    assert {c["held_by"] for c in held} == {".NET SDK and images stay on the .NET runtime's major"}
+    # Lock drift and the advisories' fixes are grouped by the same rules.
+    fixes = [c for c in record["candidates"] if c.get("basis") == "advisory_fix"]
+    assert fixes and {c.get("group") for c in fixes} == {"gomod-minor-patch"}
+    assert {c.get("group") for c in record["candidates"]} == {
+        None,
+        "actions-minor-patch",
+        "docker-minor-patch",
+        "gomod-minor-patch",
+        "microsoft",
+        "nuget-minor-patch",
+    }
 
 
 def test_out_chooses_where_the_run_directories_go(offline_scan, tmp_path, capsys):

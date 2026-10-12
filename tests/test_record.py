@@ -374,3 +374,28 @@ def test_version_3_rejects_a_release_date_on_an_advisory_fix():
     record["candidates"][-1]["released_at"] = "2026-09-10T03:16:59+00:00"
     added = set(validate_record(record, version="3")) - set(without)
     assert len(added) == 1 and "should not be valid" in added.pop(), added
+
+
+def test_version_3_accepts_a_candidate_with_and_without_a_group():
+    record = v3_record()
+    assert record["candidates"][0]["group"] == "microsoft"
+    assert "group" not in record["candidates"][1]
+    assert validate_record(record, version="3") == []
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [("", "should be non-empty"), (None, "is not of type 'string'")],
+)
+def test_version_3_rejects_a_malformed_group(value, expected):
+    record = v3_record()
+    record["candidates"][0]["group"] = value
+    problems = validate_record(record, version="3")
+    assert any(expected in p for p in problems), problems
+
+
+def test_version_2_has_no_group():
+    record = json.loads(FIXTURE_V2.read_text())
+    record["candidates"][0]["group"] = "microsoft"
+    problems = validate_record(record, version="2")
+    assert any("Additional properties are not allowed" in p for p in problems), problems

@@ -396,7 +396,8 @@ def classify(
     dependencies: dict[str, dict[str, Any]],
     policy: Policy,
 ) -> list[dict[str, Any]]:
-    """Classify candidates as in scope or held by policy, naming the rules that hold them.
+    """Classify candidates as in scope or held by policy, naming the rules that hold them,
+    and put each in the group the policy's group rules give it, if any.
 
     `baseline` holds the candidates Renovate found without the policy's holds, `main` what
     it found with the whole policy. A candidate only the baseline has was dropped by an
@@ -406,7 +407,10 @@ def classify(
     packageName, datasource, manager.
     """
     if main is None:
-        return [_classified(c, _rule_holds(c, dependencies, policy)) for c in baseline]
+        return [
+            _classified(c, _rule_holds(c, dependencies, policy), dependencies, policy)
+            for c in baseline
+        ]
 
     kept = {(c["dependency"], c["version"]) for c in main.candidates}
     lookups = {d["id"]: d["lookup"] for d in main.dependencies}
@@ -437,7 +441,7 @@ def classify(
                 f"the policy disables {dep_id}, but Renovate still proposes {version}, so it "
                 "can't be classified"
             )
-        classified.append(_classified(candidate, holding))
+        classified.append(_classified(candidate, holding, dependencies, policy))
 
     # A version `allowedVersions` lets through where the newest one was dropped (Humanizer
     # 2.9.9 under "<2.10.0", where 2.14.1 was the minor) is a candidate of its own.
@@ -452,7 +456,7 @@ def classify(
                 "under the policy, so it can't be classified"
             )
         dep = {**dependencies[candidate["dependency"]], "updateType": candidate["update_type"]}
-        classified.append(_classified(candidate, _disabling(dep, policy)))
+        classified.append(_classified(candidate, _disabling(dep, policy), dependencies, policy))
     return classified
 
 
@@ -549,10 +553,27 @@ def _pad(version: tuple[int, ...], other: tuple[int, ...]) -> tuple[int, ...]:
     return version + (0,) * (len(other) - len(version))
 
 
-def _classified(candidate: dict[str, Any], holding: list[str]) -> dict[str, Any]:
+def _classified(
+    candidate: dict[str, Any],
+    holding: list[str],
+    dependencies: dict[str, dict[str, Any]],
+    policy: Policy,
+) -> dict[str, Any]:
+    """The candidate with its classification and, when it is in one, its group.
+
+    The group is recorded here, where Renovate's match fields are at hand, because the record
+    doesn't carry them: the selection reads it from the record instead of evaluating the
+    group rules again (design decision 2 of update-selection).
+    """
+    classified = {k: v for k, v in candidate.items() if k not in ("held_by", "group")}
     if holding:
-        return {**candidate, "classification": "held_by_policy", "held_by": "; ".join(holding)}
-    return {**candidate, "classification": "in_scope"}
+        classified |= {"classification": "held_by_policy", "held_by": "; ".join(holding)}
+    else:
+        classified["classification"] = "in_scope"
+    group = group_of(dependencies[candidate["dependency"]], candidate["update_type"], policy)
+    if group is not None:
+        classified["group"] = group
+    return classified
 
 
 def _disabling(dep: dict[str, Any], policy: Policy, *, dependency_level: bool = False) -> list[str]:
