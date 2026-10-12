@@ -546,3 +546,55 @@ def test_only_products_actually_read_get_a_fetch_time():
 
     _, result = check(report_of(go_mod("1.25.14"), image("python", "3.12")), get=answer)
     assert [t["url"] for t in result.tools] == ["https://endoflife.date/api/v1/products/python"]
+
+
+@pytest.mark.parametrize(
+    ("product", "line", "entry", "version", "expected"),
+    [
+        # go.mod's directive, setup-go and the golang image, as the Go toolchain alias reads them.
+        ("go", "1.25", ("golang-version", "go", "1.25.14"), "1.27.2", "1.27"),
+        ("go", "1.25", ("github-releases", "go", "1.25"), "1.27", "1.27"),
+        (
+            "go",
+            "1.25",
+            ("docker", "docker.io/library/golang", "1.25-alpine"),
+            "1.27-alpine",
+            "1.27",
+        ),
+        # The image's own version comes first in the devcontainer's tag; the .NET line second.
+        (
+            "dotnet",
+            "10",
+            ("docker", "mcr.microsoft.com/devcontainers/dotnet", "2.2.3-10.0-noble"),
+            "2.3.2-11.0-noble",
+            "11",
+        ),
+        ("dotnet", "10", ("docker", "mcr.microsoft.com/dotnet/sdk", "10.0"), "11.0", "11"),
+        ("dotnet", "10", ("dotnet-version", "dotnet-sdk", "10.0.x"), "11.0.x", "11"),
+        # The Alpine an image is built on, from its tag.
+        (
+            "alpine-linux",
+            "3.20",
+            ("docker", "docker.io/library/golang", "1.25-alpine3.20"),
+            "1.27-alpine3.22",
+            "3.22",
+        ),
+        # Distroless names its Debian release in the image, which no tag changes.
+        (
+            "debian",
+            "12",
+            ("docker", "gcr.io/distroless/static-debian12", "nonroot"),
+            "latest",
+            "12",
+        ),
+        # A codename's line is in endoflife.date's data, which the record doesn't have.
+        ("debian", "12", ("docker", "debian", "bookworm-slim"), "trixie-slim", None),
+        # A version that doesn't read as a line, or an entry the record names another line for.
+        ("go", "1.25", ("golang-version", "go", "1.25.14"), "1.27rc1", None),
+        ("go", "1.26", ("golang-version", "go", "1.25.14"), "1.27.2", None),
+    ],
+)
+def test_the_line_of_a_candidate(product, line, entry, version, expected):
+    ecosystem, name, current = entry
+    found = {"ecosystem": ecosystem, "name": name, "current": current}
+    assert lifecycle.candidate_line(product, line, found, version) == expected

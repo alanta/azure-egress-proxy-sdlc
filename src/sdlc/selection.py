@@ -22,7 +22,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, date, datetime
 from typing import Any
 
-from sdlc import dependabot, osv
+from sdlc import dependabot, lifecycle, osv
 from sdlc.policy import Policy
 
 # The batch window: these days of every month, inclusive.
@@ -32,13 +32,18 @@ BATCH_WINDOW_LAST_DAY = 7
 MINIMUM_RELEASE_AGE_DAYS = 7
 
 SECURITY = "security"
-REASONS = (SECURITY,)
+LIFECYCLE = "lifecycle"
+REASONS = (SECURITY, LIFECYCLE)
+
+# The lifecycle states that select a line's move, as the scan recorded them (90 days ahead).
+ENDING = ("nearing_end_of_life", "end_of_life")
 
 # What the selection reports instead of a unit, in the order it reports them.
 FIX_HELD = "fix_held"  # vulnerable, but only candidates the policy holds reach the fix
 NO_ROUTE = "no_route"  # no fixed version, or no candidate reaches it
+EARLY_WARNING = "early_warning"  # a line is ending, but no in-scope candidate leaves it
 NOT_EVALUATED = "not_evaluated"  # data the decision needs is missing
-KINDS = (FIX_HELD, NO_ROUTE, NOT_EVALUATED)
+KINDS = (FIX_HELD, NO_ROUTE, EARLY_WARNING, NOT_EVALUATED)
 
 # Update types from smallest to largest. A digest only re-pins the same version, so it never
 # reaches a fix (the scan doesn't judge digests against advisories either).
@@ -78,7 +83,9 @@ def select(record: dict[str, Any], policy: Policy, today: date) -> dict[str, Any
 
     not_prepared: list[dict[str, Any]] = []
     fixes = _security_fixes(record, entries, candidates, not_prepared)
-    units = _security_units(fixes, entries, today)
+    # A lifecycle unit takes over the security fixes of its dependencies, so it goes first.
+    units = _lifecycle_units(record, entries, candidates, fixes, today, not_prepared)
+    units += _security_units(fixes, entries, today)
 
     return {
         "date": today.isoformat(),
@@ -291,6 +298,140 @@ def _security_units(
             }
         )
     return units
+
+
+def _lifecycle_units(
+    record: dict[str, Any],
+    entries: dict[str, dict[str, Any]],
+    candidates: dict[str, list[dict[str, Any]]],
+    fixes: dict[str, _Fix],
+    today: date,
+    not_prepared: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """One unit per line nearing or past its end of life, covering its dependencies.
+
+    Each dependency's target is its smallest in-scope candidate on another line that is still
+    supported. One without such a candidate is an early warning, and the unit keeps the others.
+    A dependency with a security fix brings it along: the unit carries both reasons, with the
+    higher of the two targets, and the dependency gets no security unit (design decision 4).
+    A line whose state is unknown is reported as not evaluated.
+    """
+    units: list[dict[str, Any]] = []
+    taken: dict[str, str] = {}  # dependency id: the lifecycle unit it is in
+    for line in sorted(record["lifecycle"], key=lambda e: (e["product"], e["line"])):
+        product, name = line["product"], line["line"]
+        about = {"reason": LIFECYCLE, "product": product, "line": name}
+        if line["state"] == "unknown":
+            not_prepared.append(
+                about
+                | {
+                    "kind": NOT_EVALUATED,
+                    "dependencies": line["dependencies"],
+                    "detail": line["reason"],
+                }
+            )
+            continue
+        if line["state"] not in ENDING:
+            continue
+        unit_name = f"lifecycle-{product}-{name}"
+        supported = [s for s in line.get("supported_lines", []) if s != name]
+        targets, advisories = [], []
+        for dep_id in line["dependencies"]:
+            entry = entries[dep_id]
+            report = about | {"dependency": dep_id}
+            if dep_id in taken:
+                not_prepared.append(
+                    report
+                    | {
+                        "kind": NOT_EVALUATED,
+                        "detail": f"It is already in {taken[dep_id]}, and a dependency is in "
+                        f"one unit only, so whether that unit's target also leaves {product} "
+                        f"{name} isn't evaluated.",
+                    }
+                )
+                continue
+            target, problem = _on_supported_line(
+                candidates.get(dep_id, []), entry, product, name, supported
+            )
+            if target is None:
+                not_prepared.append(report | problem)
+                continue
+            taken[dep_id] = unit_name
+            fix = fixes.pop(dep_id, None)
+            if fix is not None:
+                target = max(target, fix.target, key=_size)
+                advisories += [_advisory(v) for v in fix.advisories]
+            targets.append(_target(target, entry, today))
+        if not targets:
+            continue
+        evidence: dict[str, Any] = {
+            "lifecycle": {
+                k: line[k]
+                for k in ("product", "line", "state", "end_of_life", "supported_lines", "source")
+                if k in line
+            }
+        }
+        if advisories:
+            evidence["advisories"] = sorted(
+                advisories, key=lambda a: (a["dependency"], a["advisory"])
+            )
+        units.append(
+            {
+                "name": unit_name,
+                "reasons": [LIFECYCLE, SECURITY] if advisories else [LIFECYCLE],
+                "subject": {"product": product, "line": name},
+                "targets": sorted(targets, key=lambda t: t["dependency"]),
+                "evidence": evidence,
+            }
+        )
+    return units
+
+
+def _on_supported_line(
+    candidates: list[dict[str, Any]],
+    entry: dict[str, Any],
+    product: str,
+    line: str,
+    supported: list[str],
+) -> tuple[dict[str, Any] | None, dict[str, Any]]:
+    """The smallest in-scope candidate on a supported line, or else what to report instead."""
+    lookup = entry["lookup"]
+    if lookup["state"] in ("unknown", "skipped"):
+        return None, {
+            "kind": NOT_EVALUATED,
+            "detail": f"Whether a candidate leaves the line is unknown: the lookup of "
+            f"{entry['name']} is {lookup['state']}. {lookup['reason']}",
+        }
+    held = []
+    for candidate in sorted(candidates, key=_size):
+        if candidate["update_type"] == "digest":
+            continue
+        on = lifecycle.candidate_line(product, line, entry, candidate["version"])
+        if on is None:
+            if candidate["classification"] != "in_scope":
+                continue
+            # A smaller candidate whose line is unknown might be the target.
+            return None, {
+                "kind": NOT_EVALUATED,
+                "detail": f"The {product} line of candidate {candidate['version']} can't be "
+                "read from the record.",
+            }
+        if on not in supported:
+            continue
+        if candidate["classification"] == "in_scope":
+            return candidate, {}
+        held.append(candidate)
+    lines = ", ".join(supported) or "none"
+    problem: dict[str, Any] = {
+        "kind": EARLY_WARNING,
+        "detail": f"No in-scope candidate is on another supported line ({lines}).",
+    }
+    if held:
+        rules = sorted({c["held_by"] for c in held})
+        problem["held_by"] = "; ".join(rules)
+        versions = ", ".join(c["version"] for c in held)
+        problem["detail"] += f" {versions} would be, but the policy holds it: {'; '.join(rules)}."
+    return None, problem
 
 
 def _package(entry: dict[str, Any]) -> tuple[str, str]:

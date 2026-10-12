@@ -426,6 +426,44 @@ def _read(
     return _Use(mapping.product, line, None, entry, reason=reason)
 
 
+def candidate_line(product: str, line: str, entry: dict[str, Any], version: str) -> str | None:
+    """The product's line that a version of a record's inventory entry on `line` is on, or
+    None when the record alone can't say.
+
+    The record doesn't say which mapping read the entry's line: that took Renovate's manager
+    and package name. So each mapping of the product that fits the entry, and reads its
+    current value as `line`, reads the version too, and only a line they all agree on counts.
+    A mapping that reads the line from the image's name gives every tag of the image the same
+    line. A codename doesn't count: its line is in the product's data, which the record lacks.
+    """
+    lines = set()
+    for mapping in MAPPINGS:
+        matcher = mapping.matcher
+        if mapping.product != product:
+            continue
+        if matcher.datasource and (
+            matcher.datasource != entry["ecosystem"]
+            or not re.fullmatch(matcher.name, entry["name"], re.IGNORECASE)
+        ):
+            continue
+        if mapping.in_name:
+            if _cycle(mapping, entry["name"]) == line:
+                lines.add(line)
+            continue
+        if _cycle(mapping, entry["current"] or "") == line:
+            lines.add(_cycle(mapping, version))
+    return lines.pop() if len(lines) == 1 else None
+
+
+def _cycle(mapping: Mapping, text: str) -> str | None:
+    """The line a mapping reads from a value, without looking up a codename."""
+    found = re.fullmatch(mapping.matcher.value, text)
+    if not found or found.groupdict().get("codename"):
+        return None
+    version = found.groupdict().get("version")
+    return mapping.cycle(tuple(int(p) for p in version.split("."))) if version else None
+
+
 def _resolve(use: _Use, data: dict[str, list[dict]], failed: dict[str, str]) -> _Use:
     """The release a codename names, by the first word of its products' codenames."""
     for product in use.codenames:
