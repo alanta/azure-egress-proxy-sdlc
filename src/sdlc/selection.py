@@ -17,7 +17,9 @@ Only in-scope candidates are ever targets, whatever the reason, so the policy's 
 win, security fixes included.
 """
 
+import hashlib
 import json
+import re
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
@@ -50,6 +52,10 @@ KINDS = (FIX_HELD, NO_ROUTE, EARLY_WARNING, NOT_EVALUATED, WAITING)
 # Update types from smallest to largest. A digest only re-pins the same version, so it never
 # reaches a fix (the scan doesn't judge digests against advisories either).
 SIZES = ("digest", "patch", "minor", "major")
+
+# Unit names are used as branch names as they are, so they are kept to a length a branch
+# name and a prefix such as `sdlc/` comfortably fit in.
+NAME_LENGTH = 100
 
 # The sources of security reasons: when one couldn't be read, its reasons aren't evaluated.
 SECURITY_SOURCES = ("osv-scanner", dependabot.SUBJECT)
@@ -90,6 +96,7 @@ def select(record: dict[str, Any], policy: Policy, today: date) -> dict[str, Any
     units += _security_units(fixes, entries, today)
     in_units = {t["dependency"] for unit in units for t in unit["targets"]}
     units += _batch_units(entries, candidates, in_units, today, not_prepared)
+    units = _named(units)
 
     return {
         "date": today.isoformat(),
@@ -321,7 +328,7 @@ def _lifecycle_units(
     A line whose state is unknown is reported as not evaluated.
     """
     units: list[dict[str, Any]] = []
-    taken: dict[str, str] = {}  # dependency id: the lifecycle unit it is in
+    taken: dict[str, str] = {}  # dependency id: the line whose unit it is in
     for line in sorted(record["lifecycle"], key=lambda e: (e["product"], e["line"])):
         product, name = line["product"], line["line"]
         about = {"reason": LIFECYCLE, "product": product, "line": name}
@@ -337,7 +344,6 @@ def _lifecycle_units(
             continue
         if line["state"] not in ENDING:
             continue
-        unit_name = f"lifecycle-{product}-{name}"
         supported = [s for s in line.get("supported_lines", []) if s != name]
         targets, advisories = [], []
         for dep_id in line["dependencies"]:
@@ -348,9 +354,9 @@ def _lifecycle_units(
                     report
                     | {
                         "kind": NOT_EVALUATED,
-                        "detail": f"It is already in {taken[dep_id]}, and a dependency is in "
-                        f"one unit only, so whether that unit's target also leaves {product} "
-                        f"{name} isn't evaluated.",
+                        "detail": f"It is already in the unit for {taken[dep_id]}, and a "
+                        "dependency is in one unit only, so whether that unit's target also "
+                        f"leaves {product} {name} isn't evaluated.",
                     }
                 )
                 continue
@@ -360,7 +366,7 @@ def _lifecycle_units(
             if target is None:
                 not_prepared.append(report | problem)
                 continue
-            taken[dep_id] = unit_name
+            taken[dep_id] = f"{product} {name}"
             fix = fixes.pop(dep_id, None)
             if fix is not None:
                 target = max(target, fix.target, key=_size)
@@ -381,7 +387,7 @@ def _lifecycle_units(
             )
         units.append(
             {
-                "name": unit_name,
+                "name": f"lifecycle-{product}-{name}",
                 "reasons": [LIFECYCLE, SECURITY] if advisories else [LIFECYCLE],
                 "subject": {"product": product, "line": name},
                 "targets": sorted(targets, key=lambda t: t["dependency"]),
@@ -511,6 +517,56 @@ def _batch_units(
             }
         )
     return units
+
+
+def _named(units: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Each unit with a name safe for a branch, and its breaking mark.
+
+    A name comes only from the unit's reason and its group, package or line, never from its
+    targets, so the same unit keeps its name across scans. Two units whose names end up the
+    same once made safe, such as a group named after a package, both get a suffix from
+    their own reason and subject, and are marked as such, rather than one taking the other's
+    name.
+    """
+    names: dict[str, list[dict[str, Any]]] = {}
+    for unit in units:
+        names.setdefault(branch_name(unit["name"]), []).append(unit)
+    named = []
+    for name, same in names.items():
+        for unit in same:
+            finished = {"name": name, "reasons": unit["reasons"], "subject": unit["subject"]}
+            if len(same) > 1:
+                identity = json.dumps([unit["reasons"][0], unit["subject"]], sort_keys=True)
+                finished["name"] = branch_name(f"{unit['name']}-{_digest(identity)}")
+                finished["name_collision"] = True
+            # A lifecycle move changes the platform under the code, whatever its update type.
+            finished["breaking"] = LIFECYCLE in unit["reasons"] or any(
+                t["update_type"] == "major" for t in unit["targets"]
+            )
+            named.append(finished | {"targets": unit["targets"], "evidence": unit["evidence"]})
+    return named
+
+
+def branch_name(text: str) -> str:
+    """The text made safe for a git branch name, as one path component.
+
+    Lower case, with every run of characters outside `a-z 0-9 . _ -` and every run of
+    separators made one `-`, so there is no `..`; no separator at either end, so it can't
+    start like an option or a hidden file; no `.lock` at the end, which git refuses; and at
+    most NAME_LENGTH characters, a longer one ending in a digest of the whole text so that
+    it stays distinct.
+    """
+    name = re.sub(r"[^a-z0-9._-]+", "-", text.lower())
+    name = re.sub(r"[._-]{2,}", "-", name).strip("._-")
+    if name.endswith(".lock"):
+        name = name.removesuffix(".lock") + "-lock"
+    if len(name) > NAME_LENGTH or not name:
+        name = f"{name[: NAME_LENGTH - 9].rstrip('._-')}-{_digest(text)}".lstrip("-")
+    return name
+
+
+def _digest(text: str) -> str:
+    return hashlib.sha256(text.encode()).hexdigest()[:8]
 
 
 def _package(entry: dict[str, Any]) -> tuple[str, str]:

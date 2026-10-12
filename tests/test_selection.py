@@ -1,11 +1,12 @@
 import copy
 import json
+import subprocess
 from datetime import date
 
 import pytest
 
 from sdlc.policy import NO_POLICY, Policy
-from sdlc.selection import SelectionError, batch_window, select
+from sdlc.selection import NAME_LENGTH, SelectionError, batch_window, branch_name, select
 
 TRIAL = Policy({"source": "trial", "path": "policies/trial.renovate.json5"}, "{}", "{}")
 # A day outside the batch window, and one inside it.
@@ -163,13 +164,13 @@ def test_a_reachable_and_an_unreachable_vulnerability_both_get_a_unit():
         )
     )
     found = units(record.select(), "security")
-    assert targets(found["security-go-golang.org/x/net"]) == {
+    assert targets(found["security-go-golang.org-x-net"]) == {
         GO_MOD + "golang.org/x/net": "v0.60.0"
     }
-    assert targets(found["security-go-golang.org/x/crypto"]) == {
+    assert targets(found["security-go-golang.org-x-crypto"]) == {
         GO_MOD + "golang.org/x/crypto": "v0.56.0"
     }
-    [advisory] = found["security-go-golang.org/x/crypto"]["evidence"]["advisories"]
+    [advisory] = found["security-go-golang.org-x-crypto"]["evidence"]["advisories"]
     assert advisory["advisory"] == "GO-2" and advisory["reachability"] == "not_reachable"
 
 
@@ -565,7 +566,7 @@ def test_a_dependency_on_two_ending_lines_is_in_one_unit():
     assert targets(unit) == {image: "1.27-alpine3.22"}
     [unknown] = reports(selection, "not_evaluated")
     assert unknown["product"] == "go"
-    assert "already in lifecycle-alpine-linux-3.20" in unknown["detail"]
+    assert "already in the unit for alpine-linux 3.20" in unknown["detail"]
 
 
 THIRD = date(2026, 11, 3)
@@ -705,9 +706,9 @@ def test_a_major_outside_every_group_is_a_unit_of_its_own():
         .candidate(AZURE_CORE, "minor", "1.63.0", group="nuget-minor-patch")
     )
     found = units(record.select(THIRD))
-    assert set(found) == {"nuget-Serilog", "nuget-minor-patch"}
-    assert targets(found["nuget-Serilog"]) == {PROPS + "Serilog": "5.0.0"}
-    assert found["nuget-Serilog"]["subject"] == {"ecosystem": "nuget", "name": "Serilog"}
+    assert set(found) == {"nuget-serilog", "nuget-minor-patch"}
+    assert targets(found["nuget-serilog"]) == {PROPS + "Serilog": "5.0.0"}
+    assert found["nuget-serilog"]["subject"] == {"ecosystem": "nuget", "name": "Serilog"}
 
 
 def test_an_ungrouped_package_in_two_files_is_one_unit():
@@ -721,5 +722,112 @@ def test_an_ungrouped_package_in_two_files_is_one_unit():
         record.dependency(dep_id, "2", ecosystem="docker", name=feature)
         record.candidate(dep_id, "major", "4")
     [unit] = record.select(THIRD)["units"]
-    assert unit["name"] == f"docker-{feature}"
+    assert unit["name"] == "docker-ghcr.io-devcontainers-features-docker-in-docker"
     assert targets(unit) == dict.fromkeys(ids, "4")
+
+
+def test_a_later_scan_with_newer_targets_keeps_the_unit_names():
+    def scan(go, net, azcore):
+        return (
+            go_line(minor=go)
+            .lifecycle("go", "1.25", "end_of_life", [GO_MOD + "go"], **GO_LINES)
+            .dependency(GO_MOD + "golang.org/x/net", "v0.58.0", ecosystem="go")
+            .candidate(GO_MOD + "golang.org/x/net", "minor", net)
+            .vulnerability(GO_MOD + "golang.org/x/net", "GO-1", "v0.60.0")
+            .dependency(GO_MOD + "azcore", "v1.23.1", ecosystem="go")
+            .candidate(GO_MOD + "azcore", "patch", azcore, group="gomod-minor-patch")
+            .select(THIRD)
+        )
+
+    earlier = scan("1.27.2", "v0.60.0", "v1.23.3")
+    later = scan("1.27.5", "v0.62.0", "v1.23.4")
+    assert [u["name"] for u in earlier["units"]] == [
+        "security-go-golang.org-x-net",
+        "lifecycle-go-1.25",
+        "gomod-minor-patch",
+    ]
+    assert [u["name"] for u in later["units"]] == [u["name"] for u in earlier["units"]]
+    assert [u["targets"] for u in later["units"]] != [u["targets"] for u in earlier["units"]]
+
+
+def test_a_security_fix_that_needs_a_major_is_breaking():
+    [unit] = vulnerable(fixed="2.0.0", major="2.0.1").select()["units"]
+    assert unit["breaking"] is True
+
+
+def test_a_security_fix_in_a_patch_is_routine():
+    [unit] = vulnerable(patch="1.2.5").select()["units"]
+    assert unit["breaking"] is False
+
+
+def test_a_batch_of_minor_and_patch_updates_is_routine():
+    record = (
+        outdated(AZURE_CORE, "1.62.0", ("minor", "1.63.0", {"group": "nuget-minor-patch"}))
+        .dependency(PROPS + "Scalar.AspNetCore", "2.17.9")
+        .candidate(PROPS + "Scalar.AspNetCore", "patch", "2.17.14", group="nuget-minor-patch")
+    )
+    [unit] = record.select(THIRD)["units"]
+    assert unit["breaking"] is False
+
+
+def test_a_batched_major_is_breaking():
+    [unit] = outdated(PROPS + "Serilog", "4.3.0", ("major", "5.0.0", {})).select(THIRD)["units"]
+    assert unit["breaking"] is True
+
+
+def test_a_lifecycle_move_is_breaking_whatever_its_update_type():
+    record = go_line(minor="1.27.2").lifecycle(
+        "go", "1.25", "end_of_life", [GO_MOD + "go"], **GO_LINES
+    )
+    [unit] = record.select()["units"]
+    assert unit["targets"][0]["update_type"] == "minor"
+    assert unit["breaking"] is True
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("security-go-golang.org/x/net", "security-go-golang.org-x-net"),
+        ("nuget-Microsoft.Extensions.Http", "nuget-microsoft.extensions.http"),
+        ("docker-mcr.microsoft.com/dotnet/sdk", "docker-mcr.microsoft.com-dotnet-sdk"),
+        ("Weekly updates: NuGet & Go", "weekly-updates-nuget-go"),
+        ("..a..b..", "a-b"),
+        ("-leading_and_trailing.", "leading_and_trailing"),
+        ("group@{1}~^:?*[\\", "group-1"),
+        ("cache.lock", "cache-lock"),
+        ("nuget-x.lock", "nuget-x-lock"),
+        ("Ünïcode-naïve", "n-code-na-ve"),
+    ],
+)
+def test_names_are_safe_for_branches(text, expected):
+    assert branch_name(text) == expected
+    check = subprocess.run(
+        ["git", "check-ref-format", "--branch", f"sdlc/{expected}"], capture_output=True
+    )
+    assert check.returncode == 0, check.stderr
+
+
+def test_a_long_or_empty_name_stays_distinct():
+    long = "docker-" + "a" * 200
+    other = "docker-" + "a" * 199 + "b"
+    assert len(branch_name(long)) == NAME_LENGTH
+    assert branch_name(long) != branch_name(other)
+    assert branch_name(long) == branch_name(long)
+    assert len(branch_name("💥")) == 8
+
+
+def test_units_whose_names_collide_both_get_a_suffix():
+    record = (
+        outdated(PROPS + "Serilog", "4.3.0", ("major", "5.0.0", {}))
+        .dependency(AZURE_CORE, "1.62.0")
+        .candidate(AZURE_CORE, "minor", "1.63.0", group="NuGet Serilog")
+    )
+    found = record.select(THIRD)["units"]
+    names = [u["name"] for u in found]
+    assert len(set(names)) == 2
+    assert all(
+        n.startswith("nuget-serilog-") and len(n) == len("nuget-serilog-") + 8 for n in names
+    )
+    assert all(u["name_collision"] is True for u in found)
+    # The same units get the same names in every scan.
+    assert [u["name"] for u in record.select(THIRD)["units"]] == names

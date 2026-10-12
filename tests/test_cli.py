@@ -655,6 +655,53 @@ def test_a_scan_records_the_trial_policys_groups_on_its_candidates(scan_064aa09)
     }
 
 
+def test_the_selection_of_064aa09_moves_go_off_its_ended_line(scan_064aa09):
+    """Go 1.25 is past its end of life at 064aa09, with standard library vulnerabilities on
+    the go directive: one breaking lifecycle unit carries both, and the batch, inside its
+    window, follows the trial policy's groups."""
+    from datetime import date
+
+    from sdlc import policy
+    from sdlc.selection import select
+
+    record, _, _ = scan_064aa09("--trial-policy", str(TRIAL_POLICY))
+    trial = policy.load(Path("."), TRIAL_POLICY, validate=lambda text: [])
+
+    outside = select(record, trial, date(2026, 10, 12))
+    found = {u["name"]: u for u in outside["units"]}
+    assert set(found) == {
+        "lifecycle-go-1.25",
+        "security-go-golang.org-x-crypto",
+        "security-go-golang.org-x-net",
+    }
+    go = found["lifecycle-go-1.25"]
+    assert go["reasons"] == ["lifecycle", "security"] and go["breaking"] is True
+    assert {t["dependency"]: t["version"] for t in go["targets"]} == {
+        "dockerfile:proxy/Dockerfile:docker.io/library/golang": "1.27-alpine",
+        "github-actions:.github/workflows/ci.yml:go": "1.27",
+        "github-actions:.github/workflows/release.yml:go": "1.27",
+        "gomod:proxy/go.mod:go": "1.27.2",
+    }
+    standard_library = {
+        v["advisory"]
+        for v in record["vulnerabilities"]
+        if v["dependency"] == "gomod:proxy/go.mod:go"
+    }
+    assert {a["advisory"] for a in go["evidence"]["advisories"]} == standard_library
+    assert all(not u["name"].startswith("security-golang-version") for u in outside["units"])
+
+    inside = select(record, trial, date(2026, 11, 3))
+    batched = {u["name"] for u in inside["units"] if u["reasons"] == ["batch"]}
+    assert {
+        "actions-minor-patch",
+        "docker-minor-patch",
+        "gomod-minor-patch",
+        "microsoft",
+        "nuget-minor-patch",
+    } <= batched
+    assert "docker-ghcr.io-devcontainers-features-docker-in-docker" in batched
+
+
 def test_out_chooses_where_the_run_directories_go(offline_scan, tmp_path, capsys):
     assert main(["scan", "--repo", "alanta/demo", "--out", str(tmp_path / "elsewhere")]) == 0
     [directory] = (tmp_path / "elsewhere").glob("alanta/demo/*/*")
