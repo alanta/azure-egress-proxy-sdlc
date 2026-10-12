@@ -47,9 +47,9 @@ In the tests, Renovate's `branchName` from the lookup report serves as a cross-c
 
 ### 3. Security targets come from the candidates, not from the advisory's version
 
-For a vulnerability with `fix_reached_by_candidate: true`, the target is the in-scope candidate of the lowest update type (patch, then minor, then major) that reaches the fix. That reuses the scan's existing comparison of candidates with the advisory, and its policy classification. `fix_reached_by_candidate: false` with `fix_held_by` is a held fix. `unknown` is not evaluated. A `null` fixed version is no route.
+For a vulnerability with `fix_reached_by_candidate: true`, the target is the in-scope candidate of the lowest update type (patch, then minor, then major) that reaches the fix. The scan already compares each candidate with the advisory's affected ranges to decide `fix_reached_by_candidate`, so it also records which in-scope candidates reach the fix, as `fix_reached_by`, and the selection takes the smallest of those. Comparing a candidate with the fixed version alone would be wrong for an advisory with several ranges, where a higher version can be affected again. `fix_reached_by_candidate: false` with `fix_held_by` is a held fix. `unknown` is not evaluated. A `null` fixed version is no route.
 
-A security unit covers a package: every declaration of the same package (the inventory's ecosystem and name) at a vulnerable version, in any file. Each declaration's target is the highest of its advisories' targets, so that one update fixes them all.
+A security unit covers a package: every declaration of the same package (the inventory's ecosystem and name) at a vulnerable version, in any file. Each declaration's target is the smallest in-scope candidate that every one of its advisories lists in `fix_reached_by`, so that one update fixes them all. When no single candidate fixes them all, the declaration is reported as such rather than guessed.
 
 **Alternative:** the advisory's exact fixed version as the target. That is smaller, but it isn't a candidate. Its update type and policy classification would need versioning code for every ecosystem, which the scan doesn't have. The patch candidate that reaches the fix is usually the same line anyway.
 
@@ -57,7 +57,9 @@ A security unit covers a package: every declaration of the same package (the inv
 
 A line in state `nearing_end_of_life` or `end_of_life` gives one unit, named after the product and line, for example `lifecycle-go-1.25`. For each dependency on the line, the target is its in-scope candidate of the lowest update type whose version falls on one of the line's supported lines. The line is computed with the same mapping from versions to lines that the lifecycle check already uses. A dependency without such a candidate becomes an early warning, and the unit keeps the others.
 
-A dependency on the line that also has a security reason doesn't get its own security unit. The lifecycle unit carries the security reason as well, and takes the higher of the two targets, so that one change resolves both. The scan of `main` has this case: Go 1.25 is past its end of life, and govulncheck's standard library findings are on the `go` directive.
+A dependency on the line that also has a security reason doesn't get its own security unit. The lifecycle unit carries the security reason as well, and its target is the smallest in-scope candidate that is both on a supported line and in every advisory's `fix_reached_by`, so that one change resolves both. Without such a candidate, the dependency is an early warning for the line, and its security fix becomes a unit of its own. The scan of `main` has this case: Go 1.25 is past its end of life, and govulncheck's standard library findings are on the `go` directive.
+
+A dependency on several ending lines at once, such as a Go image whose tag names both an ending Go and an ending Alpine release, is in one lifecycle unit, which carries every one of those lines as a reason. Its target is the smallest in-scope candidate that is on a supported line of each of them. Without one, it is an early warning naming the line it can't leave.
 
 Moving a whole line in one unit keeps declarations that belong together, such as the `go` directive, the Go version in the workflows and the Go base image, in one change, which the consistency check would otherwise flag halfway.
 
@@ -77,7 +79,7 @@ Names are made safe for branch names by one function, so that `fork-mode-deliver
 
 ### 7. A new record schema version
 
-The `selection` section and the candidates' `released_at` and `group` are new properties, and the schema forbids unknown properties, so the record needs a new schema version. It builds on the version that `retire-dependabot-pr-comparison` introduces. The older schemas stay, for the records already written.
+The `selection` section, the candidates' `released_at` and `group`, and the vulnerabilities' `fix_reached_by` are new properties, and the schema forbids unknown properties, so the record needs a new schema version. It builds on the version that `retire-dependabot-pr-comparison` introduces. The older schemas stay, for the records already written.
 
 ## Risks / Trade-offs
 

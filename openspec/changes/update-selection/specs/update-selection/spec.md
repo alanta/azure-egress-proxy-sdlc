@@ -29,7 +29,7 @@ Every target of a unit SHALL be one of the scan's in-scope candidates. A candida
 
 ### Requirement: Select security fixes
 
-For each inventoried dependency with a known vulnerability that an in-scope candidate fixes, selection SHALL select a security unit for its package on every scan, whether the vulnerability is reachable or not. The unit SHALL cover every declaration of the package at a vulnerable version, in any file. Each declaration's target SHALL be the smallest in-scope candidate that reaches the fix. No minimum release age applies.
+For each inventoried dependency with a known vulnerability that an in-scope candidate fixes, selection SHALL select a security unit for its package on every scan, whether the vulnerability is reachable or not. The unit SHALL cover every declaration of the package at a vulnerable version, in any file. Each declaration's target SHALL be the smallest in-scope candidate that the scan records as reaching the fix of every advisory on it. No minimum release age applies.
 
 #### Scenario: A reachable and an unreachable vulnerability
 
@@ -70,6 +70,11 @@ For each version line in use that the scan reports as nearing its end of life or
 - **WHEN** one dependency on a line nearing its end of life has an in-scope candidate on a supported line, and another has none
 - **THEN** the unit covers the first, and the second is reported as an early warning
 
+#### Scenario: A dependency on two ending lines
+
+- **WHEN** a Go image's tag is on Go 1.25 and on Alpine 3.20, and both lines are past their end of life
+- **THEN** one lifecycle unit covers the image, with both lines as reasons, and the image's target is on a supported line of both
+
 ### Requirement: Batch the remaining updates monthly
 
 Only when the scan's date falls in the batch window, by default the first seven days of the month, SHALL selection select batch updates. A batch update is each dependency's newest in-scope candidate, if it is at least the minimum release age old (7 days by default). A candidate with no known release date counts as old enough. Dependencies with a security or lifecycle unit SHALL be left out of the batch.
@@ -101,7 +106,7 @@ Only when the scan's date falls in the batch window, by default the first seven 
 
 ### Requirement: Put each dependency in one unit
 
-A dependency SHALL be in at most one unit. When a dependency on a lifecycle unit's line also has a security reason, the lifecycle unit SHALL carry both reasons, with the higher of the two targets, and no separate security unit SHALL be selected.
+A dependency SHALL be in at most one unit. When a dependency on a lifecycle unit's line also has a security reason, the lifecycle unit SHALL carry both reasons, with a target that is on a supported line and reaches every fix, and no separate security unit SHALL be selected. When no in-scope candidate does both, the dependency SHALL be an early warning for the line, and its security fix a unit of its own.
 
 #### Scenario: Go is end of life and has standard library vulnerabilities
 
