@@ -105,6 +105,7 @@ def _consistency_problems(record: dict[str, Any]) -> list[str]:
             problems.append(f"$.candidates: {dep_id!r} has candidates but its lookup is {state!r}")
 
     problems += _advisory_fix_problems(record)
+    problems += _reached_by_problems(record)
     problems += _alert_problems(record)
     problems += _inconsistency_problems(record)
     problems += _lifecycle_problems(record)
@@ -137,6 +138,22 @@ def _advisory_fix_problems(record: dict[str, Any]) -> list[str]:
                 "advisories, yet this one doesn't say so"
             )
     return problems
+
+
+def _reached_by_problems(record: dict[str, Any]) -> list[str]:
+    """The candidates said to reach a fix are in-scope candidates of the same dependency."""
+    in_scope = {
+        (c["dependency"], c["version"])
+        for c in record["candidates"]
+        if c["classification"] == "in_scope" and c["update_type"] != "digest"
+    }
+    return [
+        f"$.vulnerabilities[{i}].fix_reached_by: {version!r} isn't an in-scope candidate of "
+        f"{v['dependency']!r}"
+        for i, v in enumerate(record["vulnerabilities"])
+        for version in v.get("fix_reached_by", [])
+        if (v["dependency"], version) not in in_scope
+    ]
 
 
 def _inconsistency_problems(record: dict[str, Any]) -> list[str]:

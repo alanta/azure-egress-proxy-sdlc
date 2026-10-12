@@ -513,6 +513,15 @@
           ],
           "description": "Whether an in-scope update candidate of the dependency is outside the advisory; unknown when its lookup failed or the advisory's ranges can't be evaluated. Present whenever a fixed or last affected version is."
         },
+        "fix_reached_by": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "description": "The versions of the in-scope candidates outside the advisory's affected ranges, in version order: those that reach the fix. Present whenever fix_reached_by_candidate is true or false, and empty exactly when it is false."
+        },
         "fix_held_by": {
           "type": "string",
           "minLength": 1,
@@ -564,6 +573,85 @@
             "required": [
               "fix_reached_by_candidate"
             ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "fix_reached_by_candidate"
+            ],
+            "properties": {
+              "fix_reached_by_candidate": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "fix_reached_by"
+            ],
+            "properties": {
+              "fix_reached_by": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "fix_reached_by_candidate"
+            ],
+            "properties": {
+              "fix_reached_by_candidate": {
+                "const": false
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "fix_reached_by"
+            ],
+            "properties": {
+              "fix_reached_by": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "not": {
+              "required": [
+                "fix_reached_by_candidate"
+              ]
+            }
+          },
+          "then": {
+            "not": {
+              "required": [
+                "fix_reached_by"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "fix_reached_by_candidate"
+            ],
+            "properties": {
+              "fix_reached_by_candidate": {
+                "const": "unknown"
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "required": [
+                "fix_reached_by"
+              ]
+            }
           }
         },
         {

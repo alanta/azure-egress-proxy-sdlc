@@ -307,8 +307,12 @@ def vulnerability(
     if last_affected and not fixed:
         found["last_affected"] = _display(entry["ecosystem"], last_affected)
     if fixed or last_affected:
-        reached, held_by = _reached(entry, candidates, advisory, ecosystem, name)
+        reached, held_by, reached_by = _reached(entry, candidates, advisory, ecosystem, name)
         found["fix_reached_by_candidate"] = reached
+        if reached is not None and reached != "unknown":
+            # Which ones, so the selection needn't compare versions with the fix itself: a
+            # version above the fixed one can be affected again by a later range.
+            found["fix_reached_by"] = reached_by
         if held_by:
             found["fix_held_by"] = held_by
     found |= {"source": source, "reachability": reachability}
@@ -511,32 +515,44 @@ def _reached(
     advisory: Advisory,
     ecosystem: str,
     name: str,
-) -> tuple[bool | str, str | None]:
-    """Whether an in-scope candidate is outside the advisory: true, false or "unknown".
+) -> tuple[bool | str, str | None, list[str]]:
+    """Whether an in-scope candidate is outside the advisory: true, false or "unknown", and
+    the versions of the in-scope candidates that are, in version order.
 
     When only a candidate the policy holds gets there, the answer is false, with the rule.
     """
     state = entry["lookup"]["state"]
     if state == "current":
-        return False, None
+        return False, None, []
     if state != "outdated":
-        return "unknown", None
+        return "unknown", None, []
     judged = [
         (c, affected(c["version"], advisory.records, ecosystem, name))
         for c in candidates
         if c["update_type"] != "digest"
     ]
+    outside = [
+        c["version"]
+        for c, result in judged
+        if c["classification"] == "in_scope" and result is False
+    ]
+    if outside:
+        return True, None, sorted(dict.fromkeys(outside), key=_order)
     in_scope = [result for c, result in judged if c["classification"] == "in_scope"]
-    if any(result is False for result in in_scope):
-        return True, None
     if any(result is None for result in in_scope):
-        return "unknown", None
+        return "unknown", None, []
     held = [c for c, result in judged if c["classification"] != "in_scope" and result is False]
     if held:
-        return False, held[0].get("held_by")
+        return False, held[0].get("held_by"), []
     if not judged:
-        return "unknown", None
-    return False, None
+        return "unknown", None, []
+    return False, None, []
+
+
+def _order(version: str) -> tuple:
+    """Version order, with anything that isn't a version after the versions, by its text."""
+    key = _key(version)
+    return (key is None, key or (), version)
 
 
 def _affected_entries(

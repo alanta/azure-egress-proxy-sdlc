@@ -380,6 +380,7 @@ def test_an_advisory_on_a_module_outside_the_inventory_gets_a_locked_entry(
         "affected_version": "v1.2.0",
         "fixed_version": "v1.3.0",
         "fix_reached_by_candidate": True,
+        "fix_reached_by": ["v1.3.0"],
         "source": "govulncheck",
         "reachability": "not_reachable",
     }

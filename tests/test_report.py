@@ -429,6 +429,7 @@ def test_a_candidate_from_an_advisory_reads_as_its_fix_not_as_a_lookups_find(rec
             "affected_version": "v0.3.7",
             "fixed_version": "v0.3.8",
             "fix_reached_by_candidate": True,
+            "fix_reached_by": ["v0.3.8"],
             "source": "osv",
             "reachability": "unknown",
         }
