@@ -442,7 +442,7 @@ def _leaving(
             "detail": f"Whether a candidate leaves {_named_lines(lines)} is unknown: the lookup "
             f"of {entry['name']} is {lookup['state']}. {lookup['reason']}",
         }
-    held, left = [], set()
+    held, left, leaves_all = [], set(), False
     for candidate in sorted(candidates, key=_size):
         if candidate["update_type"] == "digest":
             continue
@@ -456,10 +456,14 @@ def _leaving(
                 held.append(candidate)
             continue
         left |= set(leaves)
+        leaves_all = leaves_all or len(leaves) == len(lines)
         if fix is not None and candidate["version"] not in fix.versions:
             continue
+        if any(on is not None and on not in _others(e) for e, on in zip(lines, found, strict=True)):
+            continue  # it stays on a line it can be read on, so it isn't the target
         if None in found:
-            # This candidate might be the target, so a line that can't be read stops here.
+            # It leaves every line it can be read on, so it might be the target, and a line
+            # that can't be read stops the search here.
             unread = _named_lines([e for e, on in zip(lines, found, strict=True) if on is None])
             return None, {
                 "kind": NOT_EVALUATED,
@@ -476,11 +480,11 @@ def _leaving(
             f"{e['product']} {e['line']} ({', '.join(_others(e)) or 'none'})" for e in stuck
         )
         about = [{"product": e["product"], "line": e["line"]} for e in stuck]
-    elif len(lines) > 1:
+    elif not leaves_all:
         detail = f"No single in-scope candidate leaves {_named_lines(lines)} at once"
     else:
         detail = (
-            f"No in-scope candidate both leaves {_named_lines(lines)} and reaches the fix of "
+            f"No in-scope candidate that leaves {_named_lines(lines)} also reaches the fix of "
             "every advisory on it, so its security fix is a unit of its own"
         )
     problem: dict[str, Any] = {"kind": EARLY_WARNING, "lines": about, "detail": detail + "."}

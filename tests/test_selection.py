@@ -613,8 +613,8 @@ def test_without_a_candidate_that_does_both_the_fix_is_a_unit_of_its_own():
     assert targets(unit) == {GO_MOD + "go": "1.25.15"}
     [warning] = reports(selection, "early_warning")
     assert warning["detail"] == (
-        "No in-scope candidate both leaves go 1.25 and reaches the fix of every advisory on it, "
-        "so its security fix is a unit of its own."
+        "No in-scope candidate that leaves go 1.25 also reaches the fix of every advisory on "
+        "it, so its security fix is a unit of its own."
     )
 
 
@@ -1008,3 +1008,73 @@ def test_units_whose_names_collide_both_get_a_suffix():
     assert all(u["name_collision"] is True for u in found)
     # The same units get the same names in every scan.
     assert [u["name"] for u in record.select(THIRD)["units"]] == names
+
+
+def test_a_line_that_cant_be_read_doesnt_stop_a_candidate_that_stays_on_another():
+    # 1.25.1-alpine stays on Go 1.25, so its Alpine line, which a bare -alpine doesn't name,
+    # doesn't matter: it can't be the target either way.
+    record = (
+        Record()
+        .dependency(GOLANG, "1.25-alpine3.20", ecosystem="docker")
+        .candidate(GOLANG, "patch", "1.25.1-alpine")
+        .candidate(GOLANG, "minor", "1.27-alpine3.22")
+        .lifecycle("alpine-linux", "3.20", "end_of_life", [GOLANG], **ALPINE_LINES)
+        .lifecycle("go", "1.25", "end_of_life", [GOLANG], **GO_LINES)
+    )
+    selection = record.select()
+    [unit] = selection["units"]
+    assert targets(unit) == {GOLANG: "1.27-alpine3.22"}
+    assert selection["not_prepared"] == []
+
+
+def test_a_candidate_that_leaves_every_line_but_one_whose_line_cant_be_read_is_not_evaluated():
+    record = (
+        Record()
+        .dependency(GOLANG, "1.25-alpine3.20", ecosystem="docker")
+        .candidate(GOLANG, "minor", "1.27-alpine")
+        .lifecycle("alpine-linux", "3.20", "end_of_life", [GOLANG], **ALPINE_LINES)
+        .lifecycle("go", "1.25", "end_of_life", [GOLANG], **GO_LINES)
+    )
+    selection = record.select()
+    assert selection["units"] == []
+    [unknown] = reports(selection, "not_evaluated")
+    assert unknown["detail"] == (
+        "The alpine-linux 3.20 line of candidate 1.27-alpine can't be read from the record."
+    )
+
+
+def two_lines_with_a_fix(fixed_by):
+    """The Go image on Go 1.25 and Alpine 3.20, with an advisory that `fixed_by` reaches."""
+    return (
+        Record()
+        .dependency(GOLANG, "1.25-alpine3.20", ecosystem="docker")
+        .candidate(GOLANG, "minor", "1.27-alpine3.22")
+        .candidate(GOLANG, "minor", "1.27-alpine3.20", basis="advisory_fix")
+        .lifecycle("alpine-linux", "3.20", "end_of_life", [GOLANG], **ALPINE_LINES)
+        .lifecycle("go", "1.25", "end_of_life", [GOLANG], **GO_LINES)
+        .vulnerability(GOLANG, "GHSA-1", "1.27", reached_by=[fixed_by])
+    )
+
+
+def test_a_dependency_on_two_ending_lines_carries_its_security_fix():
+    [unit] = two_lines_with_a_fix("1.27-alpine3.22").select()["units"]
+    assert unit["reasons"] == ["lifecycle", "security"]
+    assert targets(unit) == {GOLANG: "1.27-alpine3.22"}
+    assert [(e["product"], e["line"]) for e in unit["evidence"]["lifecycle"]] == [
+        ("alpine-linux", "3.20"),
+        ("go", "1.25"),
+    ]
+
+
+def test_a_fix_that_leaves_only_one_of_two_lines_is_a_unit_of_its_own():
+    # 1.27-alpine3.22 leaves both lines, but only 1.27-alpine3.20, which stays on Alpine
+    # 3.20, reaches the fix: no candidate does both.
+    selection = two_lines_with_a_fix("1.27-alpine3.20").select()
+    [unit] = selection["units"]
+    assert unit["reasons"] == ["security"]
+    assert targets(unit) == {GOLANG: "1.27-alpine3.20"}
+    [warning] = reports(selection, "early_warning")
+    assert warning["detail"] == (
+        "No in-scope candidate that leaves alpine-linux 3.20 and go 1.25 also reaches the fix "
+        "of every advisory on it, so its security fix is a unit of its own."
+    )
