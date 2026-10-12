@@ -29,7 +29,7 @@ Every target of a unit SHALL be one of the scan's in-scope candidates. A candida
 
 ### Requirement: Select security fixes
 
-For each inventoried dependency with a known vulnerability that an in-scope candidate fixes, selection SHALL select a security unit for that dependency on every scan, whether the vulnerability is reachable or not. Its target SHALL be the smallest in-scope candidate that reaches the fix. No minimum release age applies.
+For each inventoried dependency with a known vulnerability that an in-scope candidate fixes, selection SHALL select a security unit for its package on every scan, whether the vulnerability is reachable or not. The unit SHALL cover every declaration of the package at a vulnerable version, in any file. Each declaration's target SHALL be the smallest in-scope candidate that reaches the fix. No minimum release age applies.
 
 #### Scenario: A reachable and an unreachable vulnerability
 
@@ -50,6 +50,11 @@ For each inventoried dependency with a known vulnerability that an in-scope cand
 
 - **WHEN** govulncheck reports a standard library vulnerability fixed in a newer Go release, and the `go` directive has an in-scope candidate that reaches it
 - **THEN** the directive gets a security unit
+
+#### Scenario: A vulnerable package declared in two files
+
+- **WHEN** the same package is declared at a vulnerable version in two files
+- **THEN** one security unit covers both declarations
 
 ### Requirement: Select end-of-life moves
 
@@ -105,7 +110,7 @@ A dependency SHALL be in at most one unit. When a dependency on a lifecycle unit
 
 ### Requirement: Group batch updates by the policy
 
-Selection SHALL put batch updates into units by the update policy's group rules. Updates that the same group rule matches SHALL form one unit, named after the group. An update that no group rule matches SHALL form a unit of its own. Security and lifecycle units SHALL NOT be grouped.
+Selection SHALL put batch updates into units by the group the scan recorded for each candidate from the update policy's group rules. Updates in the same group SHALL form one unit, named after the group. The updates of one package that no group rule matches SHALL form one unit, covering every file that declares the package. Security and lifecycle units SHALL NOT be grouped.
 
 #### Scenario: Two Go modules in one group
 
@@ -117,9 +122,14 @@ Selection SHALL put batch updates into units by the update policy's group rules.
 - **WHEN** the batch has a major update that no group rule matches
 - **THEN** it forms a unit of its own
 
+#### Scenario: An ungrouped package in two files
+
+- **WHEN** the batch has a major update of a devcontainer feature in two devcontainer files, and no group rule matches it
+- **THEN** one unit covers both files, named after the package
+
 ### Requirement: Name units stably
 
-Each unit SHALL have a name derived only from its reason and from its group, dependency or version line. The same unit SHALL keep its name across scans, even when its targets change.
+Each unit SHALL have a name derived only from its reason and from its group, package or version line. The same unit SHALL keep its name across scans, even when its targets change.
 
 #### Scenario: A newer target in a later scan
 
