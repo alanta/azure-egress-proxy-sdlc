@@ -566,3 +566,160 @@ def test_a_dependency_on_two_ending_lines_is_in_one_unit():
     [unknown] = reports(selection, "not_evaluated")
     assert unknown["product"] == "go"
     assert "already in lifecycle-alpine-linux-3.20" in unknown["detail"]
+
+
+THIRD = date(2026, 11, 3)
+DAYS_BEFORE_THIRD = {20: "2026-10-14T08:00:00+00:00", 2: "2026-11-01T08:00:00+00:00"}
+AZURE_CORE = PROPS + "Azure.Core"
+
+
+def outdated(dep_id=AZURE_CORE, current="1.62.0", *candidates, **fields):
+    """A dependency with candidates given as (update type, version, extra fields)."""
+    record = Record().dependency(dep_id, current, **fields)
+    for update_type, version, extra in candidates:
+        record.candidate(dep_id, update_type, version, **extra)
+    return record
+
+
+def test_a_scan_inside_the_window_batches_an_old_enough_candidate():
+    released = DAYS_BEFORE_THIRD[20]
+    record = outdated(AZURE_CORE, "1.62.0", ("minor", "1.63.0", {"released_at": released}))
+    [unit] = record.select(THIRD)["units"]
+    assert unit["reasons"] == ["batch"]
+    assert unit["targets"] == [
+        {
+            "dependency": AZURE_CORE,
+            "current": "1.62.0",
+            "version": "1.63.0",
+            "update_type": "minor",
+            "released_at": released,
+            "age_days": 20,
+        }
+    ]
+    assert unit["evidence"] == {
+        "batch_window": {"first_day": 1, "last_day": 7},
+        "minimum_release_age_days": 7,
+    }
+
+
+def test_a_scan_outside_the_window_batches_nothing():
+    record = outdated(AZURE_CORE, "1.62.0", ("minor", "1.63.0", {}))
+    selection = record.select(date(2026, 11, 15))
+    assert selection["units"] == [] and selection["not_prepared"] == []
+    assert selection["batch_window"] == {"open": False, "next_opens": "2026-12-01"}
+
+
+def test_a_candidate_exactly_the_minimum_age_is_old_enough():
+    record = outdated(
+        AZURE_CORE, "1.62.0", ("minor", "1.63.0", {"released_at": "2026-10-27T23:59:59+00:00"})
+    )
+    [unit] = record.select(THIRD)["units"]
+    assert unit["targets"][0]["age_days"] == 7
+
+
+def test_a_too_young_newest_candidate_waits_for_the_next_window():
+    record = outdated(
+        AZURE_CORE,
+        "1.62.0",
+        # The patch would be old enough, but the newest candidate decides.
+        ("patch", "1.62.1", {"released_at": DAYS_BEFORE_THIRD[20]}),
+        ("minor", "1.63.0", {"released_at": DAYS_BEFORE_THIRD[2]}),
+    )
+    selection = record.select(THIRD)
+    assert selection["units"] == []
+    assert selection["not_prepared"] == [
+        {
+            "kind": "waiting",
+            "reason": "batch",
+            "dependency": AZURE_CORE,
+            "version": "1.63.0",
+            "update_type": "minor",
+            "released_at": DAYS_BEFORE_THIRD[2],
+            "age_days": 2,
+            "old_enough_on": "2026-11-08",
+            "detail": "1.63.0 is 2 days old, younger than 7, so it waits for the next window, "
+            "which opens on 2026-12-01.",
+        }
+    ]
+
+
+def test_a_release_date_after_the_scan_waits_too():
+    record = outdated(
+        AZURE_CORE, "1.62.0", ("minor", "1.63.0", {"released_at": "2026-11-05T00:00:00+00:00"})
+    )
+    [waiting] = reports(record.select(THIRD), "waiting")
+    assert waiting["age_days"] == -2
+
+
+def test_a_candidate_without_a_release_date_is_batched_with_its_age_unknown():
+    record = outdated(AZURE_CORE, "1.62.0", ("minor", "1.63.0", {}))
+    [unit] = record.select(THIRD)["units"]
+    [target] = unit["targets"]
+    assert target["age_days"] == "unknown" and "released_at" not in target
+
+
+def test_the_newest_in_scope_candidate_is_batched_not_a_held_one():
+    record = outdated(
+        PROPS + "Microsoft.OpenApi",
+        "2.12.2",
+        ("minor", "2.13.0", {}),
+        ("major", "3.10.2", {"held_by": "Microsoft.OpenApi stays on 2.x"}),
+    )
+    [unit] = record.select(THIRD)["units"]
+    assert targets(unit) == {PROPS + "Microsoft.OpenApi": "2.13.0"}
+
+
+def test_a_dependency_with_a_security_unit_is_left_out_of_the_batch():
+    record = vulnerable(patch="1.2.5", minor="1.4.0")
+    selection = record.select(THIRD)
+    assert [u["reasons"] for u in selection["units"]] == [["security"]]
+    assert targets(selection["units"][0]) == {PROPS + "Serilog": "1.2.5"}
+
+
+def test_a_dependency_with_a_lifecycle_unit_is_left_out_of_the_batch():
+    record = go_line(minor="1.27.2").lifecycle(
+        "go", "1.25", "end_of_life", [GO_MOD + "go"], **GO_LINES
+    )
+    assert [u["reasons"] for u in record.select(THIRD)["units"]] == [["lifecycle"]]
+
+
+def test_two_go_modules_in_one_group_are_one_unit():
+    azcore, azblob = GO_MOD + "azcore", GO_MOD + "azblob"
+    record = (
+        Record()
+        .dependency(azcore, "v1.23.1", ecosystem="go")
+        .candidate(azcore, "minor", "v1.24.0", group="gomod-minor-patch")
+        .dependency(azblob, "v1.8.1", ecosystem="go")
+        .candidate(azblob, "patch", "v1.8.2", group="gomod-minor-patch")
+    )
+    [unit] = record.select(THIRD)["units"]
+    assert unit["name"] == "gomod-minor-patch"
+    assert unit["subject"] == {"group": "gomod-minor-patch"}
+    assert targets(unit) == {azcore: "v1.24.0", azblob: "v1.8.2"}
+
+
+def test_a_major_outside_every_group_is_a_unit_of_its_own():
+    record = (
+        outdated(PROPS + "Serilog", "4.3.0", ("major", "5.0.0", {}))
+        .dependency(AZURE_CORE, "1.62.0")
+        .candidate(AZURE_CORE, "minor", "1.63.0", group="nuget-minor-patch")
+    )
+    found = units(record.select(THIRD))
+    assert set(found) == {"nuget-Serilog", "nuget-minor-patch"}
+    assert targets(found["nuget-Serilog"]) == {PROPS + "Serilog": "5.0.0"}
+    assert found["nuget-Serilog"]["subject"] == {"ecosystem": "nuget", "name": "Serilog"}
+
+
+def test_an_ungrouped_package_in_two_files_is_one_unit():
+    feature = "ghcr.io/devcontainers/features/docker-in-docker"
+    ids = [
+        f"devcontainer:.devcontainer/devcontainer.json:{feature}",
+        f"devcontainer:.devcontainer/worktree/devcontainer.json:{feature}",
+    ]
+    record = Record()
+    for dep_id in ids:
+        record.dependency(dep_id, "2", ecosystem="docker", name=feature)
+        record.candidate(dep_id, "major", "4")
+    [unit] = record.select(THIRD)["units"]
+    assert unit["name"] == f"docker-{feature}"
+    assert targets(unit) == dict.fromkeys(ids, "4")

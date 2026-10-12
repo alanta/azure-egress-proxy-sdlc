@@ -19,7 +19,7 @@ win, security fixes included.
 
 import json
 from dataclasses import dataclass, field
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
 from sdlc import dependabot, lifecycle, osv
@@ -33,7 +33,8 @@ MINIMUM_RELEASE_AGE_DAYS = 7
 
 SECURITY = "security"
 LIFECYCLE = "lifecycle"
-REASONS = (SECURITY, LIFECYCLE)
+BATCH = "batch"
+REASONS = (SECURITY, LIFECYCLE, BATCH)
 
 # The lifecycle states that select a line's move, as the scan recorded them (90 days ahead).
 ENDING = ("nearing_end_of_life", "end_of_life")
@@ -43,7 +44,8 @@ FIX_HELD = "fix_held"  # vulnerable, but only candidates the policy holds reach 
 NO_ROUTE = "no_route"  # no fixed version, or no candidate reaches it
 EARLY_WARNING = "early_warning"  # a line is ending, but no in-scope candidate leaves it
 NOT_EVALUATED = "not_evaluated"  # data the decision needs is missing
-KINDS = (FIX_HELD, NO_ROUTE, EARLY_WARNING, NOT_EVALUATED)
+WAITING = "waiting"  # a batch update too young for this window
+KINDS = (FIX_HELD, NO_ROUTE, EARLY_WARNING, NOT_EVALUATED, WAITING)
 
 # Update types from smallest to largest. A digest only re-pins the same version, so it never
 # reaches a fix (the scan doesn't judge digests against advisories either).
@@ -86,6 +88,8 @@ def select(record: dict[str, Any], policy: Policy, today: date) -> dict[str, Any
     # A lifecycle unit takes over the security fixes of its dependencies, so it goes first.
     units = _lifecycle_units(record, entries, candidates, fixes, today, not_prepared)
     units += _security_units(fixes, entries, today)
+    in_units = {t["dependency"] for unit in units for t in unit["targets"]}
+    units += _batch_units(entries, candidates, in_units, today, not_prepared)
 
     return {
         "date": today.isoformat(),
@@ -432,6 +436,81 @@ def _on_supported_line(
         versions = ", ".join(c["version"] for c in held)
         problem["detail"] += f" {versions} would be, but the policy holds it: {'; '.join(rules)}."
     return None, problem
+
+
+def _batch_units(
+    entries: dict[str, dict[str, Any]],
+    candidates: dict[str, list[dict[str, Any]]],
+    in_units: set[str],
+    today: date,
+    not_prepared: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Inside the batch window, every other dependency's newest in-scope candidate, if it is
+    old enough, in units by the group the scan recorded for it.
+
+    A candidate without a release date counts as old enough, and its age is unknown. One that
+    is too young waits for the next window, even when an older candidate would be old enough
+    (design decision 5). The updates of a package in no group form one unit across files.
+    """
+    window = batch_window(today)
+    if not window["open"]:
+        return []
+    batched: dict[tuple[str, ...], list[dict[str, Any]]] = {}
+    for dep_id in sorted(candidates):
+        if dep_id in in_units:
+            continue
+        in_scope = [c for c in candidates[dep_id] if c["classification"] == "in_scope"]
+        if not in_scope:
+            continue
+        newest = max(in_scope, key=_size)
+        age = _age(newest, today)
+        if age is not None and age < MINIMUM_RELEASE_AGE_DAYS:
+            ready = datetime.fromisoformat(newest["released_at"]).astimezone(UTC).date()
+            ready += timedelta(days=MINIMUM_RELEASE_AGE_DAYS)
+            not_prepared.append(
+                {
+                    "kind": WAITING,
+                    "reason": BATCH,
+                    "dependency": dep_id,
+                    "version": newest["version"],
+                    "update_type": newest["update_type"],
+                    "released_at": newest["released_at"],
+                    "age_days": age,
+                    "old_enough_on": ready.isoformat(),
+                    "detail": f"{newest['version']} is {age} days old, younger than "
+                    f"{MINIMUM_RELEASE_AGE_DAYS}, so it waits for the next window, which opens "
+                    f"on {window['next_opens']}.",
+                }
+            )
+            continue
+        entry = entries[dep_id]
+        key = ("group", newest["group"]) if "group" in newest else ("package", *_package(entry))
+        batched.setdefault(key, []).append(_target(newest, entry, today))
+
+    units = []
+    for key, batch in batched.items():
+        if key[0] == "group":
+            name, subject = key[1], {"group": key[1]}
+        else:
+            entry = entries[batch[0]["dependency"]]
+            name = f"{entry['ecosystem']}-{entry['name']}"
+            subject = {"ecosystem": entry["ecosystem"], "name": entry["name"]}
+        units.append(
+            {
+                "name": name,
+                "reasons": [BATCH],
+                "subject": subject,
+                "targets": batch,
+                "evidence": {
+                    "batch_window": {
+                        "first_day": BATCH_WINDOW_FIRST_DAY,
+                        "last_day": BATCH_WINDOW_LAST_DAY,
+                    },
+                    "minimum_release_age_days": MINIMUM_RELEASE_AGE_DAYS,
+                },
+            }
+        )
+    return units
 
 
 def _package(entry: dict[str, Any]) -> tuple[str, str]:
