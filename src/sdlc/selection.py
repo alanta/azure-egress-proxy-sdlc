@@ -20,7 +20,7 @@ win, security fixes included.
 import hashlib
 import json
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
@@ -43,11 +43,12 @@ ENDING = ("nearing_end_of_life", "end_of_life")
 
 # What the selection reports instead of a unit, in the order it reports them.
 FIX_HELD = "fix_held"  # vulnerable, but only candidates the policy holds reach the fix
-NO_ROUTE = "no_route"  # no fixed version, or no candidate reaches it
+NO_ROUTE = "no_route"  # the record gives no fixed version
+NO_CANDIDATE = "no_candidate"  # there is a fix, but no candidate reaches it
 EARLY_WARNING = "early_warning"  # a line is ending, but no in-scope candidate leaves it
 NOT_EVALUATED = "not_evaluated"  # data the decision needs is missing
 WAITING = "waiting"  # a batch update too young for this window
-KINDS = (FIX_HELD, NO_ROUTE, EARLY_WARNING, NOT_EVALUATED, WAITING)
+KINDS = (FIX_HELD, NO_ROUTE, NO_CANDIDATE, EARLY_WARNING, NOT_EVALUATED, WAITING)
 
 # Update types from smallest to largest. A digest only re-pins the same version, so it never
 # reaches a fix (the scan doesn't judge digests against advisories either).
@@ -68,10 +69,19 @@ class SelectionError(Exception):
 
 @dataclass
 class _Fix:
-    """A declaration's security fix: its target and the advisories the target resolves."""
+    """A declaration's security fix: its advisories, and the in-scope candidates that reach
+    the fix of every one of them, smallest first."""
 
-    target: dict[str, Any]
-    advisories: list[dict[str, Any]] = field(default_factory=list)
+    advisories: list[dict[str, Any]]
+    reaching: list[dict[str, Any]]
+
+    @property
+    def target(self) -> dict[str, Any]:
+        return self.reaching[0]
+
+    @property
+    def versions(self) -> set[str]:
+        return {c["version"] for c in self.reaching}
 
 
 def select(record: dict[str, Any], policy: Policy, today: date) -> dict[str, Any]:
@@ -132,18 +142,17 @@ def _security_fixes(
     candidates: dict[str, list[dict[str, Any]]],
     not_prepared: list[dict[str, Any]],
 ) -> dict[str, _Fix]:
-    """Per vulnerable declaration, the in-scope candidate that fixes all its advisories that
-    one can fix; every other advisory, and every unread source, is reported.
+    """Per vulnerable declaration, the in-scope candidates that reach the fix of every one of
+    its advisories that a candidate reaches; every other advisory, and every unread source,
+    is reported.
 
-    The scan has already compared each advisory with the candidates: `fix_reached_by_candidate`
-    says whether an in-scope one is outside it (design decision 3). Which one is the smallest
-    is found by the scan's own version order, against the fixed version or the last affected
-    one: the advisory's ranges themselves aren't in the record.
+    The scan compared each candidate with the advisory's affected ranges and recorded those
+    that are outside them as `fix_reached_by` (design decision 3), so no version is compared
+    here: above the fixed version isn't enough where a later range affects a version again.
     """
-    fixes: dict[str, _Fix] = {}
+    reached: dict[str, list[dict[str, Any]]] = {}
     for vulnerability in record["vulnerabilities"]:
         dep_id = vulnerability["dependency"]
-        entry = entries[dep_id]
         report = {
             "reason": SECURITY,
             "dependency": dep_id,
@@ -152,53 +161,83 @@ def _security_fixes(
         fixed = vulnerability["fixed_version"]
         last_affected = vulnerability.get("last_affected")
         if fixed is None and last_affected is None:
+            # The scan records no fixed version both when the advisory names none and when
+            # it can't read one from the advisory's ranges, so this doesn't say which.
             not_prepared.append(
-                report | {"kind": NO_ROUTE, "detail": "The advisory names no fixed version."}
+                report
+                | {
+                    "kind": NO_ROUTE,
+                    "detail": "The record gives no fixed version for the advisory: it names "
+                    "none, or the scan couldn't read one from its ranges.",
+                }
             )
             continue
         fix = f"the fixed version {fixed}" if fixed else f"a version above {last_affected}"
-        reached = vulnerability["fix_reached_by_candidate"]
-        if reached == "unknown":
-            not_prepared.append(report | {"kind": NOT_EVALUATED, "detail": _unknown(entry, fix)})
-            continue
-        if reached is False:
-            if "fix_held_by" in vulnerability:
-                not_prepared.append(
-                    report
-                    | {
-                        "kind": FIX_HELD,
-                        "held_by": vulnerability["fix_held_by"],
-                        "detail": f"Vulnerable, fix held by policy: only candidates that rule "
-                        f"holds reach {fix}.",
-                    }
-                )
-            else:
-                not_prepared.append(
-                    report | {"kind": NO_ROUTE, "detail": f"No candidate reaches {fix}."}
-                )
-            continue
-        target = _smallest_past(candidates.get(dep_id, []), fixed, last_affected)
-        if target is None:
+        outcome = vulnerability["fix_reached_by_candidate"]
+        if outcome == "unknown":
+            detail = _unknown(entries[dep_id], candidates.get(dep_id, []), fix)
+            not_prepared.append(report | {"kind": NOT_EVALUATED, "detail": detail})
+        elif outcome is False and "fix_held_by" in vulnerability:
+            not_prepared.append(
+                report
+                | {
+                    "kind": FIX_HELD,
+                    "held_by": vulnerability["fix_held_by"],
+                    "detail": f"Vulnerable, fix held by policy: only candidates that rule "
+                    f"holds reach {fix}.",
+                }
+            )
+        elif outcome is False:
+            not_prepared.append(
+                report | {"kind": NO_CANDIDATE, "detail": f"No candidate reaches {fix}."}
+            )
+        elif "fix_reached_by" not in vulnerability:
             not_prepared.append(
                 report
                 | {
                     "kind": NOT_EVALUATED,
-                    "detail": f"The scan found an in-scope candidate outside the advisory, but "
-                    f"no candidate's version compares as reaching {fix}.",
+                    "detail": f"The record says an in-scope candidate reaches {fix}, but not "
+                    "which one, so there is no target.",
                 }
             )
+        else:
+            reached.setdefault(dep_id, []).append(vulnerability)
+
+    fixes: dict[str, _Fix] = {}
+    for dep_id, advisories in reached.items():
+        # One update fixes them all, or the declaration is reported rather than guessed at.
+        common = set.intersection(*(set(v["fix_reached_by"]) for v in advisories))
+        reaching = sorted(
+            (
+                c
+                for c in candidates.get(dep_id, [])
+                if c["classification"] == "in_scope"
+                and c["update_type"] != "digest"
+                and c["version"] in common
+            ),
+            key=_size,
+        )
+        if reaching:
+            fixes[dep_id] = _Fix(advisories, reaching)
             continue
-        found = fixes.setdefault(dep_id, _Fix(target))
-        # One update fixes them all: the highest of the advisories' targets.
-        found.target = max(found.target, target, key=_size)
-        found.advisories.append(vulnerability)
+        each = "; ".join(f"{v['advisory']}: {', '.join(v['fix_reached_by'])}" for v in advisories)
+        not_prepared.append(
+            {
+                "kind": NO_CANDIDATE,
+                "reason": SECURITY,
+                "dependency": dep_id,
+                "advisories": [v["advisory"] for v in advisories],
+                "detail": f"No single in-scope candidate reaches the fix of every advisory on "
+                f"it ({each}).",
+            }
+        )
 
     not_prepared += _unread_sources(record)
     not_prepared += _unmatched_alerts(record)
     return fixes
 
 
-def _unknown(entry: dict[str, Any], fix: str) -> str:
+def _unknown(entry: dict[str, Any], candidates: list[dict[str, Any]], fix: str) -> str:
     """Why the scan couldn't tell whether a candidate reaches the fix."""
     lookup = entry["lookup"]
     if lookup["state"] in ("unknown", "skipped"):
@@ -206,28 +245,17 @@ def _unknown(entry: dict[str, Any], fix: str) -> str:
             f"Whether a candidate reaches {fix} is unknown: the lookup of "
             f"{entry['name']} is {lookup['state']}. {lookup['reason']}"
         )
+    if not candidates:
+        return f"Whether a candidate reaches {fix} is unknown: the record has no candidates for it."
+    if all(c["update_type"] == "digest" for c in candidates):
+        return (
+            f"Whether a candidate reaches {fix} is unknown: its only candidates are digest "
+            "updates, which the scan doesn't judge against advisories."
+        )
     return (
         f"Whether a candidate reaches {fix} is unknown: the scan couldn't evaluate the "
         "advisory's ranges for its candidates."
     )
-
-
-def _smallest_past(
-    candidates: list[dict[str, Any]], fixed: str | None, last_affected: str | None
-) -> dict[str, Any] | None:
-    """The in-scope candidate of the smallest update type at or past the fix, if any."""
-    bound = osv.version_order(fixed or last_affected or "")
-    if bound is None:
-        return None
-    for candidate in sorted(candidates, key=_size):
-        if candidate["classification"] != "in_scope" or candidate["update_type"] == "digest":
-            continue
-        version = osv.version_order(candidate["version"])
-        if version is None:
-            continue
-        if (fixed and version >= bound) or (not fixed and version > bound):
-            return candidate
-    return None
 
 
 def _unread_sources(record: dict[str, Any]) -> list[dict[str, Any]]:

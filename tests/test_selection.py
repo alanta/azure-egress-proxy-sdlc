@@ -55,7 +55,9 @@ class Record:
         self.record["candidates"].append(candidate | fields)
         return self
 
-    def vulnerability(self, dep_id, advisory, fixed, *, reached=True, **fields):
+    def vulnerability(self, dep_id, advisory, fixed, *, reached=True, reached_by=None, **fields):
+        """An advisory on a dependency. When a candidate reaches its fix, every in-scope
+        candidate added so far does, unless `reached_by` says which."""
         affected = next(d["current"] for d in self.record["inventory"] if d["id"] == dep_id)
         vulnerability = {
             "advisory": advisory,
@@ -65,6 +67,18 @@ class Record:
         }
         if fixed is not None or "last_affected" in fields:
             vulnerability["fix_reached_by_candidate"] = reached
+            if reached is True and reached_by is None:
+                reached_by = [
+                    c["version"]
+                    for c in self.record["candidates"]
+                    if c["dependency"] == dep_id
+                    and c["classification"] == "in_scope"
+                    and c["update_type"] != "digest"
+                ]
+            if reached is not True:
+                reached_by = [] if reached is False else None
+            if reached_by is not None:
+                vulnerability["fix_reached_by"] = reached_by
         vulnerability |= {"source": "osv", "reachability": "unknown"} | fields
         self.record["vulnerabilities"].append(vulnerability)
         return self
@@ -143,12 +157,12 @@ def reports(selection, kind):
     return [r for r in selection["not_prepared"] if r["kind"] == kind]
 
 
-def vulnerable(dep="Serilog", current="1.2.0", fixed="1.2.3", **candidates):
+def vulnerable(dep="Serilog", current="1.2.0", fixed="1.2.3", reached_by=None, **candidates):
     """A NuGet package with an advisory, and its candidates as update type=version."""
     record = Record().dependency(PROPS + dep, current)
     for update_type, version in candidates.items():
         record.candidate(PROPS + dep, update_type, version)
-    return record.vulnerability(PROPS + dep, "GHSA-1", fixed)
+    return record.vulnerability(PROPS + dep, "GHSA-1", fixed, reached_by=reached_by)
 
 
 def test_a_reachable_and_an_unreachable_vulnerability_both_get_a_unit():
@@ -190,8 +204,39 @@ def test_the_smallest_candidate_that_reaches_the_fix_is_the_target():
 
 
 def test_a_patch_that_falls_short_of_the_fix_isnt_the_target():
-    [unit] = vulnerable(fixed="1.3.0", patch="1.2.5", minor="1.4.0").select()["units"]
+    record = vulnerable(fixed="1.3.0", reached_by=["1.4.0"], patch="1.2.5", minor="1.4.0")
+    [unit] = record.select()["units"]
     assert targets(unit) == {PROPS + "Serilog": "1.4.0"}
+
+
+def test_a_higher_version_affected_again_isnt_the_target():
+    # The advisory affects [0, 6.0.5) and [6.1.0, 6.1.2): the scan finds only 7.0.0 outside.
+    record = vulnerable(
+        current="6.0.1", fixed="6.0.5", reached_by=["7.0.0"], minor="6.1.1", major="7.0.0"
+    )
+    [unit] = record.select()["units"]
+    assert targets(unit) == {PROPS + "Serilog": "7.0.0"}
+
+
+def test_a_held_patch_is_passed_over_for_an_in_scope_minor():
+    record = (
+        Record()
+        .dependency(PROPS + "Serilog", "1.2.0")
+        .candidate(PROPS + "Serilog", "patch", "1.2.5", held_by="Patches wait")
+        .candidate(PROPS + "Serilog", "minor", "1.4.0")
+        .vulnerability(PROPS + "Serilog", "GHSA-1", "1.2.3")
+    )
+    [unit] = record.select()["units"]
+    assert targets(unit) == {PROPS + "Serilog": "1.4.0"}
+
+
+def test_a_record_that_doesnt_say_which_candidate_reaches_the_fix_has_no_target():
+    record = vulnerable(patch="1.2.5")
+    del record.record["vulnerabilities"][0]["fix_reached_by"]
+    selection = record.select()
+    assert selection["units"] == []
+    [unknown] = reports(selection, "not_evaluated")
+    assert unknown["detail"].endswith("but not which one, so there is no target.")
 
 
 def test_a_last_affected_version_is_passed_by_a_higher_candidate_only():
@@ -200,20 +245,36 @@ def test_a_last_affected_version_is_passed_by_a_higher_candidate_only():
         .dependency(PROPS + "Serilog", "1.2.0")
         .candidate(PROPS + "Serilog", "patch", "1.2.5")
         .candidate(PROPS + "Serilog", "minor", "1.4.0")
-        .vulnerability(PROPS + "Serilog", "GHSA-1", None, last_affected="1.2.5")
+        .vulnerability(
+            PROPS + "Serilog", "GHSA-1", None, last_affected="1.2.5", reached_by=["1.4.0"]
+        )
     )
     [unit] = record.select()["units"]
     assert targets(unit) == {PROPS + "Serilog": "1.4.0"}
     assert unit["evidence"]["advisories"][0]["last_affected"] == "1.2.5"
 
 
-def test_the_highest_target_across_a_declarations_advisories_fixes_them_all():
+def test_the_target_reaches_the_fix_of_every_advisory_on_the_declaration():
     record = vulnerable(patch="1.2.5", minor="1.4.0").vulnerability(
-        PROPS + "Serilog", "GHSA-2", "1.3.0"
+        PROPS + "Serilog", "GHSA-2", "1.3.0", reached_by=["1.4.0"]
     )
     [unit] = record.select()["units"]
     assert targets(unit) == {PROPS + "Serilog": "1.4.0"}
     assert [a["advisory"] for a in unit["evidence"]["advisories"]] == ["GHSA-1", "GHSA-2"]
+
+
+def test_no_single_candidate_that_fixes_every_advisory_is_reported():
+    record = vulnerable(reached_by=["1.2.5"], patch="1.2.5", minor="1.4.0").vulnerability(
+        PROPS + "Serilog", "GHSA-2", "1.3.0", reached_by=["1.4.0"]
+    )
+    selection = record.select()
+    assert selection["units"] == []
+    [report] = reports(selection, "no_candidate")
+    assert report["advisories"] == ["GHSA-1", "GHSA-2"]
+    assert report["detail"] == (
+        "No single in-scope candidate reaches the fix of every advisory on it "
+        "(GHSA-1: 1.2.5; GHSA-2: 1.4.0)."
+    )
 
 
 def test_a_new_fixing_release_is_selected_without_a_minimum_age():
@@ -294,14 +355,36 @@ def test_an_advisory_without_a_fixed_version_has_no_route():
     assert selection["units"] == []
     [route] = reports(selection, "no_route")
     assert route["advisory"] == "GO-2026-5932"
-    assert route["detail"] == "The advisory names no fixed version."
+    assert route["detail"] == (
+        "The record gives no fixed version for the advisory: it names none, or the scan "
+        "couldn't read one from its ranges."
+    )
 
 
-def test_a_fix_no_candidate_reaches_has_no_route():
-    record = vulnerable(fixed="2.0.0", patch="1.2.5")
-    record.record["vulnerabilities"][0]["fix_reached_by_candidate"] = False
-    [route] = reports(record.select(), "no_route")
-    assert route["detail"] == "No candidate reaches the fixed version 2.0.0."
+def test_a_fix_no_candidate_reaches_has_no_candidate():
+    record = (
+        Record()
+        .dependency(PROPS + "Serilog", "1.2.0")
+        .candidate(PROPS + "Serilog", "patch", "1.2.5")
+        .vulnerability(PROPS + "Serilog", "GHSA-1", "2.0.0", reached=False)
+    )
+    selection = record.select()
+    assert reports(selection, "no_route") == []
+    [missing] = reports(selection, "no_candidate")
+    assert missing["detail"] == "No candidate reaches the fixed version 2.0.0."
+
+
+def test_a_fix_only_digest_updates_could_reach_is_not_evaluated():
+    record = (
+        Record()
+        .dependency(PROPS + "Serilog", "1.2.0")
+        .candidate(PROPS + "Serilog", "digest", "1.2.0")
+        .vulnerability(PROPS + "Serilog", "GHSA-1", "1.2.3", reached="unknown")
+    )
+    [unknown] = reports(record.select(), "not_evaluated")
+    assert unknown["detail"].endswith(
+        "its only candidates are digest updates, which the scan doesn't judge against advisories."
+    )
 
 
 def test_a_failed_lookup_is_not_evaluated_with_its_reason():
@@ -483,7 +566,7 @@ def test_the_higher_of_the_lifecycle_and_security_targets_wins():
         go_line(minor="1.26.3")
         .candidate(GO_MOD + "go", "minor", "1.27.1", basis="advisory_fix")
         .lifecycle("go", "1.25", "end_of_life", [GO_MOD + "go"], **GO_LINES)
-        .vulnerability(GO_MOD + "go", "GO-1", "1.27.1")
+        .vulnerability(GO_MOD + "go", "GO-1", "1.27.1", reached_by=["1.27.1"])
     )
     [unit] = record.select()["units"]
     assert targets(unit) == {GO_MOD + "go": "1.27.1"}
@@ -751,7 +834,7 @@ def test_a_later_scan_with_newer_targets_keeps_the_unit_names():
 
 
 def test_a_security_fix_that_needs_a_major_is_breaking():
-    [unit] = vulnerable(fixed="2.0.0", major="2.0.1").select()["units"]
+    [unit] = vulnerable(fixed="2.0.0", reached_by=["2.0.1"], major="2.0.1").select()["units"]
     assert unit["breaking"] is True
 
 
