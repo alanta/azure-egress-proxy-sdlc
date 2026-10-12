@@ -20,6 +20,7 @@ from sdlc import (
     outputs,
     policy,
     renovate,
+    selection,
 )
 from sdlc.record import SCHEMA_VERSION
 from sdlc.subject import Revision, SubjectError, checkout, resolve
@@ -187,6 +188,15 @@ def scan(
         "cross_checks": disagreements,
         "gaps": gaps,
     }
+    try:
+        record["selection"] = selection.select(
+            record,
+            subject_policy,
+            datetime.fromisoformat(looked_up_at).astimezone(UTC).date(),
+        )
+    except selection.SelectionError as error:
+        print(f"error: {error}; no record written", file=sys.stderr)
+        return 1
     directory = outputs.run_directory(out, repository, revision.commit, looked_up_at)
     try:
         record_path, report_path = outputs.write(record, directory)
@@ -247,6 +257,11 @@ def summary(record: dict) -> list[str]:
         f"{reach['unknown']} with reachability unknown"
     )
     lines.append(f"inconsistent declarations: {len(record['inconsistencies'])}")
+    units = record["selection"]["units"]
+    lines.append(
+        f"would prepare: {len(units)} units ({sum(u['breaking'] for u in units)} breaking), "
+        f"{len(record['selection']['not_prepared'])} reasons not prepared"
+    )
     return lines
 
 

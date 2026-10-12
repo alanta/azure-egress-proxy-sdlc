@@ -1,7 +1,7 @@
 """The scan record: its JSON Schema and the checks a schema can't express."""
 
 import json
-from datetime import datetime
+from datetime import UTC, datetime
 from functools import cache
 from importlib.resources import files
 from typing import Any
@@ -54,6 +54,18 @@ def _consistency_problems(record: dict[str, Any]) -> list[str]:
         (f"$.candidates[{i}].released_at", c["released_at"])
         for i, c in enumerate(record["candidates"])
         if "released_at" in c
+    ]
+    selection = record.get("selection", {"units": [], "not_prepared": []})  # none before 3
+    timestamps += [
+        (f"$.selection.units[{i}].targets[{j}].released_at", t["released_at"])
+        for i, unit in enumerate(selection["units"])
+        for j, t in enumerate(unit["targets"])
+        if "released_at" in t
+    ]
+    timestamps += [
+        (f"$.selection.not_prepared[{i}].released_at", r["released_at"])
+        for i, r in enumerate(selection["not_prepared"])
+        if "released_at" in r
     ]
     if "dependabot_alerts" in record:
         timestamps.append(("$.dependabot_alerts.read_at", record["dependabot_alerts"]["read_at"]))
@@ -109,6 +121,7 @@ def _consistency_problems(record: dict[str, Any]) -> list[str]:
     problems += _alert_problems(record)
     problems += _inconsistency_problems(record)
     problems += _lifecycle_problems(record)
+    problems += _selection_problems(record)
 
     return problems
 
@@ -190,6 +203,62 @@ def _lifecycle_problems(record: dict[str, Any]) -> list[str]:
                 problems.append(f"{path}.dependencies[{j}]: unknown dependency id {dep_id!r}")
             elif location != entries[dep_id]["location"]:
                 problems.append(f"{path}.locations[{j}]: not the location of {dep_id!r}")
+    return problems
+
+
+def _selection_problems(record: dict[str, Any]) -> list[str]:
+    """The selection only names dependencies of the inventory and in-scope candidates of them,
+    on the scan's own date, and gives every unit a name of its own."""
+    selection = record.get("selection")
+    if selection is None:  # versions 1 and 2 have none
+        return []
+    problems = []
+    entries = {d["id"]: d for d in record["inventory"]}
+    in_scope = {
+        (c["dependency"], c["version"]): c["update_type"]
+        for c in record["candidates"]
+        if c["classification"] == "in_scope"
+    }
+    try:
+        scanned = datetime.fromisoformat(record["scanned_at"]).astimezone(UTC).date().isoformat()
+    except ValueError:
+        scanned = None  # reported with the timestamps
+    if scanned is not None and selection["date"] != scanned:
+        problems.append(f"$.selection.date: {selection['date']!r} isn't the scan's date {scanned}")
+
+    names: set[str] = set()
+    for i, unit in enumerate(selection["units"]):
+        path = f"$.selection.units[{i}]"
+        if unit["name"] in names:
+            problems.append(f"{path}.name: duplicate unit name {unit['name']!r}")
+        names.add(unit["name"])
+        for j, target in enumerate(unit["targets"]):
+            where = f"{path}.targets[{j}]"
+            dep_id = target["dependency"]
+            if dep_id not in entries:
+                problems.append(f"{where}.dependency: unknown dependency id {dep_id!r}")
+                continue
+            if target["current"] != entries[dep_id]["current"]:
+                problems.append(f"{where}.current: not the current version of {dep_id!r}")
+            update_type = in_scope.get((dep_id, target["version"]))
+            if update_type is None:
+                problems.append(
+                    f"{where}.version: {target['version']!r} isn't an in-scope candidate of "
+                    f"{dep_id!r}"
+                )
+            elif update_type != target["update_type"]:
+                problems.append(f"{where}.update_type: not the update type of the candidate")
+        for j, advisory in enumerate(unit["evidence"].get("advisories", [])):
+            if advisory["dependency"] not in entries:
+                problems.append(
+                    f"{path}.evidence.advisories[{j}].dependency: unknown dependency id "
+                    f"{advisory['dependency']!r}"
+                )
+
+    for i, report in enumerate(selection["not_prepared"]):
+        for dep_id in [report.get("dependency"), *report.get("dependencies", [])]:
+            if dep_id is not None and dep_id not in entries:
+                problems.append(f"$.selection.not_prepared[{i}]: unknown dependency id {dep_id!r}")
     return problems
 
 

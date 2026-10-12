@@ -18,7 +18,8 @@
     "consistency",
     "inconsistencies",
     "cross_checks",
-    "gaps"
+    "gaps",
+    "selection"
   ],
   "properties": {
     "schema_version": {
@@ -194,6 +195,10 @@
       "items": {
         "$ref": "#/$defs/gap"
       }
+    },
+    "selection": {
+      "$ref": "#/$defs/selection",
+      "description": "What the scan would prepare, decided from the rest of the record and the defaults in use (update-selection)."
     }
   },
   "$defs": {
@@ -1019,6 +1024,964 @@
           }
         }
       }
+    },
+    "selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "date",
+        "defaults",
+        "batch_window",
+        "units",
+        "not_prepared"
+      ],
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "The scan's date in UTC, which the batch window and release ages are measured against."
+        },
+        "defaults": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "batch_window",
+            "minimum_release_age_days"
+          ],
+          "properties": {
+            "batch_window": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "first_day",
+                "last_day"
+              ],
+              "properties": {
+                "first_day": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 31
+                },
+                "last_day": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 31
+                }
+              },
+              "description": "The days of every month, inclusive, when batch updates are selected."
+            },
+            "minimum_release_age_days": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "How old a batch update's release must be, in days, on the scan's date."
+            }
+          }
+        },
+        "batch_window": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "open",
+            "next_opens"
+          ],
+          "properties": {
+            "open": {
+              "type": "boolean"
+            },
+            "next_opens": {
+              "type": "string",
+              "format": "date",
+              "description": "The first day of the next window, after the month of the scan's date."
+            }
+          }
+        },
+        "units": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/selection_unit"
+          },
+          "description": "What to prepare, with the reasons, targets and evidence."
+        },
+        "not_prepared": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/not_prepared"
+          },
+          "description": "Every reason that didn't become a unit, and why."
+        }
+      }
+    },
+    "selection_target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dependency",
+        "current",
+        "version",
+        "update_type",
+        "age_days"
+      ],
+      "properties": {
+        "dependency": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The inventory entry the update changes."
+        },
+        "current": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The entry's current version, as the inventory has it."
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The version of an in-scope candidate of the dependency."
+        },
+        "update_type": {
+          "enum": [
+            "patch",
+            "minor",
+            "major",
+            "digest"
+          ]
+        },
+        "released_at": {
+          "$ref": "#/$defs/timestamp",
+          "description": "When the candidate was published; absent when the source publishes no date."
+        },
+        "age_days": {
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "const": "unknown"
+            }
+          ],
+          "description": "Whole days from the release to the scan's date; negative for a release dated after it; unknown exactly when there is no release date."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "released_at"
+            ]
+          },
+          "then": {
+            "properties": {
+              "age_days": {
+                "type": "integer"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "age_days": {
+                "const": "unknown"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "selection_unit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "reasons",
+        "subject",
+        "breaking",
+        "targets",
+        "evidence"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Safe to use as a branch name as it is; stable across scans for the same unit."
+        },
+        "name_collision": {
+          "const": true,
+          "description": "The name was changed to tell it apart from another unit whose name was the same."
+        },
+        "reasons": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "security",
+              "lifecycle",
+              "batch"
+            ]
+          }
+        },
+        "subject": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "group"
+              ],
+              "properties": {
+                "group": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "ecosystem",
+                "name"
+              ],
+              "properties": {
+                "ecosystem": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "product",
+                "line"
+              ],
+              "properties": {
+                "product": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "line": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          ],
+          "description": "A group, a package or a version line: what the unit's name comes from."
+        },
+        "breaking": {
+          "type": "boolean",
+          "description": "A lifecycle move, or any major target."
+        },
+        "targets": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/selection_target"
+          }
+        },
+        "evidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "advisories": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "advisory",
+                  "dependency",
+                  "fixed_version",
+                  "reachability",
+                  "source"
+                ],
+                "properties": {
+                  "advisory": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "aliases": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "dependency": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "fixed_version": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "last_affected": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "reachability": {
+                    "enum": [
+                      "reachable",
+                      "not_reachable",
+                      "unknown"
+                    ]
+                  },
+                  "source": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "dependabot_alerts": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  }
+                }
+              }
+            },
+            "lifecycle": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "product",
+                  "line",
+                  "state"
+                ],
+                "properties": {
+                  "product": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "line": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "state": {
+                    "enum": [
+                      "nearing_end_of_life",
+                      "end_of_life"
+                    ]
+                  },
+                  "end_of_life": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "supported_lines": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "source": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "batch_window": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "first_day",
+                "last_day"
+              ],
+              "properties": {
+                "first_day": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 31
+                },
+                "last_day": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 31
+                }
+              }
+            },
+            "minimum_release_age_days": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "reasons": {
+                "contains": {
+                  "const": "security"
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "evidence": {
+                "required": [
+                  "advisories"
+                ]
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "evidence": {
+                "not": {
+                  "required": [
+                    "advisories"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "reasons": {
+                "contains": {
+                  "const": "lifecycle"
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "evidence": {
+                "required": [
+                  "lifecycle"
+                ]
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "evidence": {
+                "not": {
+                  "required": [
+                    "lifecycle"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "reasons": {
+                "contains": {
+                  "const": "batch"
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "evidence": {
+                "required": [
+                  "batch_window",
+                  "minimum_release_age_days"
+                ]
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "evidence": {
+                "not": {
+                  "anyOf": [
+                    {
+                      "required": [
+                        "batch_window"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "minimum_release_age_days"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "reasons": {
+                "contains": {
+                  "const": "batch"
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "reasons": {
+                "maxItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "reasons": {
+                "contains": {
+                  "const": "security"
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "subject": {
+                "not": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "group"
+                  ],
+                  "properties": {
+                    "group": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "reasons"
+            ],
+            "properties": {
+              "reasons": {
+                "prefixItems": [
+                  {
+                    "const": "lifecycle"
+                  }
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "subject": {
+                "required": [
+                  "product"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "reasons": {
+                "prefixItems": [
+                  {
+                    "const": "security"
+                  }
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "subject": {
+                "required": [
+                  "ecosystem"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "reasons": {
+                "const": [
+                  "batch"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "subject": {
+                "not": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "product",
+                    "line"
+                  ],
+                  "properties": {
+                    "product": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "line": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "not_prepared": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "reason",
+        "detail"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "fix_held",
+            "no_route",
+            "no_candidate",
+            "early_warning",
+            "not_evaluated",
+            "waiting"
+          ],
+          "description": "fix_held: vulnerable, but only candidates the policy holds reach the fix; no_route: no fixed version is recorded; no_candidate: no in-scope candidate reaches the fix; early_warning: a line is ending but no in-scope candidate leaves it; not_evaluated: data the decision needs is missing; waiting: a batch update too young for this window."
+        },
+        "reason": {
+          "enum": [
+            "security",
+            "lifecycle",
+            "batch"
+          ],
+          "description": "The reason the update would have been selected for."
+        },
+        "detail": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Why it wasn't prepared, in words."
+        },
+        "dependency": {
+          "type": "string",
+          "minLength": 1
+        },
+        "advisory": {
+          "type": "string",
+          "minLength": 1
+        },
+        "advisories": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "held_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "alert": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "package": {
+          "type": "string",
+          "minLength": 1
+        },
+        "manifest": {
+          "type": "string"
+        },
+        "product": {
+          "type": "string",
+          "minLength": 1
+        },
+        "line": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dependencies": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "lines": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "product",
+              "line"
+            ],
+            "properties": {
+              "product": {
+                "type": "string",
+                "minLength": 1
+              },
+              "line": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "update_type": {
+          "enum": [
+            "patch",
+            "minor",
+            "major",
+            "digest"
+          ]
+        },
+        "released_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "age_days": {
+          "type": "integer"
+        },
+        "old_enough_on": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "fix_held"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "const": "security"
+              }
+            },
+            "required": [
+              "dependency",
+              "advisory",
+              "held_by"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "no_route"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "const": "security"
+              }
+            },
+            "required": [
+              "dependency",
+              "advisory"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "no_candidate"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "const": "security"
+              }
+            },
+            "required": [
+              "dependency"
+            ],
+            "anyOf": [
+              {
+                "required": [
+                  "advisory"
+                ]
+              },
+              {
+                "required": [
+                  "advisories"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "early_warning"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "const": "lifecycle"
+              }
+            },
+            "required": [
+              "dependency",
+              "lines"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "not_evaluated"
+              },
+              "reason": {
+                "const": "security"
+              }
+            }
+          },
+          "then": {
+            "anyOf": [
+              {
+                "required": [
+                  "advisory",
+                  "dependency"
+                ]
+              },
+              {
+                "required": [
+                  "source"
+                ]
+              },
+              {
+                "required": [
+                  "alert"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "not_evaluated"
+              },
+              "reason": {
+                "const": "lifecycle"
+              }
+            }
+          },
+          "then": {
+            "anyOf": [
+              {
+                "required": [
+                  "product",
+                  "line",
+                  "dependencies"
+                ]
+              },
+              {
+                "required": [
+                  "dependency",
+                  "lines"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "not_evaluated"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "enum": [
+                  "security",
+                  "lifecycle"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "waiting"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "const": "batch"
+              }
+            },
+            "required": [
+              "dependency",
+              "version",
+              "update_type",
+              "released_at",
+              "age_days",
+              "old_enough_on"
+            ]
+          }
+        }
+      ]
     }
   }
 }

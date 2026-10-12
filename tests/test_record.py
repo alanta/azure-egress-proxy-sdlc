@@ -399,3 +399,164 @@ def test_version_2_has_no_group():
     record["candidates"][0]["group"] = "microsoft"
     problems = validate_record(record, version="2")
     assert any("Additional properties are not allowed" in p for p in problems), problems
+
+
+def test_version_3_requires_the_selection():
+    record = v3_record()
+    del record["selection"]
+    assert any("'selection' is a required property" in p for p in validate_record(record))
+
+
+def test_versions_1_and_2_have_no_selection():
+    for version, path in (("1", FIXTURE_V1), ("2", FIXTURE_V2)):
+        record = json.loads(path.read_text())
+        record["selection"] = v3_record()["selection"]
+        problems = validate_record(record, version=version)
+        assert any("Additional properties are not allowed" in p for p in problems), problems
+
+
+def test_the_fixture_selection_has_every_kind_of_part():
+    selection = v3_record()["selection"]
+    assert [u["reasons"] for u in selection["units"]] == [["security"], ["lifecycle"], ["batch"]]
+    assert {r["kind"] for r in selection["not_prepared"]} == {
+        "no_route",
+        "not_evaluated",
+        "waiting",
+    }
+
+
+UNIT = ("selection", "units", 0)
+TARGET = ("selection", "units", 0, "targets", 0)
+REPORT = ("selection", "not_prepared", 0)
+
+
+def at(record, path):
+    for key in path:
+        record = record[key]
+    return record
+
+
+@pytest.mark.parametrize(
+    ("description", "path", "change", "expected"),
+    [
+        ("a reason that doesn't exist", UNIT, {"reasons": ["urgent"]}, "is not one of"),
+        ("no reason", UNIT, {"reasons": []}, "should be non-empty"),
+        ("an unknown field on a unit", UNIT, {"owner": "me"}, "Additional properties"),
+        ("a breaking mark that isn't boolean", UNIT, {"breaking": "yes"}, "is not of type"),
+        ("a unit without a target", UNIT, {"targets": []}, "should be non-empty"),
+        ("an update type that doesn't exist", TARGET, {"update_type": "huge"}, "is not one of"),
+        ("an age that isn't a number", TARGET, {"age_days": "old"}, "is not valid under"),
+        ("an age on a date-less target", TARGET, {"age_days": 3}, "'unknown' was expected"),
+        (
+            "a malformed release date",
+            TARGET,
+            {"released_at": "2026-09", "age_days": 3},
+            "is not an ISO",
+        ),
+        ("a report of a kind that doesn't exist", REPORT, {"kind": "stuck"}, "is not one of"),
+        ("a report without its reason", REPORT, {"detail": ""}, "should be non-empty"),
+        ("a report of the wrong reason", REPORT, {"reason": "batch"}, "'security' was expected"),
+        ("an unknown field on a report", REPORT, {"owner": "me"}, "Additional properties"),
+        (
+            "a malformed date",
+            ("selection",),
+            {"date": "5 October"},
+            "is not a 'date'",
+        ),
+        (
+            "a window that is neither open nor closed",
+            ("selection", "batch_window"),
+            {"open": "maybe"},
+            "is not of type 'boolean'",
+        ),
+        (
+            "a negative minimum release age",
+            ("selection", "defaults"),
+            {"minimum_release_age_days": -1},
+            "less than the minimum",
+        ),
+    ],
+)
+def test_a_malformed_selection_fails_the_schema(description, path, change, expected):
+    record = v3_record()
+    at(record, path).update(change)
+    problems = validate_record(record)
+    assert problems and any(expected in p for p in problems), (description, problems)
+
+
+def test_a_unit_needs_the_evidence_of_each_of_its_reasons():
+    for index, evidence in ((0, "advisories"), (1, "lifecycle"), (2, "batch_window")):
+        record = v3_record()
+        del record["selection"]["units"][index]["evidence"][evidence]
+        assert validate_record(record), evidence
+    record = v3_record()
+    record["selection"]["units"][0]["evidence"]["lifecycle"] = [
+        {"product": "go", "line": "1.25", "state": "end_of_life"}
+    ]
+    assert validate_record(record)
+
+
+def test_a_report_needs_what_its_kind_is_about():
+    for index, missing in ((0, "advisory"), (2, "old_enough_on")):
+        record = v3_record()
+        del record["selection"]["not_prepared"][index][missing]
+        assert validate_record(record), missing
+
+
+@pytest.mark.parametrize(
+    ("description", "change", "expected"),
+    [
+        (
+            "a target outside the inventory",
+            lambda s: s["units"][0]["targets"][0].update(dependency="nuget:nowhere:Nothing"),
+            "$.selection.units[0].targets[0].dependency: unknown dependency id",
+        ),
+        (
+            "a target version that isn't a candidate",
+            lambda s: s["units"][0]["targets"][0].update(version="v9.9.9"),
+            "'v9.9.9' isn't an in-scope candidate",
+        ),
+        (
+            "a target version nobody holds back but the policy does",
+            lambda s: s["units"][0]["targets"][0].update(
+                dependency="nuget:Directory.Packages.props:Microsoft.OpenApi", version="3.10.2"
+            ),
+            "isn't an in-scope candidate",
+        ),
+        (
+            "a target that moves from the wrong version",
+            lambda s: s["units"][0]["targets"][0].update(current="v0.1.0"),
+            "not the current version",
+        ),
+        (
+            "a target with the wrong update type",
+            lambda s: s["units"][0]["targets"][0].update(update_type="major"),
+            "not the update type of the candidate",
+        ),
+        (
+            "two units with one name",
+            lambda s: s["units"][1].update(name=s["units"][0]["name"]),
+            "duplicate unit name",
+        ),
+        (
+            "another date than the scan's",
+            lambda s: s.update(date="2026-10-06"),
+            "isn't the scan's date 2026-10-05",
+        ),
+        (
+            "a report about a dependency outside the inventory",
+            lambda s: s["not_prepared"][2].update(dependency="nuget:nowhere:Nothing"),
+            "unknown dependency id",
+        ),
+        (
+            "an advisory on a dependency outside the inventory",
+            lambda s: s["units"][0]["evidence"]["advisories"][0].update(dependency="nowhere"),
+            "unknown dependency id",
+        ),
+    ],
+)
+def test_the_selection_only_names_what_the_record_has(description, change, expected):
+    record = v3_record()
+    change(record["selection"])
+    problems = validate_record(record)
+    assert any(expected in p for p in problems), (description, problems)

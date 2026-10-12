@@ -1,5 +1,6 @@
 import json
 import subprocess
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -621,6 +622,42 @@ def test_an_offline_scan_of_064aa09_writes_a_record_and_a_report_from_it(scan_06
     assert "main at e93d706, **not** the scanned commit 064aa09" in rendered
     assert "| govulncheck | v1.8.0 |" in rendered
     assert "| osv-scanner | 2.6.0 |" in rendered
+
+
+def test_a_scan_records_the_selection_it_made_on_its_own_date(scan_064aa09):
+    from sdlc import policy
+    from sdlc.selection import select
+
+    record, rendered, out = scan_064aa09("--trial-policy", str(TRIAL_POLICY))
+    selection = record["selection"]
+    trial = policy.load(Path("."), TRIAL_POLICY, validate=lambda text: [])
+    without = {k: v for k, v in record.items() if k != "selection"}
+    scanned = datetime.fromisoformat(record["scanned_at"]).astimezone(UTC).date()
+    assert selection["date"] == scanned.isoformat()
+    assert selection == select(without, trial, scanned)
+    assert selection["units"] and any(u["breaking"] for u in selection["units"])
+
+
+def test_a_selection_failing_the_schema_fails_the_scan_without_a_report(
+    scan_064aa09, monkeypatch, tmp_path, capsys
+):
+    from sdlc import cli
+
+    real = cli.selection.select
+
+    def malformed(*args):
+        selection = real(*args)
+        selection["units"][0]["reasons"] = ["urgent"]
+        return selection
+
+    monkeypatch.setattr(cli.selection, "select", malformed)
+    assert main(["scan", "--repo", "alanta/azure-egress-proxy"]) == 1
+    err = capsys.readouterr().err
+    assert "error: the record fails its schema, so no report was written:" in err
+    assert "$.selection.units[0].reasons[0]: 'urgent' is not one of" in err
+    assert not list(tmp_path.rglob("report.md"))
+    [kept] = tmp_path.rglob("*.invalid.json")
+    assert json.loads(kept.read_text())["selection"]["units"][0]["reasons"] == ["urgent"]
 
 
 def test_a_scan_records_the_trial_policys_groups_on_its_candidates(scan_064aa09):

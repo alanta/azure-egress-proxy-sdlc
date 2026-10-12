@@ -130,7 +130,7 @@ def test_the_report_names_what_the_spec_requires(record):
     rendered = render(record)
     assert "| Repository | alanta/azure-egress-proxy |" in rendered
     assert "| Commit | 064aa099ecf7ffea9664b89df29f7d89d6859358 |" in rendered
-    assert "| Scanned at | 2026-10-08T09:00:00+00:00 |" in rendered
+    assert "| Scanned at | 2026-10-05T09:00:00+00:00 |" in rendered
     assert "| Tools | renovate 44.145.1, endoflife.date v1 (details under Tools) |" in rendered
     assert (
         "| Update policy | trial file policies/azure-egress-proxy.renovate.json5, supplied for "
@@ -253,7 +253,7 @@ def test_unknown_states_are_shown_as_unknown_never_as_none(record):
         "not read: osv-scanner: It crashed.",
         "not read: dependabot-alerts: The credential has no Dependabot alerts permission.",
         "1 lookup failed",
-        "1 of 5 dependencies not looked up (skipped)",
+        "1 of 7 dependencies not looked up (skipped)",
         "reachability of 1 advisory",
         "whether a candidate fixes 1 advisory",
         "lifecycle of 1 line",
@@ -324,7 +324,7 @@ def test_every_source_the_scan_couldnt_read_is_unknown(record):
     assert unknown.startswith("- **Unknown:** 4:\n")
     assert "  - not read: govulncheck: proxy/go.mod: govulncheck didn't run" in unknown
     assert "  - not read: src/Portal/packages.lock.json: OSV-Scanner returned no result" in unknown
-    assert "  - 1 of 5 dependencies not looked up (skipped), with the reasons under Not" in unknown
+    assert "  - 1 of 7 dependencies not looked up (skipped), with the reasons under Not" in unknown
     # Neither a gap's source nor the lack of advisories is claimed as complete.
     assert (
         "- **Reachable vulnerabilities:** none found; incomplete, 2 sources or files couldn't be "
