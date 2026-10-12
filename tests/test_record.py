@@ -319,3 +319,40 @@ def test_version_1_record_still_passes_its_own_schema():
 def test_version_2_rejects_version_1_record():
     problems = validate_record(json.loads(FIXTURE_V1.read_text()))
     assert any("'2' was expected" in p for p in problems), problems
+
+
+def v3_record():
+    record = json.loads(FIXTURE.read_text())
+    record["schema_version"] = "3"
+    return record
+
+
+def test_version_3_accepts_a_candidate_with_and_without_a_release_date():
+    record = v3_record()
+    assert "released_at" not in record["candidates"][0]
+    assert validate_record(record, version="3") == []
+    record["candidates"][0]["released_at"] = "2026-09-10T03:16:59+00:00"
+    assert validate_record(record, version="3") == []
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        ("last Tuesday", "is not an ISO 8601 timestamp"),
+        ("2026-13-45T00:00:00+00:00", "is not an ISO 8601 timestamp"),
+        ("2026-09-10T03:16:59", "has no time zone"),
+        (20260910, "is not of type 'string'"),
+    ],
+)
+def test_version_3_rejects_a_malformed_release_date(value, expected):
+    record = v3_record()
+    record["candidates"][0]["released_at"] = value
+    problems = validate_record(record, version="3")
+    assert any(expected in p for p in problems), problems
+
+
+def test_version_2_has_no_release_date():
+    record = json.loads(FIXTURE.read_text())
+    record["candidates"][0]["released_at"] = "2026-09-10T03:16:59+00:00"
+    problems = validate_record(record, version="2")
+    assert any("Additional properties are not allowed" in p for p in problems), problems

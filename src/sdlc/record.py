@@ -50,6 +50,11 @@ def _consistency_problems(record: dict[str, Any]) -> list[str]:
         for i, t in enumerate(record["tools"])
         if "fetched_at" in t
     ]
+    timestamps += [
+        (f"$.candidates[{i}].released_at", c["released_at"])
+        for i, c in enumerate(record["candidates"])
+        if "released_at" in c
+    ]
     if "dependabot_alerts" in record:
         timestamps.append(("$.dependabot_alerts.read_at", record["dependabot_alerts"]["read_at"]))
     for path, value in timestamps:
