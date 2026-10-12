@@ -11,7 +11,7 @@
 
 ## 3. Documentation
 
-- [ ] 3.1 Update `docs/running-a-scan.md` and `docs/scan-coverage.md` so that they no longer describe the comparison with PRs, and drop `Pull requests: read` from the scan's permissions. Label `docs/end-to-end-run.md` as describing a version 1 record. Verify with `grep -n -i "parity\|Dependabot PR" docs/running-a-scan.md docs/scan-coverage.md` that only the Dependabot alerts are left.
+- [x] 3.1 Update `docs/running-a-scan.md` and `docs/scan-coverage.md` so that they no longer describe the comparison with PRs, and drop `Pull requests: read` from the scan's permissions. Label `docs/end-to-end-run.md` as describing a version 1 record. Verify with `grep -n -i "parity\|Dependabot PR" docs/running-a-scan.md docs/scan-coverage.md` that only the Dependabot alerts are left.
 
 ## 4. End-to-end check
 
